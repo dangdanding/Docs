@@ -1,0 +1,1105 @@
+目录
+1. Docker 简介
+1.1 为什么使用Docker
+为什么要使用 Docker？
+更快速的交付和部署
+更高效的虚拟化
+更轻松的迁移和扩展
+更简单的管理
+对比传统虚拟机总结
+2. 基本概念
+2.1 Docker 镜像
+2.2 Docker 容器
+2.3 Docker 仓库
+3. 安装
+3.1 Ubuntu 系列安装 Docker
+4. Docker 镜像
+4.1 获取镜像
+4.2 列出本地镜像
+4.3 创建镜像
+4.4 存出和载入镜像
+4.5 移除本地镜像
+5. 容器
+5.1 启动容器
+5.2 守护态运行
+5.3 终止容器
+5.4 进入容器
+5.5 导出和导入容器
+5.6 删除容器
+6. 仓库
+6.1
+6.2 私有仓库
+6.3 仓库配置文件
+7. Docker 数据管理
+7.1 数据卷
+7.2 数据卷容器
+7.3 利用数据卷容器来备份、恢复、迁移数据卷
+8. 使用网络
+8.1 外部访问容器
+8.2 容器互联
+1. Docker 简介
+1.1 为什么使用Docker
+为什么要使用 Docker？
+作为一种新兴的虚拟化方式，Docker 跟传统的虚拟化方式相比具有众多的优势。
+
+首先，Docker 容器的启动可以在秒级实现，这相比传统的虚拟机方式要快得多。 其次，Docker 对系统资源的利用率很高，一台主机上可以同时运行数千个 Docker 容器。
+
+容器除了运行其中应用外，基本不消耗额外的系统资源，使得应用的性能很高，同时系统的开销尽量小。传统虚拟机方式运行 10 个不同的应用就要起 10 个虚拟机，而Docker 只需要启动 10 个隔离的应用即可。
+
+具体说来，Docker 在如下几个方面具有较大的优势。
+
+更快速的交付和部署
+对开发和运维（devop）人员来说，最希望的就是一次创建或配置，可以在任意地方正常运行。
+
+开发者可以使用一个标准的镜像来构建一套开发容器，开发完成之后，运维人员可以直接使用这个容器来部署代码。 Docker 可以快速创建容器，快速迭代应用程序，并让整个过程全程可见，使团队中的其他成员更容易理解应用程序是如何创建和工作的。 Docker 容器很轻很快！容器的启动时间是秒级的，大量地节约开发、测试、部署的时间。
+
+更高效的虚拟化
+Docker 容器的运行不需要额外的 hypervisor 支持，它是内核级的虚拟化，因此可以实现更高的性能和效率。
+
+更轻松的迁移和扩展
+Docker 容器几乎可以在任意的平台上运行，包括物理机、虚拟机、公有云、私有云、个人电脑、服务器等。 这种兼容性可以让用户把一个应用程序从一个平台直接迁移到另外一个。
+
+更简单的管理
+使用 Docker，只需要小小的修改，就可以替代以往大量的更新工作。所有的修改都以增量的方式被分发和更新，从而实现自动化并且高效的管理。
+
+对比传统虚拟机总结
+特性	容器	虚拟机
+启动	秒级	分钟级
+硬盘使用	一般为 MB	一般为 GB
+性能	接近原生	弱于
+系统支持量	单机支持上千个容器	一般几十个
+2. 基本概念
+Docker 包括三个基本概念
+
+镜像（Image）
+容器（Container）
+仓库（Repository）
+理解了这三个概念，就理解了 Docker 的整个生命周期。
+
+2.1 Docker 镜像
+Docker 镜像就是一个只读的模板。
+
+例如：一个镜像可以包含一个完整的 ubuntu 操作系统环境，里面仅安装了 Apache 或用户需要的其它应用程序。
+
+镜像可以用来创建 Docker 容器。
+
+Docker 提供了一个很简单的机制来创建镜像或者更新现有的镜像，用户甚至可以直接从其他人那里下载一个已经做好的镜像来直接使用。
+
+2.2 Docker 容器
+Docker 利用容器来运行应用。
+
+容器是从镜像创建的运行实例。它可以被启动、开始、停止、删除。每个容器都是相互隔离的、保证安全的平台。
+
+可以把容器看做是一个简易版的 Linux 环境（包括root用户权限、进程空间、用户空间和网络空间等）和运行在其中的应用程序。
+
+*注：镜像是只读的，容器在启动的时候创建一层可写层作为最上层。
+
+2.3 Docker 仓库
+仓库是集中存放镜像文件的场所。有时候会把仓库和仓库注册服务器（Registry）混为一谈，并不严格区分。实际上，仓库注册服务器上往往存放着多个仓库，每个仓库 中又包含了多个镜像，每个镜像有不同的标签（tag）。
+
+仓库分为公开仓库（Public）和私有仓库（Private）两种形式。
+
+最大的公开仓库是 Docker Hub，存放了数量庞大的镜像供用户下载。 国内的公开仓库包括Docker Pool 等，可以提供大陆用户更稳定快速的访问。
+
+当然，用户也可以在本地网络内创建一个私有仓库。
+
+当用户创建了自己的镜像之后就可以使用 push 命令将它上传到公有或者私有仓库，这样下次在另外一台机器上使用这个镜像时候，只需要从仓库上 pull 下来就可以了。
+
+*注：Docker 仓库的概念跟 Git 类似，注册服务器可以理解为 GitHub 这样的托管服务
+
+3. 安装
+3.1 Ubuntu 系列安装 Docker
+通过系统自带包安装
+
+Ubuntu 14.04 版本系统中已经自带了 Docker 包，可以直接安装。
+
+$ sudo apt-get update
+$ sudo apt-get install -y docker.io
+$ sudo ln -sf /usr/bin/docker.io /usr/local/bin/docker
+$ sudo sed -i '$acomplete -F _docker docker' /etc/bash_completion.d/docker.io
+
+如果使用操作系统自带包安装 Docker，目前安装的版本是比较旧的 0.9.1。 要安装更新的版本，可以通过使用 Docker 源的方式。
+通过Docker源安装最新版本
+
+要安装最新的 Docker 版本，首先需要安装 apt-transport-https 支持，之后通过添加源来安装。
+
+$ sudo apt-get install apt-transport-https
+$ sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 36A1D7869245C8950F966E92D8576A8BA88D21E9
+$ sudo bash -c "echo deb https://get.docker.io/ubuntu docker main > /etc/apt/sources.list.d/docker.list"
+$ sudo apt-get update
+$ sudo apt-get install lxc-docker
+
+14.04 之前版本
+
+如果是较低版本的 Ubuntu 系统，需要先更新内核。
+
+$ sudo apt-get update
+$ sudo apt-get install linux-image-generic-lts-raring linux-headers-generic-lts-raring
+$ sudo reboot
+
+然后重复上面的步骤即可。
+
+安装之后启动 Docker 服务。
+
+$ sudo service docker start
+4. Docker 镜像
+在之前的介绍中，我们知道镜像是 Docker 的三大组件之一。
+
+Docker 运行容器前需要本地存在对应的镜像，如果镜像不存在本地，Docker 会从镜像仓库下载（默认是 Docker Hub 公共注册服务器中的仓库）。
+
+本章将介绍更多关于镜像的内容，包括：
+
+从仓库获取镜像；
+管理本地主机上的镜像；
+介绍镜像实现的基本原理。
+4.1 获取镜像
+可以使用 docker pull 命令来从仓库获取所需要的镜像。
+
+下面的例子将从 Docker Hub 仓库下载一个 Ubuntu 12.04 操作系统的镜像。
+
+$ sudo docker pull ubuntu:12.04
+Pulling repository ubuntu
+ab8e2728644c: Pulling dependent layers
+511136ea3c5a: Download complete
+5f0ffaa9455e: Download complete
+a300658979be: Download complete
+904483ae0c30: Download complete
+ffdaafd1ca50: Download complete
+d047ae21eeaf: Download complete
+
+下载过程中，会输出获取镜像的每一层信息。
+
+该命令实际上相当于 $ sudo docker pull registry.hub.docker.com/ubuntu:12.04 命令，即从注册服务器 registry.hub.docker.com 中的 ubuntu 仓库来下载标记为 12.04 的镜像。
+
+有时候官方仓库注册服务器下载较慢，可以从其他仓库下载。 从其它仓库下载时需要指定完整的仓库注册服务器地址。例如
+
+$ sudo docker pull dl.dockerpool.com:5000/ubuntu:12.04
+Pulling dl.dockerpool.com:5000/ubuntu
+ab8e2728644c: Pulling dependent layers
+511136ea3c5a: Download complete
+5f0ffaa9455e: Download complete
+a300658979be: Download complete
+904483ae0c30: Download complete
+ffdaafd1ca50: Download complete
+d047ae21eeaf: Download complete
+
+完成后，即可随时使用该镜像了，例如创建一个容器，让其中运行 bash 应用。
+
+$ sudo docker run -t -i ubuntu:12.04 /bin/bash
+root@fe7fc4bd8fc9:/#
+
+4.2 列出本地镜像
+使用 docker images 显示本地已有的镜像。
+
+$ sudo docker images
+REPOSITORY       TAG      IMAGE ID      CREATED      VIRTUAL SIZE
+ubuntu           12.04    74fe38d11401  4 weeks ago  209.6 MB
+ubuntu           precise  74fe38d11401  4 weeks ago  209.6 MB
+ubuntu           14.04    99ec81b80c55  4 weeks ago  266 MB
+ubuntu           latest   99ec81b80c55  4 weeks ago  266 MB
+ubuntu           trusty   99ec81b80c55  4 weeks ago  266 MB
+...
+
+在列出信息中，可以看到几个字段信息
+
+    来自于哪个仓库，比如 ubuntu
+    镜像的标记，比如 14.04
+    它的 ID 号（唯一）
+    创建时间
+    镜像大小
+
+其中镜像的 ID 唯一标识了镜像，注意到 ubuntu:14.04 和 ubuntu:trusty 具有相同的镜像 ID，说明它们实际上是同一镜像。
+
+TAG 信息用来标记来自同一个仓库的不同镜像。例如 ubuntu 仓库中有多个镜像，通过 TAG 信息来区分发行版本，例如 10.04、12.04、12.10、13.04、14.04 等。例如下面的命令指定使用镜像 ubuntu:14.04 来启动一个容器。
+
+$ sudo docker run -t -i ubuntu:14.04 /bin/bash
+
+如果不指定具体的标记，则默认使用 latest 标记信息。
+4.3 创建镜像
+创建镜像有很多方法，用户可以从 Docker Hub 获取已有镜像并更新，也可以利用本地文件系统创建一个。
+修改已有镜像
+
+先使用下载的镜像启动容器。
+
+$ sudo docker run -t -i training/sinatra /bin/bash
+root@0b2616b0e5a8:/#
+
+注意：记住容器的 ID，稍后还会用到。
+
+在容器中添加 json 和 gem 两个应用。
+
+root@0b2616b0e5a8:/# gem install json
+
+当结束后，我们使用 exit 来退出，现在我们的容器已经被我们改变了，使用 docker commit 命令来提交更新后的副本。
+
+$ sudo docker commit -m "Added json gem" -a "Docker Newbee" 0b2616b0e5a8 ouruser/sinatra:v2
+4f177bd27a9ff0f6dc2a830403925b5360bfe0b93d476f7fc3231110e7f71b1c
+
+其中，
+-m 来指定提交的说明信息，跟我们使用的版本控制工具一样；
+-a 可以指定更新的用户信息；之后是用来创建镜像的容器的 ID；
+最后指定目标镜像的仓库名和 tag 信息。创建成功后会返回这个镜像的 ID 信息。
+
+使用 docker images 来查看新创建的镜像。
+
+$ sudo docker images
+REPOSITORY          TAG     IMAGE ID       CREATED       VIRTUAL SIZE
+training/sinatra    latest  5bc342fa0b91   10 hours ago  446.7 MB
+ouruser/sinatra     v2      3c59e02ddd1a   10 hours ago  446.7 MB
+ouruser/sinatra     latest  5db5f8471261   10 hours ago  446.7 MB
+
+之后，可以使用新的镜像来启动容器
+
+$ sudo docker run -t -i ouruser/sinatra:v2 /bin/bash
+root@78e82f680994:/#
+
+利用 Dockerfile 来创建镜像
+
+使用 docker commit 来扩展一个镜像比较简单，但是不方便在一个团队中分享。我们可以使用 docker build 来创建一个新的镜像。为此，首先需要创建一个 Dockerfile，包含一些如何创建镜像的指令。
+
+新建一个目录和一个 Dockerfile
+
+$ mkdir sinatra
+$ cd sinatra
+$ touch Dockerfile
+
+Dockerfile 中每一条指令都创建镜像的一层，例如：
+
+# This is a comment
+FROM ubuntu:14.04
+MAINTAINER Docker Newbee 
+RUN apt-get -qq update
+RUN apt-get -qqy install ruby ruby-dev
+RUN gem install sinatra
+
+Dockerfile 基本的语法是
+
+    使用#来注释
+    FROM 指令告诉 Docker 使用哪个镜像作为基础
+    接着是维护者的信息
+    RUN开头的指令会在创建中运行，比如安装一个软件包，在这里使用 apt-get 来安装了一些软件
+
+编写完成 Dockerfile 后可以使用 docker build 来生成镜像。
+
+$ sudo docker build -t="ouruser/sinatra:v2" .
+Uploading context  2.56 kB
+Uploading context
+Step 0 : FROM ubuntu:14.04
+ ---> 99ec81b80c55
+Step 1 : MAINTAINER Newbee 
+ ---> Running in 7c5664a8a0c1
+ ---> 2fa8ca4e2a13
+Removing intermediate container 7c5664a8a0c1
+Step 2 : RUN apt-get -qq update
+ ---> Running in b07cc3fb4256
+ ---> 50d21070ec0c
+Removing intermediate container b07cc3fb4256
+Step 3 : RUN apt-get -qqy install ruby ruby-dev
+ ---> Running in a5b038dd127e
+Selecting previously unselected package libasan0:amd64.
+(Reading database ... 11518 files and directories currently installed.)
+Preparing to unpack .../libasan0_4.8.2-19ubuntu1_amd64.deb ...
+Setting up ruby (1:1.9.3.4) ...
+Setting up ruby1.9.1 (1.9.3.484-2ubuntu1) ...
+Processing triggers for libc-bin (2.19-0ubuntu6) ...
+ ---> 2acb20f17878
+Removing intermediate container a5b038dd127e
+Step 4 : RUN gem install sinatra
+ ---> Running in 5e9d0065c1f7
+. . .
+Successfully installed rack-protection-1.5.3
+Successfully installed sinatra-1.4.5
+4 gems installed
+ ---> 324104cde6ad
+Removing intermediate container 5e9d0065c1f7
+Successfully built 324104cde6ad
+
+其中 -t 标记来添加 tag，指定新的镜像的用户信息。 “.” 是 Dockerfile 所在的路径（当前目录），也可以替换为一个具体的 Dockerfile 的路径。
+
+可以看到 build 进程在执行操作。它要做的第一件事情就是上传这个 Dockerfile 内容，因为所有的操作都要依据 Dockerfile 来进行。 然后，Dockfile 中的指令被一条一条的执行。每一步都创建了一个新的容器，在容器中执行指令并提交修改（就跟之前介绍过的 docker commit 一样）。当所有的指令都执行完毕之后，返回了最终的镜像 id。所有的中间步骤所产生的容器都被删除和清理了。
+
+*注意一个镜像不能超过 127 层
+
+此外，还可以利用 ADD 命令复制本地文件到镜像；用 EXPOSE 命令来向外部开放端口；用 CMD 命令来描述容器启动后运行的程序等。例如
+
+# put my local web site in myApp folder to /var/www
+ADD myApp /var/www
+# expose httpd port
+EXPOSE 80
+# the command to run
+CMD ["/usr/sbin/apachectl", "-D", "FOREGROUND"]
+
+现在可以利用新创建的镜像来启动一个容器。
+
+$ sudo docker run -t -i ouruser/sinatra:v2 /bin/bash
+root@8196968dac35:/#
+
+还可以用 docker tag 命令来修改镜像的标签。
+
+$ sudo docker tag 5db5f8471261 ouruser/sinatra:devel
+$ sudo docker images ouruser/sinatra
+REPOSITORY          TAG     IMAGE ID      CREATED        VIRTUAL SIZE
+ouruser/sinatra     latest  5db5f8471261  11 hours ago   446.7 MB
+ouruser/sinatra     devel   5db5f8471261  11 hours ago   446.7 MB
+ouruser/sinatra     v2      5db5f8471261  11 hours ago   446.7 MB
+
+*注：更多用法，请参考 Dockerfile 章节。
+从本地文件系统导入
+
+要从本地文件系统导入一个镜像，可以使用 openvz（容器虚拟化的先锋技术）的模板来创建： openvz 的模板下载地址为 templates 。
+
+比如，先下载了一个 ubuntu-14.04 的镜像，之后使用以下命令导入：
+
+sudo cat ubuntu-14.04-x86_64-minimal.tar.gz  |docker import - ubuntu:14.04
+
+然后查看新导入的镜像。
+
+docker images
+REPOSITORY          TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
+ubuntu              14.04               05ac7c0b9383        17 seconds ago      215.5 MB
+
+上传镜像
+
+用户可以通过 docker push 命令，把自己创建的镜像上传到仓库中来共享。例如，用户在 Docker Hub 上完成注册后，可以推送自己的镜像到仓库中。
+
+$ sudo docker push ouruser/sinatra
+The push refers to a repository [ouruser/sinatra] (len: 1)
+Sending image list
+Pushing repository ouruser/sinatra (3 tags)
+4.4 存出和载入镜像
+存出镜像
+
+如果要导出镜像到本地文件，可以使用 docker save 命令。
+
+$ sudo docker images
+REPOSITORY          TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
+ubuntu              14.04               c4ff7513909d        5 weeks ago         225.4 MB
+...
+$sudo docker save -o ubuntu_14.04.tar ubuntu:14.04
+载入镜像
+
+可以使用 docker load 从导出的本地文件中再导入到本地镜像库，例如
+
+$ sudo docker load --input ubuntu_14.04.tar
+
+或
+
+$ sudo docker load < ubuntu_14.04.tar
+
+这将导入镜像以及其相关的元数据信息（包括标签等）。
+
+4.5 移除本地镜像
+如果要移除本地的镜像，可以使用 docker rmi 命令。注意 docker rm 命令是移除容器。
+
+$ sudo docker rmi training/sinatra
+Untagged: training/sinatra:latest
+Deleted: 5bc342fa0b91cabf65246837015197eecfa24b2213ed6a51a8974ae250fedd8d
+Deleted: ed0fffdcdae5eb2c3a55549857a8be7fc8bc4241fb19ad714364cbfd7a56b22f
+Deleted: 5c58979d73ae448df5af1d8142436d81116187a7633082650549c52c3a2418f0
+
+*注意：在删除镜像之前要先用 docker rm 删掉依赖于这个镜像的所有容器。
+
+docker rm $(docker ps -a -q) 删除所有容器
+
+docker rmi $(docker images | awk '/^<none>/ {print $3}') 删除tag为NONE的镜像
+
+docker rmi $(docker images | awk '{print $3}') 删除所有镜像
+
+5. 容器
+容器是 Docker 又一核心概念。
+
+简单的说，容器是独立运行的一个或一组应用，以及它们的运行态环境。对应的，虚拟机可以理解为模拟运行的一整套操作系统（提供了运行态环境和其他系统环境）和跑在上面 的应用。
+
+本章将具体介绍如何来管理一个容器，包括创建、启动和停止等
+
+5.1 启动容器
+新建并启动
+
+所需要的命令主要为 docker run。
+
+例如，下面的命令输出一个 “Hello World”，之后终止容器。
+
+$ sudo docker run ubuntu:14.04 /bin/echo 'Hello world'
+Hello world
+
+下面的命令则启动一个 bash 终端，允许用户进行交互。
+
+$ sudo docker run -t -i ubuntu:14.04 /bin/bash
+root@af8bae53bdd3:/#
+
+其中，-t 选项让Docker分配一个伪终端（pseudo-tty）并绑定到容器的标准输入上， -i 则让容器的标准输入保持打开。
+
+当利用 docker run 来创建容器时，Docker 在后台运行的标准操作包括：
+
+检查本地是否存在指定的镜像，不存在就从公有仓库下载
+利用镜像创建并启动一个容器
+分配一个文件系统，并在只读的镜像层外面挂载一层可读写层
+从宿主主机配置的网桥接口中桥接一个虚拟接口到容器中去
+从地址池配置一个 ip 地址给容器
+执行用户指定的应用程序
+执行完毕后容器被终止
+5.2 守护态运行
+更多的时候，需要让 Docker 容器在后台以守护态（Daemonized）形式运行。此时，可以通过添加 -d 参数来实现。
+
+例如下面的命令会在后台运行容器。
+
+$ sudo docker run -d ubuntu:14.04 /bin/sh -c "while true; do echo hello world; sleep 1; done"
+1e5535038e285177d5214659a068137486f96ee5c2e85a4ac52dc83f2ebe4147
+
+容器启动后会返回一个唯一的 id，也可以通过 docker ps 命令来查看容器信息。
+
+$ sudo docker ps
+CONTAINER ID  IMAGE         COMMAND               CREATED        STATUS       PORTS NAMES
+1e5535038e28  ubuntu:14.04  /bin/sh -c 'while tr  2 minutes ago  Up 1 minute        insane_babbage
+
+要获取容器的输出信息，可以通过 docker logs 命令。
+
+$ sudo docker logs insane_babbage
+hello world
+hello world
+hello world
+. . .
+5.3 终止容器
+可以使用 docker stop 来终止一个运行中的容器。
+
+此外，当Docker容器中指定的应用终结时，容器也自动终止。 例如对于上一章节中只启动了一个终端的容器，用户通过 exit 命令或 Ctrl+d 来退出终端时，所创建的容器立刻终止。
+
+终止状态的容器可以用 docker ps -a 命令看到。例如
+
+sudo docker ps -a
+CONTAINER ID        IMAGE                    COMMAND                CREATED             STATUS                          PORTS               NAMES
+ba267838cc1b        ubuntu:14.04             "/bin/bash"            30 minutes ago      Exited (0) About a minute ago                       trusting_newton
+98e5efa7d997        training/webapp:latest   "python app.py"        About an hour ago   Exited (0) 34 minutes ago                           backstabbing_pike
+
+处于终止状态的容器，可以通过 docker start 命令来重新启动。
+
+此外，docker restart 命令会将一个运行态的容器终止，然后再重新启动它。
+5.4 进入容器
+
+在使用 -d 参数时，容器启动后会进入后台。 某些时候需要进入容器进行操作，有很多种方法，包括使用 docker attach 命令或 nsenter 工具等。
+attach 命令
+
+docker attach 是Docker自带的命令。下面示例如何使用该命令。
+
+$ sudo docker run -idt ubuntu
+243c32535da7d142fb0e6df616a3c3ada0b8ab417937c853a9e1c251f499f550
+$ sudo docker ps
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+243c32535da7        ubuntu:latest       "/bin/bash"         18 seconds ago      Up 17 seconds                           nostalgic_hypatia
+$sudo docker attach nostalgic_hypatia
+root@243c32535da7:/#
+
+但是使用 attach 命令有时候并不方便。当多个窗口同时 attach 到同一个容器的时候，所有窗口都会同步显示。当某个窗口因命令阻塞时,其他窗口也无法执行操作了。
+nsenter 命令
+安装
+
+nsenter 工具在 util-linux 包2.23版本后包含。 如果系统中 util-linux 包没有该命令，可以按照下面的方法从源码安装。
+
+$ cd /tmp; curl https://www.kernel.org/pub/linux/utils/util-linux/v2.24/util-linux-2.24.tar.gz | tar -zxf-; cd util-linux-2.24;
+$ ./configure --without-ncurses
+$ make nsenter && sudo cp nsenter /usr/local/bin
+
+使用
+
+nsenter 可以访问另一个进程的名字空间。nsenter 要正常工作需要有 root 权限。 很不幸，Ubuntu 14.04 仍然使用的是 util-linux 2.20。安装最新版本的 util-linux（2.24）版，请按照以下步骤：
+
+$ wget https://www.kernel.org/pub/linux/utils/util-linux/v2.24/util-linux-2.24.tar.gz; tar xzvf util-linux-2.24.tar.gz
+$ cd util-linux-2.24
+$ ./configure --without-ncurses && make nsenter
+$ sudo cp nsenter /usr/local/bin
+
+为了连接到容器，你还需要找到容器的第一个进程的 PID，可以通过下面的命令获取。
+
+PID=$(docker inspect --format "{ { .State.Pid } }" )
+
+通过这个 PID，就可以连接到这个容器：
+
+$ nsenter --target $PID --mount --uts --ipc --net --pid
+
+下面给出一个完整的例子。
+
+$ sudo docker run -idt ubuntu
+243c32535da7d142fb0e6df616a3c3ada0b8ab417937c853a9e1c251f499f550
+$ sudo docker ps
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+243c32535da7        ubuntu:latest       "/bin/bash"         18 seconds ago      Up 17 seconds                           nostalgic_hypatia
+$ PID=$(docker-pid 243c32535da7)
+10981
+$ sudo nsenter --target 10981 --mount --uts --ipc --net --pid
+root@243c32535da7:/#
+
+更简单的，建议大家下载 .bashrc_docker，并将内容放到 .bashrc 中。
+
+$ wget -P ~ https://github.com/yeasy/docker_practice/raw/master/_local/.bashrc_docker;
+$ echo "[ -f ~/.bashrc_docker ] && . ~/.bashrc_docker" >> ~/.bashrc; source ~/.bashrc
+
+这个文件中定义了很多方便使用 Docker 的命令，例如 docker-pid 可以获取某个容器的 PID；而 docker-enter 可以进入容器或直接在容器内执行命令。
+
+$ echo $(docker-pid )
+$ docker-enter  ls
+
+
+5.5 导出和导入容器
+
+导出容器
+
+如果要导出本地某个容器，可以使用 docker export 命令。
+
+$ sudo docker ps -a
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS                    PORTS               NAMES
+7691a814370e        ubuntu:14.04        "/bin/bash"         36 hours ago        Exited (0) 21 hours ago                       test
+$ sudo docker export 7691a814370e > ubuntu.tar
+
+这样将导出容器快照到本地文件。
+导入容器快照
+
+可以使用 docker import 从容器快照文件中再导入为镜像，例如
+
+$ cat ubuntu.tar | sudo docker import - test/ubuntu:v1.0
+$ sudo docker images
+REPOSITORY          TAG                 IMAGE ID            CREATED              VIRTUAL SIZE
+test/ubuntu         v1.0                9d37a6082e97        About a minute ago   171.3 MB
+
+此外，也可以通过指定 URL 或者某个目录来导入，例如
+
+$sudo docker import http://example.com/exampleimage.tgz example/imagerepo
+
+*注：用户既可以使用 docker load 来导入镜像存储文件到本地镜像库，也可以使用 docker import 来导入一个容器快照到本地镜像库。这两者的区别在于容器快照文件将丢弃所有的历史记录和元数据信息（即仅保存容器当时的快照状态），而镜像存储文件将保存完整记录，体积也要大。此外，从容器快照文件导入时可以重新指定标签等元数据信息。
+
+5.6 删除容器
+可以使用 docker rm 来删除一个处于终止状态的容器。 例如
+
+$sudo docker rm  trusting_newton
+trusting_newton
+如果要删除一个运行中的容器，可以添加 -f 参数。Docker 会发送 SIGKILL 信号给容器。
+
+6. 仓库
+仓库（Repository）是集中存放镜像的地方。
+
+一个容易混淆的概念是注册服务器（Registry）。实际上注册服务器是管理仓库的具体服务器，每个服务器上可以有多个仓库，而每个仓库下面有多个镜像。从这方面来 说，仓库可以被认为是一个具体的项目或目录。例如对于仓库地址 dl.dockerpool.com/ubuntu 来说，dl.dockerpool.com 是注册服务器地址，ubuntu 是仓库名。
+
+大部分时候，并不需要严格区分这两者的概念。
+
+6.1
+Docker Hub
+
+目前 Docker 官方维护了一个公共仓库 Docker Hub，其中已经包括了超过 15,000 的镜像。大部分需求，都可以通过在 Docker Hub 中直接下载镜像来实现。
+登录
+
+可以通过执行 docker login 命令来输入用户名、密码和邮箱来完成注册和登录。 注册成功后，本地用户目录的 .dockercfg 中将保存用户的认证信息。
+基本操作
+
+用户无需登录即可通过 docker search 命令来查找官方仓库中的镜像，并利用 docker pull 命令来将它下载到本地。
+
+例如以 centos 为关键词进行搜索：
+
+$ sudo docker search centos
+NAME                                            DESCRIPTION                                     STARS     OFFICIAL   AUTOMATED
+centos                                          The official build of CentOS.                   465       [OK]
+tianon/centos                                   CentOS 5 and 6, created using rinse instea...   28
+blalor/centos                                   Bare-bones base CentOS 6.5 image                6                    [OK]
+saltstack/centos-6-minimal                                                                      6                    [OK]
+tutum/centos-6.4                                DEPRECATED. Use tutum/centos:6.4 instead. ...   5                    [OK]
+...
+
+可以看到返回了很多包含关键字的镜像，其中包括镜像名字、描述、星级（表示该镜像的受欢迎程度）、是否官方创建、是否自动创建。 官方的镜像说明是官方项目组创建和维护的，automated 资源允许用户验证镜像的来源和内容。
+
+根据是否是官方提供，可将镜像资源分为两类。 一种是类似 centos 这样的基础镜像，被称为基础或根镜像。这些基础镜像是由 Docker 公司创建、验证、支持、提供。这样的镜像往往使用单个单词作为名字。 还有一种类型，比如 tianon/centos 镜像，它是由 Docker 的用户创建并维护的，往往带有用户名称前缀。可以通过前缀 user_name/ 来指定使用某个用户提供的镜像，比如 tianon 用户。
+
+另外，在查找的时候通过 -s N 参数可以指定仅显示评价为 N 星以上的镜像。
+
+下载官方 centos 镜像到本地。
+
+$ sudo docker pull centos
+Pulling repository centos
+0b443ba03958: Download complete
+539c0211cd76: Download complete
+511136ea3c5a: Download complete
+7064731afe90: Download complete
+
+用户也可以在登录后通过 docker push 命令来将镜像推送到 Docker Hub。
+自动创建
+
+自动创建（Automated Builds）功能对于需要经常升级镜像内程序来说，十分方便。 有时候，用户创建了镜像，安装了某个软件，如果软件发布新版本则需要手动更新镜像。。
+
+而自动创建允许用户通过 Docker Hub 指定跟踪一个目标网站（目前支持 GitHub 或BitBucket）上的项目，一旦项目发生新的提交，则自动执行创建。
+
+要配置自动创建，包括如下的步骤：
+
+    创建并登录 Docker Hub，以及目标网站；
+    在目标网站中连接帐户到 Docker Hub；
+    在 Docker Hub 中 配置一个自动创建；
+    选取一个目标网站中的项目（需要含 Dockerfile）和分支；
+    指定 Dockerfile 的位置，并提交创建。
+
+之后，可以 在Docker Hub 的 自动创建页面 中跟踪每次创建的状态。
+6.2 私有仓库
+
+有时候使用 Docker Hub 这样的公共仓库可能不方便，用户可以创建一个本地仓库供私人使用。
+
+本节介绍如何使用本地仓库。
+
+docker-registry 是官方提供的工具，可以用于构建私有的镜像仓库。
+安装运行 docker-registry
+容器运行
+
+在安装了 Docker 后，可以通过获取官方 registry 镜像来运行。
+
+$ sudo docker run -d -p 5000:5000 registry
+
+这将使用官方的 registry 镜像来启动本地的私有仓库。 用户可以通过指定参数来配置私有仓库位置，例如配置镜像存储到 Amazon S3 服务。
+
+$ sudo docker run \
+         -e SETTINGS_FLAVOR=s3 \
+         -e AWS_BUCKET=acme-docker \
+         -e STORAGE_PATH=/registry \
+         -e AWS_KEY=AKIAHSHB43HS3J92MXZ \
+         -e AWS_SECRET=xdDowwlK7TJajV1Y7EoOZrmuPEJlHYcNP2k4j49T \
+         -e SEARCH_BACKEND=sqlalchemy \
+         -p 5000:5000 \
+         registry
+`
+
+此外，还可以指定本地路径（如 /home/user/registry-conf ）下的配置文件。
+
+$ sudo docker run -d -p 5000:5000 -v /home/user/registry-conf:/registry-conf -e DOCKER_REGISTRY_CONFIG=/registry-conf/config.yml registry
+
+默认情况下，仓库会被创建在容器的 /tmp/registry 下。可以通过 -v 参数来将镜像文件存放在本地的指定路径。 例如下面的例子将上传的镜像放到 /opt/data/registry 目录。
+
+$ sudo docker run -d -p 5000:5000 -v /opt/data/registry:/tmp/registry registry
+
+本地安装
+
+对于 Ubuntu 或 CentOS 等发行版，可以直接通过源安装。
+
+    Ubuntu
+
+    $ sudo apt-get install -y build-essential python-dev libevent-dev python-pip liblzma-dev
+
+    $ sudo pip install docker-registry
+
+    CentOS
+
+    $ sudo yum install -y python-devel libevent-devel python-pip gcc xz-devel
+
+    $ sudo python-pip install docker-registry
+
+也可以从 docker-registry 项目下载源码进行安装。
+
+$ sudo apt-get install build-essential python-dev libevent-dev python-pip libssl-dev liblzma-dev libffi-dev
+$ git clone https://github.com/docker/docker-registry.git
+$ cd docker-registry
+$ sudo python setup.py install
+
+然后修改配置文件，主要修改 dev 模板段的 storage_path 到本地的存储仓库的路径。
+
+$ cp config/config_sample.yml config/config.yml
+
+之后启动 Web 服务。
+
+$ sudo gunicorn -c contrib/gunicorn.py docker_registry.wsgi:application
+
+或者
+
+$ sudo gunicorn --access-logfile - --error-logfile - -k gevent -b 0.0.0.0:5000 -w 4 --max-requests 100 docker_registry.wsgi:application
+
+此时使用 curl 访问本地的 5000 端口，看到输出 docker-registry 的版本信息说明运行成功。
+
+*注：config/config_sample.yml 文件是示例配置文件。
+在私有仓库上传、下载、搜索镜像
+
+创建好私有仓库之后，就可以使用 docker tag 来标记一个镜像，然后推送它到仓库，别的机器上就可以下载下来了。例如私有仓库地址为 192.168.7.26:5000。
+
+先在本机查看已有的镜像。
+
+$ sudo docker images
+REPOSITORY                        TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
+ubuntu                            latest              ba5877dc9bec        6 weeks ago         192.7 MB
+ubuntu                            14.04               ba5877dc9bec        6 weeks ago         192.7 MB
+
+使用docker tag 将 ba58 这个镜像标记为 192.168.7.26:5000/test（格式为 docker tag IMAGE[:TAG] [REGISTRYHOST/][USERNAME/]NAME[:TAG]）。
+
+$ sudo docker tag ba58 192.168.7.26:5000/test
+root ~ # docker images
+REPOSITORY                        TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
+ubuntu                            14.04               ba5877dc9bec        6 weeks ago         192.7 MB
+ubuntu                            latest              ba5877dc9bec        6 weeks ago         192.7 MB
+192.168.7.26:5000/test            latest              ba5877dc9bec        6 weeks ago         192.7 MB
+
+使用 docker push 上传标记的镜像。
+
+$ sudo docker push 192.168.7.26:5000/test
+The push refers to a repository [192.168.7.26:5000/test] (len: 1)
+Sending image list
+Pushing repository 192.168.7.26:5000/test (1 tags)
+Image 511136ea3c5a already pushed, skipping
+Image 9bad880da3d2 already pushed, skipping
+Image 25f11f5fb0cb already pushed, skipping
+Image ebc34468f71d already pushed, skipping
+Image 2318d26665ef already pushed, skipping
+Image ba5877dc9bec already pushed, skipping
+Pushing tag for rev [ba5877dc9bec] on {http://192.168.7.26:5000/v1/repositories/test/tags/latest}
+
+用 curl 查看仓库中的镜像。
+
+$ curl http://192.168.7.26:5000/v1/search
+{"num_results": 7, "query": "", "results": [{"description": "", "name": "library/miaxis_j2ee"}, {"description": "", "name": "library/tomcat"}, {"description": "", "name": "library/ubuntu"}, {"description": "", "name": "library/ubuntu_office"}, {"description": "", "name": "library/desktop_ubu"}, {"description": "", "name": "dockerfile/ubuntu"}, {"description": "", "name": "library/test"}]}
+
+这里可以看到 {"description": "", "name": "library/test"}，表明镜像已经被成功上传了。
+
+现在可以到另外一台机器去下载这个镜像。
+
+$ sudo docker pull 192.168.7.26:5000/test
+Pulling repository 192.168.7.26:5000/test
+ba5877dc9bec: Download complete
+511136ea3c5a: Download complete
+9bad880da3d2: Download complete
+25f11f5fb0cb: Download complete
+ebc34468f71d: Download complete
+2318d26665ef: Download complete
+$ sudo docker images
+REPOSITORY                         TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
+192.168.7.26:5000/test             latest              ba5877dc9bec        6 weeks ago         192.7 MB
+
+可以使用 这个脚本 批量上传本地的镜像到注册服务器中，默认是本地注册服务器 127.0.0.1:5000。例如：
+
+$ wget https://github.com/yeasy/docker_practice/raw/master/_local/push_images.sh; sudo chmod a+x push_images.sh
+$ ./push_images.sh ubuntu:latest centos:centos7
+The registry server is 127.0.0.1
+Uploading ubuntu:latest...
+The push refers to a repository [127.0.0.1:5000/ubuntu] (len: 1)
+Sending image list
+Pushing repository 127.0.0.1:5000/ubuntu (1 tags)
+Image 511136ea3c5a already pushed, skipping
+Image bfb8b5a2ad34 already pushed, skipping
+Image c1f3bdbd8355 already pushed, skipping
+Image 897578f527ae already pushed, skipping
+Image 9387bcc9826e already pushed, skipping
+Image 809ed259f845 already pushed, skipping
+Image 96864a7d2df3 already pushed, skipping
+Pushing tag for rev [96864a7d2df3] on {http://127.0.0.1:5000/v1/repositories/ubuntu/tags/latest}
+Untagged: 127.0.0.1:5000/ubuntu:latest
+Done
+Uploading centos:centos7...
+The push refers to a repository [127.0.0.1:5000/centos] (len: 1)
+Sending image list
+Pushing repository 127.0.0.1:5000/centos (1 tags)
+Image 511136ea3c5a already pushed, skipping
+34e94e67e63a: Image successfully pushed
+70214e5d0a90: Image successfully pushed
+Pushing tag for rev [70214e5d0a90] on {http://127.0.0.1:5000/v1/repositories/centos/tags/centos7}
+Untagged: 127.0.0.1:5000/centos:centos7
+Done
+
+
+6.3 仓库配置文件
+
+Docker 的 Registry 利用配置文件提供了一些仓库的模板（flavor），用户可以直接使用它们来进行开发或生产部署。
+模板
+
+在 config_sample.yml 文件中，可以看到一些现成的模板段：
+
+    common：基础配置
+    local：存储数据到本地文件系统
+    s3：存储数据到 AWS S3 中
+    dev：使用 local 模板的基本配置
+    test：单元测试使用
+    prod：生产环境配置（基本上跟s3配置类似）
+    gcs：存储数据到 Google 的云存储
+    swift：存储数据到 OpenStack Swift 服务
+    glance：存储数据到 OpenStack Glance 服务，本地文件系统为后备
+    glance-swift：存储数据到 OpenStack Glance 服务，Swift 为后备
+    elliptics：存储数据到 Elliptics key/value 存储
+
+用户也可以添加自定义的模版段。
+
+默认情况下使用的模板是 dev，要使用某个模板作为默认值，可以添加 SETTINGS_FLAVOR 到环境变量中，例如
+
+export SETTINGS_FLAVOR=dev
+
+另外，配置文件中支持从环境变量中加载值，语法格式为 _env:VARIABLENAME[:DEFAULT]。
+示例配置
+
+common:
+    loglevel: info
+    search_backend: "_env:SEARCH_BACKEND:"
+    sqlalchemy_index_database:
+        "_env:SQLALCHEMY_INDEX_DATABASE:sqlite:////tmp/docker-registry.db"
+
+prod:
+    loglevel: warn
+    storage: s3
+    s3_access_key: _env:AWS_S3_ACCESS_KEY
+    s3_secret_key: _env:AWS_S3_SECRET_KEY
+    s3_bucket: _env:AWS_S3_BUCKET
+    boto_bucket: _env:AWS_S3_BUCKET
+    storage_path: /srv/docker
+    smtp_host: localhost
+    from_addr: docker@myself.com
+    to_addr: my@myself.com
+
+dev:
+    loglevel: debug
+    storage: local
+    storage_path: /home/myself/docker
+
+test:
+    storage: local
+    storage_path: /tmp/tmpdockertmp
+
+选项
+
+7. Docker 数据管理
+这一章介绍如何在 Docker 内部以及容器之间管理数据，在容器中管理数据主要有两种方式：
+
+数据卷（Data volumes）
+数据卷容器（Data volume containers）
+7.1 数据卷
+数据卷是一个可供一个或多个容器使用的特殊目录，它绕过 UFS，可以提供很多有用的特性：
+
+    数据卷可以在容器之间共享和重用
+    对数据卷的修改会立马生效
+    对数据卷的更新，不会影响镜像
+    卷会一直存在，直到没有容器使用
+
+*数据卷的使用，类似于 Linux 下对目录或文件进行 mount。
+创建一个数据卷
+
+在用 docker run 命令的时候，使用 -v 标记来创建一个数据卷并挂载到容器里。在一次 run 中多次使用可以挂载多个数据卷。
+
+下面创建一个 web 容器，并加载一个数据卷到容器的 /webapp 目录。
+
+$ sudo docker run -d -P --name web -v /webapp training/webapp python app.py
+
+*注意：也可以在 Dockerfile 中使用 VOLUME 来添加一个或者多个新的卷到由该镜像创建的任意容器。
+挂载一个主机目录作为数据卷
+
+使用 -v 标记也可以指定挂载一个本地主机的目录到容器中去。
+
+$ sudo docker run -d -P --name web -v /src/webapp:/opt/webapp training/webapp python app.py
+
+上面的命令加载主机的 /src/webapp 目录到容器的 /opt/webapp 目录。这个功能在进行测试的时候十分方便，比如用户可以放置一些程序到本地目录中，来查看容器是否正常工作。本地目录的路径必须是绝对路径，如果目录不存在 Docker 会自动为你创建它。
+
+*注意：Dockerfile 中不支持这种用法，这是因为 Dockerfile 是为了移植和分享用的。然而，不同操作系统的路径格式不一样，所以目前还不能支持。
+
+Docker 挂载数据卷的默认权限是读写，用户也可以通过 :ro 指定为只读。
+
+$ sudo docker run -d -P --name web -v /src/webapp:/opt/webapp:ro
+training/webapp python app.py
+
+加了 :ro 之后，就挂载为只读了。
+挂载一个本地主机文件作为数据卷
+
+-v 标记也可以从主机挂载单个文件到容器中
+
+$ sudo docker run --rm -it -v ~/.bash_history:/.bash_history ubuntu /bin/bash
+
+这样就可以记录在容器输入过的命令了。
+
+*注意：如果直接挂载一个文件，很多文件编辑工具，包括 vi 或者 sed --in-place，可能会造成文件 inode 的改变，从 Docker 1.1 .0起，这会导致报错误信息。所以最简单的办法就直接挂载文件的父目录。
+7.2 数据卷容器
+如果你有一些持续更新的数据需要在容器之间共享，最好创建数据卷容器。
+
+数据卷容器，其实就是一个正常的容器，专门用来提供数据卷供其它容器挂载的。
+
+首先，创建一个命名的数据卷容器 dbdata：
+
+$ sudo docker run -d -v /dbdata --name dbdata training/postgres echo Data-only container for postgres
+
+然后，在其他容器中使用 --volumes-from 来挂载 dbdata 容器中的数据卷。
+
+$ sudo docker run -d --volumes-from dbdata --name db1 training/postgres
+$ sudo docker run -d --volumes-from dbdata --name db2 training/postgres
+
+还可以使用多个 --volumes-from 参数来从多个容器挂载多个数据卷。 也可以从其他已经挂载了数据卷的容器来挂载数据卷。
+
+$ sudo docker run -d --name db3 --volumes-from db1 training/postgres
+
+*注意：使用 --volumes-from 参数所挂载数据卷的容器自己并不需要保持在运行状态。
+
+如果删除了挂载的容器（包括 dbdata、db1 和 db2），数据卷并不会被自动删除。如果要删除一个数据卷，必须在删除最后一个还挂载着它的容器时使用 docker rm -v 命令来指定同时删除关联的容器。 这可以让用户在容器之间升级和移动数据卷。具体的操作将在下一节中进行讲解。
+7.3 利用数据卷容器来备份、恢复、迁移数据卷
+
+可以利用数据卷对其中的数据进行进行备份、恢复和迁移。
+备份
+
+首先使用 --volumes-from 标记来创建一个加载 dbdata 容器卷的容器，并从本地主机挂载当前到容器的 /backup 目录。命令如下：
+
+$ sudo docker run --volumes-from dbdata -v $(pwd):/backup ubuntu tar cvf /backup/backup.tar /dbdata
+
+容器启动后，使用了 tar 命令来将 dbdata 卷备份为本地的 /backup/backup.tar。
+恢复
+
+如果要恢复数据到一个容器，首先创建一个带有数据卷的容器 dbdata2。
+
+$ sudo docker run -v /dbdata --name dbdata2 ubuntu /bin/bash
+
+然后创建另一个容器，挂载 dbdata2 的容器，并使用 untar 解压备份文件到挂载的容器卷中。
+
+$ sudo docker run --volumes-from dbdata2 -v $(pwd):/backup busybox tar xvf
+/backup/backup.tar
+
+
+8. 使用网络
+8.1 外部访问容器
+
+容器中可以运行一些网络应用，要让外部也可以访问这些应用，可以通过 -P 或 -p 参数来指定端口映射。
+
+当使用 -P 标记时，Docker 会随机映射一个 49000~49900 的端口到内部容器开放的网络端口。
+
+使用 docker ps 可以看到，本地主机的 49155 被映射到了容器的 5000 端口。此时访问本机的 49155 端口即可访问容器内 web 应用提供的界面。
+
+$ sudo docker run -d -P training/webapp python app.py
+$ sudo docker ps -l
+CONTAINER ID  IMAGE                   COMMAND       CREATED        STATUS        PORTS                    NAMES
+bc533791f3f5  training/webapp:latest  python app.py 5 seconds ago  Up 2 seconds  0.0.0.0:49155->5000/tcp  nostalgic_morse
+
+同样的，可以通过 docker logs 命令来查看应用的信息。
+
+$ sudo docker logs -f nostalgic_morse
+* Running on http://0.0.0.0:5000/
+10.0.2.2 - - [23/May/2014 20:16:31] "GET / HTTP/1.1" 200 -
+10.0.2.2 - - [23/May/2014 20:16:31] "GET /favicon.ico HTTP/1.1" 404 -
+
+-p（小写的）则可以指定要映射的端口，并且，在一个指定端口上只可以绑定一个容器。支持的格式有 ip:hostPort:containerPort | ip::containerPort | hostPort:containerPort。
+映射所有接口地址
+
+使用 hostPort:containerPort 格式本地的 5000 端口映射到容器的 5000 端口，可以执行
+
+$ sudo docker run -d -p 5000:5000 training/webapp python app.py
+
+此时默认会绑定本地所有接口上的所有地址。
+映射到指定地址的指定端口
+
+可以使用 ip:hostPort:containerPort 格式指定映射使用一个特定地址，比如 localhost 地址 127.0.0.1
+
+$ sudo docker run -d -p 127.0.0.1:5000:5000 training/webapp python app.py
+
+映射到指定地址的任意端口
+
+使用 ip::containerPort 绑定 localhost 的任意端口到容器的 5000 端口，本地主机会自动分配一个端口。
+
+$ sudo docker run -d -p 127.0.0.1::5000 training/webapp python app.py
+
+还可以使用 udp 标记来指定 udp 端口
+
+$ sudo docker run -d -p 127.0.0.1:5000:5000/udp training/webapp python app.py
+
+查看映射端口配置
+
+使用 docker port 来查看当前映射的端口配置，也可以查看到绑定的地址
+
+$ docker port nostalgic_morse 5000
+127.0.0.1:49155.
+
+注意：
+
+    容器有自己的内部网络和 ip 地址（使用 docker inspect 可以获取所有的变量，Docker 还可以有一个可变的网络配置。）
+    -p 标记可以多次使用来绑定多个端口
+
+例如
+
+$ sudo docker run -d -p 5000:5000  -p 3000:80 training/webapp python app.py
+
+
+8.2 容器互联
+容器的连接（linking）系统是除了端口映射外，另一种跟容器中应用交互的方式。
+
+该系统会在源和接收容器之间创建一个隧道，接收容器可以看到源容器指定的信息。
+自定义容器命名
+
+连接系统依据容器的名称来执行。因此，首先需要自定义一个好记的容器命名。
+
+虽然当创建容器的时候，系统默认会分配一个名字。自定义命名容器有2个好处：
+
+    自定义的命名，比较好记，比如一个web应用容器我们可以给它起名叫web
+    当要连接其他容器时候，可以作为一个有用的参考点，比如连接web容器到db容器
+
+使用 --name 标记可以为容器自定义命名。
+
+$ sudo docker run -d -P --name web training/webapp python app.py
+
+使用 docker ps 来验证设定的命名。
+
+$ sudo docker ps -l
+CONTAINER ID  IMAGE                  COMMAND        CREATED       STATUS       PORTS                    NAMES
+aed84ee21bde  training/webapp:latest python app.py  12 hours ago  Up 2 seconds 0.0.0.0:49154->5000/tcp  web
+
+也可以使用 docker inspect 来查看容器的名字
+
+$ sudo docker inspect -f "{ { .Name } }" aed84ee21bde
+/web
+
+注意：容器的名称是唯一的。如果已经命名了一个叫 web 的容器，当你要再次使用 web 这个名称的时候，需要先用docker rm 来删除之前创建的同名容器。
+
+在执行 docker run 的时候如果添加 --rm 标记，则容器在终止后会立刻删除。注意，--rm 和 -d 参数不能同时使用。
+容器互联
+
+使用 --link 参数可以让容器之间安全的进行交互。
+
+下面先创建一个新的数据库容器。
+
+$ sudo docker run -d --name db training/postgres
+
+删除之前创建的 web 容器
+
+$ docker rm -f web
+
+然后创建一个新的 web 容器，并将它连接到 db 容器
+
+$ sudo docker run -d -P --name web --link db:db training/webapp python app.py
+
+此时，db 容器和 web 容器建立互联关系。
+
+--link 参数的格式为 --link name:alias，其中 name 是要链接的容器的名称，alias 是这个连接的别名。
+
+使用 docker ps 来查看容器的连接
+
+$ docker ps
+CONTAINER ID  IMAGE                     COMMAND               CREATED             STATUS             PORTS                    NAMES
+349169744e49  training/postgres:latest  su postgres -c '/usr  About a minute ago  Up About a minute  5432/tcp                 db, web/db
+aed84ee21bde  training/webapp:latest    python app.py         16 hours ago        Up 2 minutes       0.0.0.0:49154->5000/tcp  web
+
+可以看到自定义命名的容器，db 和 web，db 容器的 names 列有 db 也有 web/db。这表示 web 容器链接到 db 容器，web 容器将被允许访问 db 容器的信息。
+
+Docker 在两个互联的容器之间创建了一个安全隧道，而且不用映射它们的端口到宿主主机上。在启动 db 容器的时候并没有使用 -p 和 -P 标记，从而避免了暴露数据库端口到外部网络上。
+
+Docker 通过 2 种方式为容器公开连接信息：
+
+    环境变量
+    更新 /etc/hosts 文件
+
+使用 env 命令来查看 web 容器的环境变量
+
+$ sudo docker run --rm --name web2 --link db:db training/webapp env
+. . .
+DB_NAME=/web2/db
+DB_PORT=tcp://172.17.0.5:5432
+DB_PORT_5000_TCP=tcp://172.17.0.5:5432
+DB_PORT_5000_TCP_PROTO=tcp
+DB_PORT_5000_TCP_PORT=5432
+DB_PORT_5000_TCP_ADDR=172.17.0.5
+. . .
+
+其中 DB_ 开头的环境变量是供 web 容器连接 db 容器使用，前缀采用大写的连接别名。
+
+除了环境变量，Docker 还添加 host 信息到父容器的 /etc/hosts 的文件。下面是父容器 web 的 hosts 文件
+
+$ sudo docker run -t -i --rm --link db:db training/webapp /bin/bash
+root@aed84ee21bde:/opt/webapp# cat /etc/hosts
+172.17.0.7  aed84ee21bde
+. . .
+172.17.0.5  db
+
+这里有 2 个 hosts，第一个是 web 容器，web 容器用 id 作为他的主机名，第二个是 db 容器的 ip 和主机名。 可以在 web 容器中安装 ping 命令来测试跟db容器的连通。
+
+root@aed84ee21bde:/opt/webapp# apt-get install -yqq inetutils-ping
+root@aed84ee21bde:/opt/webapp# ping db
+PING db (172.17.0.5): 48 data bytes
+56 bytes from 172.17.0.5: icmp_seq=0 ttl=64 time=0.267 ms
+56 bytes from 172.17.0.5: icmp_seq=1 ttl=64 time=0.250 ms
+56 bytes from 172.17.0.5: icmp_seq=2 ttl=64 time=0.256 ms
+
+用 ping 来测试db容器，它会解析成 172.17.0.5。 *注意：官方的 ubuntu 镜像默认没有安装 ping，需要自行安装。
+
+用户可以链接多个父容器到子容器，比如可以链接多个 web 到 db 容器上。
