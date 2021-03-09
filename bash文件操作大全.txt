@@ -1,0 +1,2316 @@
+1.创建文件夹
+#!/bin/sh
+mkdir -m 777 "%%1"
+
+2.创建文件
+#!/bin/sh
+touch "%%1"
+
+3.删除文件
+#!/bin/sh
+rm -if "%%1"
+
+4.删除文件夹
+#!/bin/sh
+rm -rf "%%1"
+
+5.删除一个目录下所有的文件夹
+#!/bin/bash
+direc="%%1" #$(pwd)
+for dir2del in $direc/* ; do
+if [ -d $dir2del ]; then
+  rm -rf $dir2del
+fi
+done
+
+6.清空文件夹
+#!/bin/bash
+direc="%%1" #$(pwd)
+rm -if $direc/*
+for dir2del in $direc/* ; do
+if [ -d $dir2del ]; then
+  rm -rf $dir2del
+fi
+done
+
+7.读取文件
+#!/bin/sh
+7.1.操作系统默认编码
+cat "%%1" | while read line; do
+echo $line;
+done
+
+7.2.UTF-8编码
+cat "%%1" | while read line; do
+echo $line;
+done
+
+7.3.分块读取
+cat "%%1" | while read line; do
+echo $line;
+done
+
+8.写入文件
+#!/bin/sh
+cat > "%%1" << EOF
+%%2
+EOF
+
+tee "%%1" > /dev/null << EOF
+%%2
+EOF
+
+#sed -i '$a %%2' %%2
+
+9.写入随机文件
+#!/bin/sh
+cat > "%%1" << EOF
+%%2
+EOF
+
+tee "%%1" > /dev/null << EOF
+%%2
+EOF
+
+#sed -i '$a %%2' %%2
+
+10.读取文件属性
+#!/bin/bash
+file=%%1
+file=${file:?'必须给出参数'}
+if [ ! -e $file ]; then
+    echo "$file 不存在"
+    exit 1
+fi
+if [ -d $file ]; then
+    echo "$file 是一个目录"
+    if [ -x $file ]; then
+        echo "可以"
+    else
+        echo "不可以"
+    fi
+    echo "对此进行搜索"  
+elif [ -f $file ]; then
+    echo "$file 是一个正规文件"
+else
+    echo "$file不是一个正规文件"
+fi
+if [ -O $file ]; then
+    echo "你是$file的拥有者"
+else
+    echo "你不是$file的拥有者"
+fi
+if [ -r $file ]; then
+    echo "你对$file拥有"
+else
+    echo "你并不对$file拥有"
+fi
+echo "可读权限"
+if [ -w $file ]; then
+    echo "你对$file拥有"
+else
+    echo "你并不对$file拥有"
+fi
+echo "可写权限"
+if [ -x $file -a ! -d $file ]; then
+    echo "你拥有对$file"
+else
+    echo "你并不拥有对$file"
+fi
+echo "可执行的权限"
+
+11.写入文件属性
+#!/bin/bash
+#修改存放在ext2、ext3、ext4、xfs、ubifs、reiserfs、jfs等文件系统上的文件或目录属性，使用权限超级用户。
+#一些功能是由Linux内核版本来支持的，如果Linux内核版本低于2.2，那么许多功能不能实现。同样－D检查压缩文件中的错误的功能，需要2.5.19以上内核才能支持。另外，通过chattr命令修改属性能够提高系统的安全性，但是它并不适合所有的目录。chattr命令不能保护/、/dev、/tmp、/var目录。
+chattr [-RV] [-+=AacDdijsSu] [-v version] 文件或目录
+  －R：递归处理所有的文件及子目录。
+  －V：详细显示修改内容，并打印输出。
+  －：失效属性。
+  ＋：激活属性。
+  = ：指定属性。
+  A：Atime，告诉系统不要修改对这个文件的最后访问时间。
+  S：Sync，一旦应用程序对这个文件执行了写操作，使系统立刻把修改的结果写到磁盘。
+  a：Append Only，系统只允许在这个文件之后追加数据，不允许任何进程覆盖或截断这个文件。如果目录具有这个属性，系统将只允许在这个目录下建立和修改文件，而不允许删除任何文件。
+  i：Immutable，系统不允许对这个文件进行任何的修改。如果目录具有这个属性，那么任何的进程只能修改目录之下的文件，不允许建立和删除文件。
+  D：检查压缩文件中的错误。
+  d：No dump，在进行文件系统备份时，dump程序将忽略这个文件。
+  C：Compress，系统以透明的方式压缩这个文件。从这个文件读取时，返回的是解压之后的数据；而向这个文件中写入数据时，数据首先被压缩之后才写入磁盘。
+  S：Secure Delete，让系统在删除这个文件时，使用0填充文件所在的区域。
+  u：Undelete，当一个应用程序请求删除这个文件，系统会保留其数据块以便以后能够恢复删除这个文件。
+
+12.枚举一个目录中的所有文件夹
+#!/bin/bash
+OLDIFS=$IFS
+IFS=:
+for path in $( find "%%1" -type d -printf "%p$IFS")
+do
+#"$path"
+done
+IFS=$OLDIFS
+
+13.复制文件夹
+#!/bin/sh
+cp -rf "%%1" "%%2"
+
+14.复制一个目录下所有的文件夹到另一个目录下
+#!/bin/bash
+direc="%%1" #$(pwd)
+for dir2cp in $direc/* ; do
+if [ -d $dir2cp ]; then
+  cp $dir2cp "%%2"
+fi
+done
+
+15.移动文件夹
+#!/bin/sh
+mv -rf "%%1" "%%2"
+
+16.移动一个目录下所有的文件夹到另一个目录下
+#!/bin/bash
+direc="%%1" #$(pwd)
+for dir2mv in $direc/* ; do
+if [ -d $dir2mv ]; then
+  mv $dir2mv "%%2"
+fi
+done
+
+17.以一个文件夹的框架在另一个目录下创建文件夹和空文件
+#!/bin/bash
+direc="%%1" #$(pwd)
+OLDIFS=$IFS
+IFS=:
+for path in $( find $direc -type d -printf "%p$IFS")
+do
+mkdir -p "%%2/${path:${#direc}+1}"
+done
+IFS=$OLDIFS
+#cp -a "%%1" "%%2"
+
+表达式 含义
+${#string}
+{#string}
+1，取得字符串长度
+string=abc12342341          //等号二边不要有空格
+echo ${#string}             //结果11
+expr length $string         //结果11
+expr "$string" : ".*"       //结果11 分号二边要有空格,这里的:根match的用法差不多2，字符串所在位置
+expr index $string '123'    //结果4 字符串对应的下标是从0开始的这个方法让我想起来了js的indexOf，各种语言对字符串的操作方法大方向都差不多，如果有语言基础的话，学习shell会很快的。
+3，从字符串开头到子串的最大长度
+expr match $string 'abc.*3' //结果9个人觉得这个函数的用处不大，为什么要从开头开始呢。
+4，字符串截取
+echo ${string:4}      //2342341  从第4位开始截取后面所有字符串
+echo ${string:3:3}    //123      从第3位开始截取后面3位
+echo ${string:3:6}    //123423   从第3位开始截取后面6位
+echo ${string: -4}    //2341  ：右边有空格   截取后4位
+echo ${string:(-4)}   //2341  同上
+expr substr $string 3 3   //123  从第3位开始截取后面3位上面的方法让我想起了，php的substr函数，后面截取的规则是一样的。
+5，匹配显示内容
+//例3中也有match和这里的match不同，上面显示的是匹配字符的长度，而下面的是匹配的内容
+expr match $string '\([a-c]*[0-9]*\)'  //abc12342341
+expr $string : '\([a-c]*[0-9]\)'       //abc1
+expr $string : '.*\([0-9][0-9][0-9]\)' //341 显示括号中匹配的内容这里括号的用法，是不是根其他的括号用法有相似之处呢，
+6，截取不匹配的内容
+echo ${string#a*3}     //42341  从$string左边开始，去掉最短匹配子串
+echo ${string#c*3}     //abc12342341  这样什么也没有匹配到
+echo ${string#*c1*3}   //42341  从$string左边开始，去掉最短匹配子串
+echo ${string##a*3}    //41     从$string左边开始，去掉最长匹配子串
+echo ${string%3*1}     //abc12342  从$string右边开始，去掉最短匹配子串
+echo ${string%%3*1}    //abc12     从$string右边开始，去掉最长匹配子串这里要注意，必须从字符串的第一个字符开始，或者从最后一个开始，
+7，匹配并且替换
+echo ${string/23/bb}   //abc1bb42341  替换一次
+echo ${string//23/bb}  //abc1bb4bb41  双斜杠替换所有匹配
+echo ${string/#abc/bb} //bb12342341   #以什么开头来匹配，根php中的^有点像
+echo ${string/%41/bb}  //abc123423bb  %以什么结尾来匹配，根php中的$有点像
+
+#!/bin/bash
+direc=$(pwd)
+for file in "$(direc)/*"
+do
+if [ "${file##*.}" = "sh" ]; then
+xterm -e bash $file
+elif [ "${file##*.}" = "bin" ]; then
+xterm -e $file
+elif [ "${file##*.}" = "run" ]; then
+xterm -e $file
+elif [ "${file##*.}" = "bundle" ]; then
+xterm -e $file
+elif [ "${file##*.}" = "pl" ]; then
+xterm -e perl $file
+elif [ "${file##*.}" = "class" ]; then
+xterm -e java ${file%.*}
+elif [ "${file##*.}" = "rpm" ]; then
+xterm -e rpm -ivh $file
+elif [ "${file##*.}" = "rb" ]; then
+xterm -e ruby $file
+elif [ "${file##*.}" = "py" ]; then
+xterm -e python $file
+elif [ "${file##*.}" = "jar" ]; then
+xterm -e java -jar $file
+fi
+done
+OLDIFS=$IFS
+IFS=:
+for path in $( find $direc -type d -printf "%p$IFS")
+do
+for file in `ls $path`
+do
+if [ "${file##*.}" = "sh" ]; then
+xterm -e bash """"$path"/"$file""""
+elif [ "${file##*.}" = "bin" ]; then
+xterm -e """"$path"/"$file""""
+elif [ "${file##*.}" = "run" ]; then
+xterm -e """"$path"/"$file""""
+elif [ "${file##*.}" = "bundle" ]; then
+xterm -e """"$path"/"$file""""
+elif [ "${file##*.}" = "pl" ]; then
+xterm -e perl """"$path"/"$file""""
+elif [ "${file##*.}" = "class" ]; then
+xterm -e java """"$path"/"${file%.*}""""
+elif [ "${file##*.}" = "rpm" ]; then
+xterm -e rpm -ivh """"$path"/"$file""""
+elif [ "${file##*.}" = "rb" ]; then
+xterm -e ruby """"$path"/"$file""""
+elif [ "${file##*.}" = "py" ]; then
+xterm -e python """"$path"/"$file""""
+elif [ "${file##*.}" = "jar" ]; then
+xterm -e java -jar """"$path"/"$file""""
+fi
+done
+done
+IFS=$OLDIFS
+
+18.复制文件
+#!/bin/sh
+cp %%1 %%2
+
+19.复制一个目录下所有的文件到另一个目录
+#!/bin/bash
+direc="%%1" $(pwd)
+for file in "$direc/*"
+do
+cp "$file" "%%1"
+done
+
+20.提取扩展名
+#!/bin/sh
+%%2=${%%1##.}
+
+21.提取文件名
+#!/bin/sh
+%%2="$(basename %%1)"
+
+22.提取文件路径
+#!/bin/sh
+%%2="$(dirname %%1)"
+
+23.替换扩展名
+#!/bin/sh
+%%3="$(basename %%1)$%%2"
+
+24.追加路径
+#!/bin/sh
+%%3="$(dirname %%1)/$%%2"
+
+25.移动文件
+#!/bin/sh
+mv "%%1" "%%2"
+
+26.移动一个目录下所有文件到另一个目录
+#!/bin/bash
+direc="%%1" #$(pwd)
+OLDIFS=$IFS
+IFS=:
+for file in "$(direc)/*"
+do
+mv "$file" "%%1"
+done
+IFS=$OLDIFS
+
+27.指定目录下搜索文件
+#!/bin/sh
+find -name "%%1"
+
+28.打开文件对话框
+#!/bin/sh
+%%1="$(Xdialog --fselect '~/' 0 0 2>&1)"
+
+29.文件分割
+#!/bin/sh
+split -b 2k "%%1"
+
+while read f1 f2 f3
+do
+    echo $f1 >> f1
+    echo $f2 >> f2
+    echo $f3 >> f3
+done
+
+
+#!/bin/bash
+  linenum=`wc   -l   httperr8007.log|   awk   '{print   $1}'`  
+  n1=1  
+  file=1  
+  while   [   $n1   -lt   $linenum   ]  
+  do  
+                  n2=`expr   $n1   +   999`  
+                  sed   -n   "${n1},   ${n2}p"   httperr8007.log >   file_$file.log    
+                  n1=`expr   $n2   +   1`  
+                  file=`expr   $file   +   1`  
+  done  
+
+
+
+
+其中httperr8007.log为你想分割的大文件，file_$file.log  为分割后的文件，最后为file_1.log，file_2.log，file_3.log……,分割完后的每个文件只有1000行（参数可以自己设置）
+
+split 参数：
+-b  ：后面可接欲分割成的档案大小，可加单位，例如 b, k, m 等；
+-l  ：以行数来进行分割；
+
+
+
+#按每个文件1000行来分割除
+
+split -l 1000 httperr8007.log httperr
+
+httpaa，httpab，httpac ........
+
+#按照每个文件100K来分割
+
+split -b 100k httperr8007.log http
+
+httpaa，httpab，httpac ........
+
+#!/bin/bash
+if [ $# -ne 2 ]; then
+echo 'Usage: split file size(in bytes)'
+exit
+fi
+
+file=$1
+size=$2
+
+if [ ! -f $file ]; then
+echo "$file doesn't exist"
+exit
+fi
+
+#TODO: test if $size is a valid integer
+
+filesize=`/bin/ls -l $file | awk '{print $5}'`
+echo filesize: $filesize
+
+let pieces=$filesize/$size
+let remain=$filesize-$pieces*$size
+if [ $remain -gt 0 ]; then
+let pieces=$pieces+1
+fi
+echo pieces: $pieces
+
+i=0
+while [ $i -lt $pieces ];
+do
+echo split: $file.$i:
+dd if=$file of=$file.$i bs=$size count=1 skip=$i
+let i=$i+1
+done
+
+echo "#!/bin/bash" > merge
+
+echo "i=0" >> merge
+echo "while [ $i -lt $pieces ];" >> merge
+echo "do" >> merge
+echo " echo merge: $file.$i" >> merge
+echo " if [ ! -f $file.$i ]; then" >> merge
+echo " echo merge: $file.$i missed" >> merge
+echo " rm -f $file.merged" >> merge
+echo " exit" >> merge
+echo " fi" >> merge
+echo " dd if=$file.$i of=$file.merged bs=$size count=1 seek=$i" >> merge
+echo " let i=$i+1" >> merge
+echo "done" >> merge
+chmod u+x merge'
+
+30.文件合并
+#!/bin/sh
+cp "%%1"+"%%2" "%%3"
+
+exec 3<f1
+exec 4<f2
+while read f1 <&3 && read f2 <&4
+do
+    echo $f1 $f2 >> join.txt
+done
+
+#!/bin/bash
+if [ $# -ne 2 ]; then
+echo 'Usage: split file size(in bytes)'
+exit
+fi
+
+file=$1
+size=$2
+
+if [ ! -f $file ]; then
+echo "$file doesn't exist"
+exit
+fi
+
+#TODO: test if $size is a valid integer
+
+filesize=`/bin/ls -l $file | awk '{print $5}'`
+echo filesize: $filesize
+
+let pieces=$filesize/$size
+let remain=$filesize-$pieces*$size
+if [ $remain -gt 0 ]; then
+let pieces=$pieces+1
+fi
+echo pieces: $pieces
+
+i=0
+while [ $i -lt $pieces ];
+do
+echo split: $file.$i:
+dd if=$file of=$file.$i bs=$size count=1 skip=$i
+let i=$i+1
+done
+
+echo "#!/bin/bash" > merge
+
+echo "i=0" >> merge
+echo "while [ $i -lt $pieces ];" >> merge
+echo "do" >> merge
+echo " echo merge: $file.$i" >> merge
+echo " if [ ! -f $file.$i ]; then" >> merge
+echo " echo merge: $file.$i missed" >> merge
+echo " rm -f $file.merged" >> merge
+echo " exit" >> merge
+echo " fi" >> merge
+echo " dd if=$file.$i of=$file.merged bs=$size count=1 seek=$i" >> merge
+echo " let i=$i+1" >> merge
+echo "done" >> merge
+chmod u+x merge'
+
+31.文件简单加密
+#!/bin/bash
+#make test && make strings && sudo make install
+shc -r -f %%1.sh
+#%%1.x
+#%%1.x.c
+
+32.文件简单解密
+#!/bin/bash
+#make test && make strings && sudo make install
+shc -r -f %%1.sh
+#%%1.x
+#%%1.x.c
+
+33.读取ini文件属性
+#!/bin/bash
+if [ "$%%3" = "" ];then
+   sed -n "/\[$%%2\]/,/\[.*\]/{
+   /^\[.*\]/d
+   /^[ ]*$/d
+   s/;.*$//
+   p
+   }" $1
+elif [ "$%%4" = "" ];then
+   sed -n "/\[$%%2\]/,/\[.*\]/{
+   /^\[.*\]/d
+   /^[ ]*$/d
+   s/;.*$//
+   s/^[ |        ]*$%%3[ | ]*=[ |   ]*\(.*\)[ |     ]*/\1/p
+   }" $1
+else
+       if [ "$%%4" = "#" ];then
+            sed "/\[$%%2\]/,/\[.*\]/{
+            s/^[ |        ]*$%%3[ |    ]*=.*/ /
+            }p" $1 > /tmp/sed$$
+            mv /tmp/sed$$ $1
+       else
+            sed "/\[$2\]/,/\[.*\]/{
+            s/^[ |        ]*$%%3[ |    ]*=.*/$%%3=$%%4/
+            }p" $1 > /tmp/sed$$
+            mv /tmp/sed$$ $%%1
+       fi
+fi
+
+34.合并一个文件下所有的文件
+#!/bin/sh
+cat $(ls |grep -E '%%1\.') > %%1
+
+#!/bin/bash
+OLDIFS=$IFS
+IFS=:
+for path in $( find %%1 -type d -printf "%p$IFS")
+do
+for file in $path/*.c $path/*.cpp
+do
+if [[ ! "$file" =~ \*.[A-Za-z]+ ]]; then
+#"$(path)/$(file)"
+fi
+done
+done
+IFS=$OLDIFS
+
+#!/bin/bash
+cat <<'EOF'> combine.c
+#include<stdio.h>
+int main()
+{
+FILE *f1,*f2,*f3;
+f1=fopen("a1.txt","r");
+f2=fopen("a2.txt","r");
+f3=fopen("a3.txt","w");
+int a,b;
+a=getw(f1);   /*从a1.txt和a2.txt中分别取最小的数a和b*/
+b=getw(f2);
+while(!feof(f1)&&!feof(f2))  /*两个文件都没结束时，执行循环、比较*/
+{
+if(a<=b)
+{
+putw(a,f3);
+a=getw(f1);
+}
+else
+{putw(b,f3);
+b=getw(f2);
+}
+   }
+if(feof(f1))  /*文件a1.txt结束时，把a2.txt中的数全部输入a3.txt*/
+{putw(b,f3);
+while((b=getw(f2))!=EOF)
+putw(b,f3);
+}
+if(feof(f2))   /*同上*/
+{
+putw(a,f3);
+while((a=getw(f1))!=EOF)
+putw(a,f3);
+}
+fclose(f1);
+fclose(f2);
+fclose(f3);
+printf("已完成!");
+return 0;
+}
+EOF
+gcc -o combine combine.c
+if [ $? -eq 0 ]; then
+./combine
+else
+echo 'Compile ERROR'
+fi
+
+35.写入ini文件属性
+#!/bin/bash
+if [ "$%%3" = "" ];then
+   sed -n "/\[$%%2\]/,/\[.*\]/{
+   /^\[.*\]/d
+   /^[ ]*$/d
+   s/;.*$//
+   p
+   }" $1
+elif [ "$%%4" = "" ];then
+   sed -n "/\[$%%2\]/,/\[.*\]/{
+   /^\[.*\]/d
+   /^[ ]*$/d
+   s/;.*$//
+   s/^[ |        ]*$%%3[ | ]*=[ |   ]*\(.*\)[ |     ]*/\1/p
+   }" $1
+else
+       if [ "$%%4" = "#" ];then
+            sed "/\[$%%2\]/,/\[.*\]/{
+            s/^[ |        ]*$%%3[ |    ]*=.*/ /
+            }p" $1 > /tmp/sed$$
+            mv /tmp/sed$$ $%%1
+       else
+            sed "/\[$%%2\]/,/\[.*\]/{
+            s/^[ |        ]*$%%3[ |    ]*=.*/$%%3=$%%4/
+            }p" $1 > /tmp/sed$$
+            mv /tmp/sed$$ $%%1
+       fi
+fi
+
+36.获得当前路径
+#!/bin/sh
+%%1=$(pwd)
+
+37.读取XML数据库
+
+如何通过shell命令行读取xml文件中某个属性所对应的值？
+例如：
+<key>BuildVersion</key> <string>5</string>
+我希望能够通过Unix shell命令对属性键的名称BuildVersion进行查询，返回的结果是5，如何实现呀？
+#!/bin/bash
+grep BuildVersion|sed 's/.*<.*>\([^<].*\)<.*>.*/\1/'
+
+结果返回的是“BuildVersion”，而不是“5”，如果要查询BuildVersion自动返回数值5应当如何写？
+
+应该没错的。试一下： echo "<key>BuildVersion</key> <string>5</string>"|grep BuildVersion|sed 's/.*<.*>\([^<].*\)<.*>.*/\1/'我在SL的终端里试，返回值是5
+
+目前需要从xml文件提取数据，想做一个xmlparser.sh
+xml 类似这样
+<result>
+   <shareinfo hostip="192.168.0.1" sharename="abcd" password="abc123"></shareinfo>
+</result>
+
+
+希望输入 xmlparser.sh a.xml hostip可以返回192.168.0.1
+
+
+#!/bin/sh
+
+if [ $# -ne 2 ];then
+   echo "Usage: $0 <xmlfile> <key>"
+   exit 0
+fi
+
+grep $2 $1|awk '{print $2}'|grep -o "[0-9.]*"
+
+
+把
+grep $2 $1|awk '{print $2}'|grep -o "[0-9.]*"
+改成
+grep $2 $1|awk '{print $2}'|grep -Eo "[0-9.]+"
+楼上这个有问题，如果我要得到的是
+<result>
+   <shareinfo hostip="192.168.0.1" sharename="abcd" password="abc123"></shareinfo>
+</result>
+中的sharename，那么，呵呵，就错了
+
+我觉得应该先定位到第二个参数“$2”的位置，然后再提取“=”后面的内容
+
+这里有个完整的实现：
+Parse Simple XML Files using Bash – Extract Name Value Pairs and Attributes
+http://www.humbug.in/2010/parse-simple-xml-files-using-bash-extract-name-value-pairs-and-attributes/
+
+
+不过需要安装xmllint.
+
+设计到对多个xml文件进行element的读取和列表。有人做过么？
+举个例子，
+多个xml文件里面都有
+<article>
+        <title>xxx</titlel>
+</article>
+
+通过shell读取，然后合并到一起，再生成一个新的xml，但是其他元素不变。
+<article>
+        <title>aaa</titlel>
+</article>
+<article>
+        <title>bbb</titlel>
+</article>
+
+如果格式异常简单，没有特例，那么可以用shell实现
+如果有可能格式复杂，因为shell的命令所使用的正则表达式都不支持跨行匹配，所以用shell来解决这个问题就绕圈子了。
+用perl来作这个工作最直接、简单。perl的XML:DOM模块是专门处理XML文件的。
+
+偶倒是觉得,用PHP写Scripts也很方便,功能强大,而且,跨平台,
+
+#!/bin/sh
+
+
+
+sed -n '/<article>/{
+
+N;
+
+/\n[[:space:]]*<title>/{
+
+    N;
+
+    /<article>.*<\/article>/p
+
+    }
+
+D;
+
+n
+
+}'
+
+
+这小段代码能把一个xml文件中,你要的东西拿出来.
+你可以用for file in $*把这些信息都>>tmpfile中.
+然后用sed 在指定文件的指定位置用r命令把tmpfile粘贴进来~~~~
+
+大思路如此^_^  我想有这个东西(只要能正确的跑出结果)后面就不难了吧...
+
+Name
+xmllint — command line XML tool
+
+Synopsis
+xmllint [[--version] | [--debug] | [--shell] | [--debugent] | [--copy] | [--recover] | [--noent] | [--noout] | [--nonet] | [--htmlout] | [--nowrap] | [--valid] | [--postvalid] | [--dtdvalid URL] | [--dtdvalidfpi FPI] | [--timing] | [--output file] | [--repeat] | [--insert] | [--compress] | [--html] | [--xmlout] | [--push] | [--memory] | [--maxmem nbbytes] | [--nowarning] | [--noblanks] | [--nocdata] | [--format] | [--encode encoding] | [--dropdtd] | [--nsclean] | [--testIO] | [--catalogs] | [--nocatalogs] | [--auto] | [--xinclude] | [--noxincludenode] | [--loaddtd] | [--dtdattr] | [--stream] | [--walker] | [--pattern patternvalue] | [--chkregister] | [--relaxng] | [--schema] | [--c14n]] [xmlfile]
+
+Introduction
+The xmllint program parses one or more XML files, specified on the command line as xmlfile. It prints various types of output, depending upon the options selected. It is useful for detecting errors both in XML code and in the XML parser itself.
+
+It is included in libxml2.
+
+Options
+--version
+Display the version of libxml2 used.
+--debug
+Parse a file and output an annotated tree of the in-memory version of the document.
+--shell
+Run a navigating shell. Details on available commands in shell mode are below.
+--debugent
+Debug the entities defined in the document.
+--copy
+Test the internal copy implementation.
+--recover
+Output any parsable portions of an invalid document.
+--noent
+Substitute entity values for entity references. By default, xmllint leaves entity references in place.
+--nocdata
+Substitute CDATA section by equivalent text nodes.
+--nsclean
+Remove redundant namespace declarations.
+--noout
+Suppress output. By default, xmllint outputs the result tree.
+--htmlout
+Output results as an HTML file. This causes xmllint to output the necessary HTML tags surrounding the result tree output so the results can be displayed in a browser.
+--nowrap
+Do not output HTML doc wrapper.
+--valid
+Determine if the document is a valid instance of the included Document Type Definition (DTD). A DTD to be validated against also can be specified at the command line using the --dtdvalid option. By default, xmllint also checks to determine if the document is well-formed.
+--postvalid
+Validate after parsing is completed.
+--dtdvalid URL
+Use the DTD specified by URL for validation.
+--dtdvalidfpi FPI
+Use the DTD specified by the Public Identifier FPI for validation, note that this will require a Catalog exporting that Public Identifier to work.
+--timing
+Output information about the time it takes xmllint to perform the various steps.
+--output file
+Define a file path where xmllint will save the result of parsing. Usually the programs build a tree and save it on stdout, with this option the result XML instance will be saved onto a file.
+--repeat
+Repeat 100 times, for timing or profiling.
+--insert
+Test for valid insertions.
+--compress
+Turn on gzip compression of output.
+--html
+Use the HTML parser.
+--xmlout
+Used in conjunction with --html. Usually when HTML is parsed the document is saved with the HTML serializer, but with this option the resulting document is saved with the XML serializer. This is primarily used to generate XHTML from HTML input.
+--push
+Use the push mode of the parser.
+--memory
+Parse from memory.
+--maxmem nnbytes
+Test the parser memory support. nnbytes is the maximum number of bytes the library is allowed to allocate. This can also be used to make sure batch processing of XML files will not exhaust the virtual memory of the server running them.
+--nowarning
+Do not emit warnings from the parser and/or validator.
+--noblanks
+Drop ignorable blank spaces.
+--format
+Reformat and reindent the output. The $XMLLINT_INDENT environment variable controls the indentation (default value is two spaces " ").
+--testIO
+Test user input/output support.
+--encode encoding
+Output in the given encoding.
+--catalogs
+Use the catalogs from $SGML_CATALOG_FILES. Otherwise /etc/xml/catalog is used by default.
+--nocatalogs
+Do not use any catalogs.
+--auto
+Generate a small document for testing purposes.
+--xinclude
+Do XInclude processing.
+--noxincludenode
+Do XInclude processing but do not generate XInclude start and end nodes.
+--loaddtd
+Fetch external DTD.
+--dtdattr
+Fetch external DTD and populate the tree with inherited attributes.
+--dropdtd
+Remove DTD from output.
+--stream
+Use streaming API - useful when used in combination with --relaxng or --valid options for validation of files that are too large to be held in memory.
+--walker
+Test the walker module, which is a reader interface but for a document tree, instead of using the reader API on an unparsed document it works on a existing in-memory tree. Used in debugging.
+--chkregister
+Turn on node registration. Useful for developers testing libxml2 node tracking code.
+--pattern patternvalue
+Used to exercise the pattern recognition engine, which can be used with the reader interface to the parser. It allows to select some nodes in the document based on an XPath (subset) expression. Used for debugging.
+--relaxng schema
+Use RelaxNG file named schema for validation.
+--schema schema
+Use a W3C XML Schema file named schema for validation.
+--c14n
+Use the W3C XML Canonicalisation (C14N) to serialize the result of parsing to stdout. It keeps comments in the result.
+Shell
+xmllint offers an interactive shell mode invoked with the --shell command. Available commands in shell mode include:
+
+base
+display XML base of the node
+bye
+leave shell
+cat node
+Display node if given or current node.
+cd path
+Change the current node to path (if given and unique) or root if no argument given.
+dir path
+Dumps information about the node (namespace, attributes, content).
+du path
+Show the structure of the subtree under path or the current node.
+exit
+Leave the shell.
+help
+Show this help.
+free
+Display memory usage.
+load name
+Load a new document with the given name.
+ls path
+List contents of path (if given) or the current directory.
+pwd
+Display the path to the current node.
+quit
+Leave the shell.
+save name
+Saves the current document to name if given or to the original name.
+validate
+Check the document for error.
+write name
+Write the current node to the given filename.
+Catalogs
+Catalog behavior can be changed by redirecting queries to the user's own set of catalogs. This can be done by setting the XML_CATALOG_FILES environment variable to a list of catalogs. An empty one should deactivate loading the default /etc/xml/catalog default catalog.
+
+Debugging Catalogs
+Setting the environment variable XML_DEBUG_CATALOG using the command "export XML_DEBUG_CATALOG=" outputs debugging information related to catalog operations.
+
+Error Return Codes
+On the completion of execution, Xmllint returns the following error codes:
+
+0
+No error
+1
+Unclassified
+2
+Error in DTD
+3
+Validation error
+4
+Validation error
+5
+Error in schema compilation
+6
+Error writing output
+7
+Error in pattern (generated when [--pattern] option is used)
+8
+Error in Reader registration (generated when [--chkregister] option is used)
+9
+Out of memory error
+
+Parse Simple XML Files using Bash – Extract Name Value Pairs and Attributes
+
+
+2 Comments
+1
+Tweet
+
+
+
+
+Pratik Sinha | July 31, 2010
+
+
+I have written up a simple routine par***ML to parse simple XML files to extract unique name values pairs and their attributes. The script extracts all xml tags of the format <abc arg1="hello">xyz</abc> and dynamically creates bash variables which hold values of the attributes as well as the elements. This is a good solution, if you don’t wish to use xpath for some simple xml files. However you will need xmllint installed on your system to use the script. Here’s a sample script which uses the par***ML function
+#!/bin/bash
+xmlFile=$1
+
+function par***ML() {
+  elemList=( $(cat $xmlFile | tr '\n' ' ' | XMLLINT_INDENT="" xmllint --format - | /bin/grep -e "</.*>$" | while read line; do \
+    echo $line | sed -e 's/^.*<\///' | cut -d '>' -f 1; \
+  done) )
+
+  totalNoOfTags=${#elemList[@]}; ((totalNoOfTags--))
+  suffix=$(echo ${elemList[$totalNoOfTags]} | tr -d '</>')
+  suffix="${suffix}_"
+
+  for (( i = 0 ; i < ${#elemList[@]} ; i++ )); do
+    elem=${elemList[$i]}
+    elemLine=$(cat $xmlFile | tr '\n' ' ' | XMLLINT_INDENT="" xmllint --format - | /bin/grep "</$elem>")
+    echo $elemLine | grep -e "^</[^ ]*>$" 1>/dev/null 2>&1
+    if [ "0" = "$?" ]; then
+      continue
+    fi
+    elemVal=$(echo $elemLine | tr '\011' '\040'| sed -e 's/^[ ]*//' -e 's/^<.*>\([^<].*\)<.*>$/\1/' | sed -e 's/^[ ]*//' | sed -e 's/[ ]*$//')
+    xmlElem="${suffix}$(echo $elem | sed 's/-/_/g')"
+    eval ${xmlElem}=`echo -ne \""${elemVal}"\"`
+    attrList=($(cat $xmlFile | tr '\n' ' ' | XMLLINT_INDENT="" xmllint --format - | /bin/grep "</$elem>" | tr '\011' '\040' | sed -e 's/^[ ]*//' | cut -d '>' -f 1  | sed -e 's/^<[^ ]*//' | tr "'" '"' | tr '"' '\n'  | tr '=' '\n' | sed -e 's/^[ ]*//' | sed '/^$/d' | tr '\011' '\040' | tr ' ' '>'))
+    for (( j = 0 ; j < ${#attrList[@]} ; j++ )); do
+      attr=${attrList[$j]}
+      ((j++))
+      attrVal=$(echo ${attrList[$j]} | tr '>' ' ')
+      attrName=`echo -ne ${xmlElem}_${attr}`
+      eval ${attrName}=`echo -ne \""${attrVal}"\"`
+    done
+  done
+}
+
+par***ML
+echo "$status_xyz |  $status_abc |  $status_pqr" #Variables for each  XML ELement
+echo "$status_xyz_arg1 |  $status_abc_arg2 |  $status_pqr_arg3 | $status_pqr_arg4" #Variables for each XML Attribute
+echo ""
+
+#All the variables that were produced by the par***ML function
+set | /bin/grep -e "^$suffix"
+
+The XML File used for the above script example is:
+<?xml version="1.0"?>
+<status>
+  <xyz arg1="1"> a </xyz>
+  <abc arg2="2"> p </abc>
+  <pqr arg3="3" arg4="a phrase"> x </pqr>
+</status>
+
+
+The root tag, which in this case is “status”, is used as a suffix for all variables. Once the XML file is passed to the function, it dynamically creates the variables $status_xyz, $status_abc, $status_pqr, $status_xyz_arg1, $status_abc_arg2, $status_pqr_arg3 and $status_pqr_arg4.
+
+The output when the script is ran with the xml file as an argument is
+@$ bash  par***ML.sh test.xml
+a |  p |  x
+1 |  2 |  3 | a phrase
+
+status_abc=p
+status_abc_arg2=2
+status_pqr=x
+status_pqr_arg3=3
+status_pqr_arg4='a phrase'
+status_xyz=a
+status_xyz_arg1=1
+
+This script won’t work for XML files like the one below with duplicate element names.
+<?xml version="1.0"?>
+<status>
+  <test arg1="1"> a </test>
+  <test arg2="2"> p </test>
+  <test arg3="3" arg4="a phrase"> x </test>
+</status>
+
+
+This script also won’t be able to extract attributes of elements without any CDATA. For eg, the script won’t be able to create variables corresponding to <test arg1="1">. It will only create the variables corresponding to <test1 arg2="2">abc</test1>.
+<?xml version="1.0"?>
+<status>
+  <test arg1="1">
+    <test1 arg2="2">abc</test1>
+  </test>
+</status>
+
+38.写入XML数据库
+#!/bin/bash
+
+39.ZIP压缩文件
+#!/bin/sh
+zip -r "/%%1" "%%2"
+
+40.ZIP解压缩
+#!/bin/sh
+unzip -x "/%%1" "%%2"
+
+41.获得应用程序完整路径
+#!/bin/bash
+
+42.ZIP压缩文件夹
+#!/bin/bash
+
+43.递归删除目录下的文件
+#!/bin/bash
+rm -if "%%1/*"
+OLDIFS=$IFS
+IFS=:
+for path in $( find %%1 -type d -printf "%p$IFS")
+do
+for file in $path/*.c $path/*.cpp
+do
+if [[ ! "$file" =~ \*.[A-Za-z]+ ]]; then
+#"$(path)/$(file)"
+fi
+done
+done
+IFS=$OLDIFS
+
+44.IDEA加密算法
+#!/bin/bash
+
+45.RC6算法
+#!/bin/bash
+cat <<'EOF'> rc6.c
+#include<stdio.h>
+/* Timing data for RC6 (rc6.c)
+
+128 bit key:
+Key Setup:    1632 cycles
+Encrypt:       270 cycles =    94.8 mbits/sec
+Decrypt:       226 cycles =   113.3 mbits/sec
+Mean:          248 cycles =   103.2 mbits/sec
+
+192 bit key:
+Key Setup:    1885 cycles
+Encrypt:       267 cycles =    95.9 mbits/sec
+Decrypt:       235 cycles =   108.9 mbits/sec
+Mean:          251 cycles =   102.0 mbits/sec
+
+256 bit key:
+Key Setup:    1877 cycles
+Encrypt:       270 cycles =    94.8 mbits/sec
+Decrypt:       227 cycles =   112.8 mbits/sec
+Mean:          249 cycles =   103.0 mbits/sec
+
+*/
+
+#include "../std_defs.h"
+
+static char *alg_name[] = { "rc6", "rc6.c", "rc6" };
+
+char **cipher_name()
+{
+    return alg_name;
+}
+
+#define f_rnd(i,a,b,c,d)                    \
+        u = rotl(d * (d + d + 1), 5);       \
+        t = rotl(b * (b + b + 1), 5);       \
+        a = rotl(a ^ t, u) + l_key;      \
+        c = rotl(c ^ u, t) + l_key[i + 1]
+
+#define i_rnd(i,a,b,c,d)                    \
+        u = rotl(d * (d + d + 1), 5);       \
+        t = rotl(b * (b + b + 1), 5);       \
+        c = rotr(c - l_key[i + 1], t) ^ u;  \
+        a = rotr(a - l_key, u) ^ t
+
+u4byte  l_key[44];  /* storage for the key schedule         */
+
+/* initialise the key schedule from the user supplied key   */
+
+u4byte *set_key(const u4byte in_key[], const u4byte key_len)
+{   u4byte  i, j, k, a, b, l[8], t;
+
+    l_key[0] = 0xb7e15163;
+
+    for(k = 1; k < 44; ++k)
+       
+        l_key[k] = l_key[k - 1] + 0x9e3779b9;
+
+    for(k = 0; k < key_len / 32; ++k)
+
+        l[k] = in_key[k];
+
+    t = (key_len / 32) - 1; // t = (key_len / 32);
+
+    a = b = i = j = 0;
+
+    for(k = 0; k < 132; ++k)
+    {   a = rotl(l_key + a + b, 3); b += a;
+        b = rotl(l[j] + b, b);
+        l_key = a; l[j] = b;
+        i = (i == 43 ? 0 : i + 1); // i = (i + 1) % 44; 
+        j = (j == t ? 0 : j + 1);  // j = (j + 1) % t;
+    }
+
+    return l_key;
+};
+
+/* encrypt a block of text  */
+
+void encrypt(const u4byte in_blk[4], u4byte out_blk[4])
+{   u4byte  a,b,c,d,t,u;
+
+    a = in_blk[0]; b = in_blk[1] + l_key[0];
+    c = in_blk[2]; d = in_blk[3] + l_key[1];
+
+    f_rnd( 2,a,b,c,d); f_rnd( 4,b,c,d,a);
+    f_rnd( 6,c,d,a,b); f_rnd( 8,d,a,b,c);
+    f_rnd(10,a,b,c,d); f_rnd(12,b,c,d,a);
+    f_rnd(14,c,d,a,b); f_rnd(16,d,a,b,c);
+    f_rnd(18,a,b,c,d); f_rnd(20,b,c,d,a);
+    f_rnd(22,c,d,a,b); f_rnd(24,d,a,b,c);
+    f_rnd(26,a,b,c,d); f_rnd(28,b,c,d,a);
+    f_rnd(30,c,d,a,b); f_rnd(32,d,a,b,c);
+    f_rnd(34,a,b,c,d); f_rnd(36,b,c,d,a);
+    f_rnd(38,c,d,a,b); f_rnd(40,d,a,b,c);
+
+    out_blk[0] = a + l_key[42]; out_blk[1] = b;
+    out_blk[2] = c + l_key[43]; out_blk[3] = d;
+};
+
+/* decrypt a block of text  */
+
+void decrypt(const u4byte in_blk[4], u4byte out_blk[4])
+{   u4byte  a,b,c,d,t,u;
+
+    d = in_blk[3]; c = in_blk[2] - l_key[43];
+    b = in_blk[1]; a = in_blk[0] - l_key[42];
+
+    i_rnd(40,d,a,b,c); i_rnd(38,c,d,a,b);
+    i_rnd(36,b,c,d,a); i_rnd(34,a,b,c,d);
+    i_rnd(32,d,a,b,c); i_rnd(30,c,d,a,b);
+    i_rnd(28,b,c,d,a); i_rnd(26,a,b,c,d);
+    i_rnd(24,d,a,b,c); i_rnd(22,c,d,a,b);
+    i_rnd(20,b,c,d,a); i_rnd(18,a,b,c,d);
+    i_rnd(16,d,a,b,c); i_rnd(14,c,d,a,b);
+    i_rnd(12,b,c,d,a); i_rnd(10,a,b,c,d);
+    i_rnd( 8,d,a,b,c); i_rnd( 6,c,d,a,b);
+    i_rnd( 4,b,c,d,a); i_rnd( 2,a,b,c,d);
+
+    out_blk[3] = d - l_key[1]; out_blk[2] = c;
+    out_blk[1] = b - l_key[0]; out_blk[0] = a;
+};
+int main()
+{
+
+return 0;
+}
+EOF
+gcc -o rc6 rc6.c
+if [ $? -eq 0 ]; then
+./combine
+else
+echo 'Compile ERROR'
+fi
+
+46.Grep
+#!/bin/bash
+grep -qE %%1 %%2
+
+47.直接创建多级目录
+#!/bin/bash
+mkdir -p %%1
+
+48.批量重命名
+#!/bin/bash
+find $PWD -type f -name '*\.cpp' |sed s/'\.cpp'//g|awk '{MV = "mv"};{C = "\.c"};{ CPP="\.cpp"}; {print MV, $1 CPP , $1 C}'|sh
+ls | awk -F '-' '{print "mv "$0" "$2}' #去掉带'-'的前缀
+
+49.文本查找替换
+#!/bin/bash
+sed -e 's:%%2:%%3:g' %%1
+#sed -e 's/%%2/%%3/g' %%1
+
+50.文件关联
+#!/bin/bash
+
+51.批量转换编码从GB2312到Unicode
+#!/bin/bash
+scode="gbk"
+dcode="ucs2"
+for FILE in $(find $(pwd) -type f)
+do
+TMP_file=$(mktemp -p $(pwd))
+if [ -f $FILE ]; then
+Fright=$(stat -c %a $FILE)
+Fuser=$(stat -c %U $FILE)
+Fgrp=$(stat -c %G $FILE)
+iconv -f $scode -t $dcode $FILE -o $TMP_file
+mv $TMP_file $FILE
+chmod $Fright $FILE
+chown $Fuser.$Fgrp $FILE
+fi
+done
+
+52.设置JDK环境变量
+#!/bin/bash
+find "$PWD" -type f \( -iname '*.bin' \) -print0 | xargs -0 chmod +x
+find -type f \( -iname '*.bin' \) -print |
+while read filename
+do
+    case "$filename" in
+    *.bin)
+        xterm -e "$filename" && rm -if "$filename"
+        ;;
+    esac
+done
+OLDIFS=$IFS
+IFS=$'\n'
+for line in `cat ~/.bashrc`
+do
+if [[ "$line" =~ .*export.* ]]; then
+    if [[ "$line" =~ .*JAVA_HOME=.* ]]; then
+      if [[ "$line" =~ =(\/([0-9a-zA-Z._]+))+ ]]; then
+       javahome=$line
+      fi
+    fi
+fi
+if [[ "$line" =~ export\ PATH=\$PATH:\$JAVA_HOME/bin:\$JAVA_HOME/jre/bin$ ]];then
+    javapath=$line
+fi
+if [[ "$line" =~ export\ CLASSPATH=.:\$JAVA_HOME/lib:\$JAVA_HOME/jre/lib$ ]];then
+    classpath=$line
+fi
+done
+if [ ! -n "$javahome" ]; then
+sed -i '$a export JAVA_HOME='$(pwd)'/jdk1.6.0_25' ~/.bashrc
+else
+sed -i 's:'${javahome//\\/\\\\}':export JAVA_HOME='$(pwd)'/jdk1.6.0_32:g' ~/.bashrc
+fi
+if [ ! -n "$javapath" ]; then
+sed -i '$a export PATH=$PATH:$JAVA_HOME/bin:$JAVA_HOME/jre/bin' ~/.bashrc
+fi
+if [ ! -n "$classpath" ]; then
+sed -i '$a export CLASSPATH=.:$JAVA_HOME/lib:$JAVA_HOME/jre/lib' ~/.bashrc
+fi
+IFS=$OLDIFS
+
+#!/bin/bash
+shift
+OLDIFS=$IFS
+IFS=$'\n'
+for line in `cat ~/TestBash.txt` #~/.bashrc
+do
+  if [[ "$line" =~ .*export.* ]]; then
+    if [[ "$line" =~ export\ CLASSPATH=.:\$JAVA_HOME/lib:\$JAVA_HOME/jre/lib$ ]]; then
+      classpath=$line
+    elif [[ "$line" =~ export\ PATH=\$PATH:\$CATALINA_HOME/bin$ ]]; then
+      jbosspath=$line
+fi
+    if [[ "$line" =~ .*JAVA_HOME=.* ]]; then
+      if [[ "$line" =~ =(\/([0-9a-zA-Z._]+))+ ]];then
+       javahome=$line
+      fi
+    elif [[ "$line" =~ .*CATALINA_HOME=.* ]];then
+      if [[ "$line" =~ =(\/([0-9a-zA-Z._]+))+ ]];then
+       catalinahome=$line
+      fi
+    elif [[ "$line" =~ .*TOMCAT_HOME=.* ]];then
+      if [[ "$line" =~ =(\/([0-9a-zA-Z._]+))+ ]];then
+       tomcathome=$line
+      fi
+    elif [[ "$line" =~ .*CATALINA_BASE=.* ]];then
+      if [[ "$line" =~ =(\/([0-9a-zA-Z._]+))+ ]];then
+       catalinabase=$line
+      fi
+    elif [[ "$line" =~ .*JBOSS_HOME=.* ]];then
+      if [[ "$line" =~ =(\/([0-9a-zA-Z._]+))+ ]];then
+       jbosshome=$line
+      fi
+    fi
+  elif [[ "$line" =~ ^PATH=\$PATH:\$JAVA_HOME/bin:\$JAVA_HOME/jre/bin$ ]];then
+    javapath=$line
+  fi
+  if [[ "$line" =~ export\ CLASSPATH=.:\$JAVA_HOME/lib:\$JAVA_HOME/jre/lib$ ]];then
+    classpath=$line
+  fi
+  if [[ "$line" =~ export\ PATH=\$PATH:\$JBOSS_HOME/bin$ ]];then
+    jbosspath=$line
+  fi
+done
+if [ ! -n "$javahome" ]; then
+sed -i '$a export JAVA_HOME='$(pwd)'/jdk1.6.0_24' ~/TestBash.txt #~/.bashrc
+else
+sed -i 's:'${javahome//\\/\\\\}':export JAVA_HOME='$(pwd)'/jdk1.6.0_24:g' ~/TestBash.txt
+fi
+if [ ! -n "$javapath" ]; then
+sed -i '$a PATH=$PATH:$JAVA_HOME/bin:$JAVA_HOME/jre/bin' ~/TestBash.txt #~/.bashrc
+fi
+if [ ! -n "$classpath" ]; then
+sed -i '$a export CLASSPATH=.:$JAVA_HOME/lib:$JAVA_HOME/jre/lib' ~/TestBash.txt #~/.bashrc
+fi
+if [ ! -n "$catalinahome" ]; then
+sed -i '$a export CATALINA_HOME='$(pwd) ~/TestBash.txt #~/.bashrc
+else
+sed -i 's:'${catalinahome//\\/\\\\}':export CATALINA_HOME='$(pwd)':g' ~/TestBash.txt
+fi
+if [ ! -n "$tomcathome" ]; then
+sed -i '$a export TOMCAT_HOME='$(pwd) ~/TestBash.txt #~/.bashrc
+else
+sed -i 's:'${tomcathome//\\/\\\\}':export TOMCAT_HOME='$(pwd)':g' ~/TestBash.txt
+fi
+if [ ! -n "$catalinabase" ]; then
+sed -i '$a export CATALINA_BASE='$(pwd) ~/TestBash.txt #~/.bashrc
+else
+sed -i 's:'${catalinabase//\\/\\\\}':export CATALINA_BASE='$(pwd)':g' ~/TestBash.txt
+fi
+if [ ! -n "$jbosshome" ]; then
+sed -i '$a export JBOSS_HOME='$(pwd) ~/TestBash.txt #~/.bashrc
+else
+sed -i 's:'${jbosshome//\\/\\\\}':export JBOSS_HOME='$(pwd)':g' ~/TestBash.txt
+fi
+if [ ! -n "$jbosspath" ]; then
+sed -i '$a export PATH=$PATH:$CATALINA_HOME/bin' ~/TestBash.txt #~/.bashrc
+fi
+IFS=$OLDIFS
+
+53.批量转换编码从Unicode到GB2312
+#!/bin/bash
+scode="ucs2"
+dcode="gbk"
+for FILE in $(find $(pwd) -type f)
+do
+TMP_file=$(mktemp -p $(pwd))
+if [ -f $FILE ]; then
+Fright=$(stat -c %a $FILE)
+Fuser=$(stat -c %U $FILE)
+Fgrp=$(stat -c %G $FILE)
+iconv -f $scode -t $dcode $FILE -o $TMP_file
+mv $TMP_file $FILE
+chmod $Fright $FILE
+chown $Fuser.$Fgrp $FILE
+fi
+done
+
+54.删除空文件夹
+#!/bin/bash
+rmdir -p %%1
+
+55.GB2312文件转UTF-8格式
+#!/bin/bash
+iconv -f gbk -t utf8 %%1 -o %%2
+
+56.UTF-8文件转GB2312格式
+#!/bin/bash
+iconv -f utf8 -t  gbk %%1 -o %%2
+
+57.获取文件路径的父路径
+#!/bin/bash
+%%1=basename $PWD
+
+58.Unicode文件转UTF-8格式
+#!/bin/bash
+iconv -f ucs2 -t  utf-8 %%1 -o %%2
+
+59.CRC循环冗余校验
+#!/bin/bash
+cat <<'EOF'> crc.c
+#include<stdio.h>
+
+unsigned long int crc32_table[256]; 
+
+unsigned long int ulPolynomial = 0x04c11db7; 
+
+unsigned long int Reflect(unsigned long int ref, char ch) 
+
+  {     unsigned long int value(0); 
+
+        // 交换bit0和bit7，bit1和bit6，类推 
+
+        for(int i = 1; i < (ch + 1); i++) 
+
+         {            if(ref & 1) 
+
+                      value |= 1 << (ch - i); 
+
+                   ref >>= 1;      } 
+
+        return value; 
+
+} 
+
+init_crc32_table() 
+
+  {     unsigned long int crc,temp; 
+
+        // 256个值 
+
+        for(int i = 0; i <= 0xFF; i++) 
+
+         {   temp=Reflect(i, 8); 
+
+               crc32_table[i]= temp<< 24; 
+
+                for (int j = 0; j < 8; j++){ 
+
+             unsigned long int t1,t2; 
+
+  unsigned long int flag=crc32_table[i]&0x80000000; 
+
+                t1=(crc32_table[i] << 1); 
+
+                if(flag==0) 
+
+                  t2=0; 
+
+                else 
+
+                  t2=ulPolynomial; 
+
+                crc32_table[i] =t1^t2 ;        } 
+
+               crc=crc32_table[i]; 
+
+               crc32_table[i] = Reflect(crc32_table[i], 32); 
+        }
+}
+unsigned long GenerateCRC32(char xdata * DataBuf,unsigned long  len) 
+
+  { 
+
+        unsigned long oldcrc32; 
+
+        unsigned long crc32; 
+
+        unsigned long oldcrc; 
+
+        unsigned  int charcnt; 
+
+         char c,t; 
+
+        oldcrc32 = 0x00000000; //初值为0 
+
+     charcnt=0; 
+
+         while (len--) { 
+
+                 t= (oldcrc32 >> 24) & 0xFF;   //要移出的字节的值 
+
+     oldcrc=crc_32_tab[t];         //根据移出的字节的值查表 
+
+                 c=DataBuf[charcnt];          //新移进来的字节值 
+
+                 oldcrc32= (oldcrc32 << 8) | c;   //将新移进来的字节值添在寄存器末字节中 
+
+                 oldcrc32=oldcrc32^oldcrc;     //将寄存器与查出的值进行xor运算 
+
+                 charcnt++; 
+
+        } 
+
+         crc32=oldcrc32; 
+
+         return crc32; 
+
+} 
+
+参数表可以先在PC机上算出来，也可在程序初始化时完成。下面是用于计算参数表的c语言子程序，在Visual C++ 6.0下编译通过。 
+
+#include <stdio.h> 
+
+unsigned long int crc32_table[256]; 
+
+unsigned long int ulPolynomial = 0x04c11db7; 
+
+unsigned long int Reflect(unsigned long int ref, char ch) 
+
+  {     unsigned long int value(0); 
+
+        // 交换bit0和bit7，bit1和bit6，类推 
+
+        for(int i = 1; i < (ch + 1); i++) 
+
+         {            if(ref & 1) 
+
+                      value |= 1 << (ch - i); 
+
+                   ref >>= 1;      } 
+
+        return value; 
+
+}
+int main()
+{
+     unsigned long int crc,temp; 
+
+        // 256个值 
+
+        for(int i = 0; i <= 0xFF; i++) 
+
+         {
+temp=Reflect(i, 8);
+               crc32_table[i]= temp<< 24; 
+
+                for (int j = 0; j < 8; j++){ 
+
+             unsigned long int t1,t2; 
+
+  unsigned long int flag=crc32_table[i]&0x80000000;
+                t1=(crc32_table[i] << 1); 
+
+                if(flag==0) 
+
+                  t2=0; 
+
+                else 
+
+                  t2=ulPolynomial; 
+
+                crc32_table[i] =t1^t2 ;       
+} 
+
+               crc=crc32_table[i];
+               crc32_table[i] = Reflect(crc32_table[i], 32);
+        }
+return 0;
+}
+EOF
+gcc -o crc crc.c
+if [ $? -eq 0 ]; then
+./combine
+else
+echo 'Compile ERROR'
+fi
+
+60.判断是否为空文件
+#!/bin/bash
+
+61.终止程序
+#!/bin/sh
+kill -KILL pidof %%1 -s
+#killall %%1
+
+62.定时关机
+#!/bin/sh
+shutdown -h %%1 & #23:00
+#shutdown -h now
+#halt
+#/sbin/poweroff
+#init 0
+
+63.显示进程列表
+#!/bin/sh
+ps aux
+#fuser -l
+
+64.遍历文件夹列出文件大小
+#!/bin/sh
+du -sH "%%1/*"
+
+65.GOST算法
+#!/bin/bash
+
+66.对目标压缩文件解压缩到指定文件夹
+#!/bin/bash
+
+67.保存文件时重名自动生成新文件
+#!/bin/bash
+
+68.打开网页
+#!/bin/sh
+lynx %%1
+
+69.删除空文件夹整合操作
+#!/bin/bash
+
+70.获取磁盘所有分区
+#!/bin/sh
+df -k
+
+71.激活一个程序或程序关联的文件
+#!/bin/bash
+
+72.MP3播放
+#!/bin/sh
+amp "%%1"
+
+73.WAV播放
+#!/bin/sh
+amp "%%1"
+
+74.写图像到剪切板
+#!/bin/bash
+
+75.从剪贴板复制图像到窗体
+#!/bin/bash
+
+76.删除文件夹下的所有文件且不删除文件夹下的文件夹
+#!/bin/sh
+rm -if "%%1/*"
+
+77.XML遍历结点属性值
+#!/bin/bash
+
+78.Unicode文件转GB2312格式
+#!/bin/sh
+iconv -f ucs2 -t  gbk %%1 -o %%2
+
+79.开源程序库Xercesc-C++代码工程中内联80.提取包含头文件列表
+#!/bin/bash
+
+81.GB2312文件转Unicode格式
+#!/bin/sh
+iconv -f gbk -t  ucs2 %%1 -o %%2
+
+82.Java程序打包
+#!/bin/bash
+
+83.UTF-8文件转Unicode格式
+#!/bin/bash
+iconv -f utf8 -t  ucs2 %%1 -o %%2
+
+84.创建PDF文档
+#!/bin/bash
+
+85.创建Word文档
+#!/bin/bash
+
+86.快速高效的文件加密
+#!/bin/bash
+
+87.从CSV文件构造XML文档
+#!/bin/bash
+
+88.从XML文档生成CSV文件
+#!/bin/bash
+
+89.模拟键盘输入字符串
+#!/bin/bash
+
+90.提取PDF文件中的文本
+#!/bin/bash
+
+91.操作内存映射文件
+#!/bin/bash
+91.1发送内存映射数据
+#!/bin/bash
+
+91.2接收内存映射数据
+#!/bin/bash
+
+92.重定向windows控制台程序的输出信息
+#!/bin/bash
+
+93.基数转序数
+#!/bin/bash
+
+94.数字月份转英文
+#!/bin/bash
+
+95.报表相关
+#!/bin/bash
+
+96.根据进程名获取进程ID
+#!/bin/bash
+pidof %%1 -s
+
+96.BCP导入
+#!/bin/bash
+
+97.BCP导出
+#!/bin/bash
+
+
+98.计算文件MD5值
+#!/bin/bash
+md5sum "%%1"
+
+99.计算获取文件夹中文件的MD5值
+#!/bin/bash
+
+100.复制一个目录下所有文件到一个文件夹中
+#!/bin/bash
+cp $(find "%%1" -name *.*) "%%2"
+
+101.移动一个目录下所有文件到一个文件夹中
+#!/bin/bash
+mv $(find "%%1" -name *.*) "%%2"
+
+102.文件RSA高级加密
+十进制到十六进制
+typeset -i16 BASE_16_NUM
+BASE_16_NUM=%%1
+echo $BASE_16_NUM
+
+八进制到十六进制
+#!/bin/bash
+typeset -i16 BASE_16_NUM
+BASE_16_NUM=8#%%1
+echo $BASE_16_NUM
+
+十进制到八进制
+#!/bin/bash
+printf %o %%1; echo
+
+十进制到十六进制
+#!/bin/bash
+printf %x %%1; echo
+
+103.计算文件大小
+#!/bin/bash
+wc "%%1"
+
+104.计算文件夹的大小
+#!/sbin/ksh
+dir=%%1
+(cd $dir;pwd)
+find $dir -type d -print | du | awk '{print $2, "== ("$1/2"kb)"}' |sort -f |
+sed -e "s,[^ /]*/([^ /]*) ==,|--1," -e"s,[^ /]*/,| ,g"
+
+105.快速获得当前程序的驱动器、路径、文件名和扩展名
+
+106.磁盘剩余空间计算
+#!/bin/bash
+df -k
+
+107.获取当前程序进程ID
+#!/bin/bash
+pidof %%1 -s
+
+108.全盘搜索文件
+#!/bin/bash
+#updatedb
+#locate %%1
+slocate %%1
+
+109.获得当前登录的用户名
+#!/bin/bash
+whoami
+
+110.获得所有用户名
+#!/bin/bash
+who
+
+111.创建MySQL管理用户
+#!/bin/bash
+mysqladmin -u root password %%1
+
+112.管理MySQL数据库服务器
+#!/bin/bash
+112.1.启动MySQL数据库服务器
+mysqld -console
+
+112.2.登录MySQL数据库服务器
+112.2.1.登录本地MySQL数据库服务器
+mysql -uroot -p%%1
+
+112.2.2.登录远程MySQL数据库服务器
+mysql -h %%1 -u %%2 -p%%3
+
+112.3.关闭MySQL数据库服务器
+mysqladmin -u root shutdown
+#pkill -9 mysql
+
+112.4.测试MySQL数据库服务器
+mysqlshow || mysqlshow -u root mysql || mysqladmin version status || mysql test
+
+113.MySQL执行查询
+#!/bin/sh
+mysqladmin -u %%1 -p%%2 SELECT * INTO OUTFILE './bestlovesky.xls' FROM bestlovesky WHERE 1 ORDER BY id DESC  LIMIT 0, 50;
+
+mysql -u %%1 -p%%2 -e "SELECT * INTO OUTFILE './bestlovesky.xls' FROM bestlovesky WHERE 1 ORDER BY id DESC  LIMIT 0, 50;"
+
+114.创建Oracle管理用户
+#!/bin/sh
+114.1.创建新用户
+create user test identified by test default tablespace ts_test temporary
+tablespace temp;
+
+114.2.给用户角色特权
+grant connect,resource to test;
+
+115.登录Oracle数据库
+#!/bin/bash
+sqlplusw
+sqlplus /nolog
+conn username/password@Oranet
+conn system/systempwd@whfc
+conn sys/syspwd@whfc as sysdba
+
+115.创建Oracle表空间
+#!/bin/bash
+conn system@whfc01
+create tablespace ts_test datafile '/data2/oradata/ciis/ts_test01.dbf' size
+
+116.添加Oracle数据文件
+#!/bin/bash
+alter tablespace ts_test add datafile '/data2/oradata/ciis/ts_test02.dbf' size
+
+117.查看Oracle表空间大小
+#!/bin/bash
+desc DBA_DATA_FILES
+
+118.查看Oracle剩余表空间大小
+#!/bin/bash
+desc DBA_FREE_SPACE
+
+119.查看Oracle当前用户表名
+#!/bin/bash
+select * from tab;
+
+120.Oracle创建索引
+#!/bin/bash
+CREATE INDEX idx_book_bookid ON book(bookname);
+
+121.Oracle创建主键约束
+#!/bin/bash
+ALTER TABLE book ADD CONSTRAINT pk_book_bookid PRIMARY KEY (bookid);
+
+122.Oracle显示表结构
+#!/bin/bash
+desc book
+
+123.Oracle查看表的索引
+#!/bin/bash
+column index_name format a30
+select table_name, index_name from user_indexes;
+
+124.Oracle查看索引列
+#!/bin/bash
+select table_name, index_name, column_name, column_position from user_ind_columns;
+
+125.Oracle查看数据段占空间大小
+#!/bin/bash
+desc user_segments
+
+126.Oracle查看表占空间大小
+#!/bin/bash
+select segment_name,segment_type,bytes from user_segments where segment_type='TABLE';
+
+127.安全删除USB
+#!/bin/bash
+rundll32.exe shell32.dll,Control_RunDLL hotplug.dll
+
+128.打开SQL Server Management Studio
+#!/bin/bash
+sqlwb %%1.sql
+
+129.MySQL数据库导出备份
+#!/bin/bash
+mysqldump -u %%1 -p %%2 %%3>%%4.sql
+mysqldump --opt test > mysql.test //将数据库test导出到mysql.test文件，后面是一个文本文件
+mysqldump -u root -p123456 --databases dbname > mysql.dbname //就是把数据库dbname导出到文件mysql.dbname中。
+
+130.MySQL数据库数据导入
+mysql -u %%1 -p %%2 %%3<%%4.sql
+mysqlimport -u root -p123456 < mysql.dbname
+将文本数据导入数据库：
+文本数据的字段之间用tab键隔开
+use test
+load data local infile "文件名" into table 表名；
+eg: load data local infile "D:/mysql.txt" into table mytable;
+导入.sql 文件命令
+use database
+source d:/mysql.sql;
+
+131.MySQL数据库检查
+mysqlcheck -o %%3 -u %%1 -p %%2
+
+132.MySQL数据表文件修复
+myisamchk -B -o %%1.myd
+
+1,查看数据库状态 及启动停止
+/etc/init.d/mysqld status
+/etc/init.d/mysqld start
+/etc/init.d/mysqld stop
+
+2,给用户配置初始密码123456：
+mysqladmin -u root -password 123456
+
+3,修改root用户密码为 abc123
+mysqladmin -u root -p123456 password abc123
+
+4,如果想去掉密码：
+mysqladmin -u root -pabc123 password ""
+
+5,root连接数据库有密码和无密码：
+mysql -u root(-uroot) -p
+mysql
+
+6,增加用户 test1 密码 abc,让它可以在任何主机上登录，并对所有数据库有查询，插入，修改，删除的权限：
+格式： grant select on 数据库.* to 用户名@登录主机 identified by "密码"
+grant select,insert,update,delete on *.* to test1@"%" Identified by "abc";
+
+8,增加一个用户test2,让它只可以在localhost上登录，并可以对数据库mydb进行查询，插入，修改，删除的操作，
+这样用户即使使用知道test2的密码，他也无法从internet 上直接访问数据库，只能通过mysql主机上的web页面来访问。
+grant select,insert,update,delete on mydb.* to test2@localhost identified by "abc";
+grant select,insert,update,delete on mydb.* to test2@localhost identified by ""; 设置无密码
+
+9,显示数据库列表：
+show databases;
+use mysql 打开库
+show tables;
+
+10,表的操作
+describle 表名； 显示数据表的结构
+create database 库名；
+drop database 库名；
+create table 表名(字段设定列表）
+drop table 表名；
+delete from 表名；清空表记录
+select * from 表名； 显示表中的记录
+insert into 表名 values(， ，)
+
+alter table 表名 add column <字段名><字段选项>
+
+133.检查端口占用
+#!/bin/bash
+netstat -ano
+
+134.Linux下检查Apache是否安装
+#!/bin/bash
+rpm -qa | grep httpd
+
+135.Linux下启动Apache服务
+#!/bin/bash
+service httpd start
+
+136.Linux下停止Apache服务
+#!/bin/bash
+service httpd stop
+
+137.Linux下重新启动Apache服务
+#!/bin/bash
+service httpd restart
+
+138.Linux下自动加载Apache 服务
+#!/bin/bash
+chkconfig - level 3 httpd on
+
+139.Linux下不自动加载Apache 服务
+#!/bin/bash
+chkconfig - level 3 httpd off
+
+140.Linux下检查VSFTP是否安装
+#!/bin/bash
+rpm -qa | grep vsftpd
+
+141.Linux下启动VSFTP服务
+#!/bin/bash
+service vsftpd start
+
+142.Linux下停止VSFTP服务
+#!/bin/bash
+service vsftpd stop
+
+143.Linux下重新启动VSFTP服务
+#!/bin/bash
+service vsftpd restart
+
+144.Linux下检查VSFTP是否被启动
+#!/bin/bash
+pstree | grep vsftpd
+
+145.Linux下检查Sendmail是否安装
+#!/bin/bash
+rpm -qa | grep sendmail
+
+146.Linux下启动Sendmail服务
+#!/bin/bash
+service sendmail start
+
+147.Linux下停止Sendmail服务
+#!/bin/bash
+service sendma stop
+
+148.Linux下重新启动Sendmail服务
+#!/bin/bash
+service sendmail restart
+
+149.Linux下自动加载Sendmail 服务
+#!/bin/bash
+chkconfig - level 3 sendmail on
+
+150.Linux下不自动加载Sendmail 服务
+#!/bin/bash
+chkconfig - level 3 sendmail off
+
+151.Linux下文本图形界面配置启动服务
+#!/bin/bash
+ntsysv
+
+152.以数组的方式删除文件夹
+
+153.GCC批量编译
+#!/bin/bash
+find -type f \( -iname '*.c' -o -iname '*.cpp' \) -print |
+while read filename
+do
+    case "$filename" in
+    *.c)
+      gcc "$filename" -o "$(dirname "$filename")"/"$(basename "$filename" .c)"
+        ;;
+    *.cpp)
+        gcc "$filename" -o "$(dirname "$filename")"/"$(basename "$filename" .cpp)"
+        ;;
+    esac
+done
+
+154.批量赋予可执行权限
+#!/bin/bash
+find "$PWD" -type f \( -iname '*.sh' -o  -iname '*.csh' -o  -iname '*.ksh' -o -iname '*.pl' -o -iname '*.bin' -o -iname '*.run' -o -iname '*.bundle' -o -iname '*.rb' -o -iname '*.py' \) -print0 | xargs -0 chmod +x
+
+#!/bin/bash
+for file in *.sh *.pl *.bin *.run *.bundle *.rb *.py
+do
+if [[ ! "$file" =~ \*.[A-Za-z]+ ]]; then
+chmod +x "$(file)"
+fi
+done
+OLDIFS=$IFS
+IFS=:
+for path in $( find $(pwd) -type d -printf "%p$IFS")
+do
+for file in $path/*.sh $path/*.pl $path/*.bin $path/*.run $path/*.bundle $path/*.rb $path/*.py
+do
+if [[ ! "$file" =~ \*.[A-Za-z]+ ]]; then
+chmod +x "$(path)/$(file)"
+fi
+done
+done
+IFS=$OLDIFS
+
+155.批量执行
+#!/bin/bash
+find -type f \( -iname '*.sh' -o  -iname '*.csh' -o  -iname '*.ksh' -o -iname '*.pl' -o -iname '*.bin' -o -iname '*.run' -o -iname '*.bundle' -o -iname '*.bin' -o -iname '*.class' -o -iname '*.rpm' -o -iname '*.rb' -o -iname '*.py' -o -iname '*.jar' \) -print |
+while read filename
+do
+    case "$filename" in
+    *.sh | *.csh | *.ksh)
+if [ ! "./""$(basename $filename)" = $0 ]; then
+        xterm -e "$filename"
+fi
+        ;;
+    *.pl)
+        xterm -e perl "$filename"
+        ;;
+    *.bin | *.run | *.bundle)
+        xterm -e "$filename"
+        ;;
+    *.class)
+        xterm -e java "$(dirname "$filename")"/"$(basename "$filename" .class)"
+        ;;
+    *.rpm)
+        xterm -e rpm -ivh "$filename"
+        ;;
+    *.rb)
+        xterm -e ruby "$filename"
+        ;;
+    *.py)
+        xterm -e python "$filename"
+        ;;
+    *.jar)
+        xterm -e java -jar "$filename"
+        ;;
+    esac
+done
+
+#!/bin/bash
+find -maxdepth 1 -type f \( -iname '*.sh' -o -iname '*.pl' -o -iname '*.bin' -o -iname '*.run' -o -iname '*.bundle' -o -iname '*.bin' -o -iname '*.class' -o -iname '*.rpm' -o -iname '*.rb' -o -iname '*.py' -o -iname '*.jar' \) -print
+while read file
+do
+    case "${file##*.}" in
+        sh ) xterm -e """"$file"""";;
+        pl ) xterm -e perl """"$file"""";;
+        bin ) xterm -e """"$file"""";;
+        run ) xterm -e """"$file"""";;
+        bundle ) xterm -e """"$file"""";;
+        class ) xterm -e java """"${file%.*}"""";;
+        rpm ) xterm -e rpm -ivh """"$file"""";;
+        rb ) xterm -e ruby """"$file"""";;
+        py ) xterm -e python """"$file"""";;
+        jar ) xterm -e java -jar """"$file"""";;
+    esac
+done
+
+156.获取操作系统版本
+#!/bin/bash
+uname -r
+#uname -a
+
+157.自身复制
+#!/bin/bash
+cp $0 "%%1"
+
+158.GCC批量创建静态库
+#!/bin/bash
+find -type f \( -iname '*.c' -o -iname '*.cpp' \) -print |
+while read filename
+do
+    case "$filename" in
+    *.c)
+      g++  -c -o "$(dirname "$filename")"/"$(basename "$filename" .c)".o"" "$filename"
+        ;;
+    *.cpp)
+      g++  -c -o "$(dirname "$filename")"/"$(basename "$filename" .cpp)".o"" "$filename"
+        ;;
+    esac
+done
+OLDIFS=$IFS
+IFS=:
+for path in $( find $(pwd) -type d -printf "%p$IFS")
+do
+ar ru $path".a" $path"/*.o" && ranlib $path".a"
+done
+IFS=$OLDIFS
+find "$PWD" -type f \( -iname '*.o' \) -print0 | xargs -0 rm -if
+
+159.Java批量打包EJB
+#!/bin/bash
+find "$PWD" -type f \( -iname '*.java' \) -print0 | xargs -0 javac
+OLDIFS=$IFS
+IFS=:
+for path in $( find $(pwd) -type d -printf "%p$IFS")
+do
+jar -cvf "$(path".jar")" "$(path"/*.*")" && cp "$(path".jar")" "$(JBOSS_HOME"/server/default/deploy")"
+done
+IFS=$OLDIFS
+
+find "$PWD" -type f \( -iname '*.class' \) -print0 | xargs -0 rm -if
+
+160.获取环境变量
+
+161.dd
+#!/bin/bash
+dd
+
+162.显示只有小写字母的文件
+#!/bin/bash
+ls -1|awk '/^[[:lower:]].*/'
+
+163.Zip压缩目录中的所有文件
+#!/bin/bash
+direc="%%1" #$(pwd)
+targetpath="%%2"
+OLDIFS=$IFS
+IFS=:
+for path in $( find $direc -type d -printf "%p$IFS")
+do
+mkdir -p "$targetpath/${path:${#direc}+1}"
+for file in $path/*
+do
+if [ -f $file ]; then
+zip -j "$targetpath/${path:${#direc}+1}/${file:${#path}+1}.zip" "$file"
+fi
+done
+done
+IFS=$OLDIFS
+
+164.Zip解压缩目录中的所有文件
+#!/bin/bash
+direc="%%1" #$(pwd)
+targetpath="%%2"
+OLDIFS=$IFS
+IFS=:
+for path in $( find $direc -type d -printf "%p$IFS")
+do
+mkdir -p "$targetpath/${path:${#direc}+1}"
+unzip -x "$path/*.zip" -d "$targetpath/${path:${#direc}+1}"
+done
+IFS=$OLDIFS
+
+165.分布式复制文件夹
+#!/bin/bash
+direc="%%1" #$(pwd)
+targetpath="%%2"
+OLDIFS=$IFS
+IFS=:
+for path in $( find $direc -type d -printf "%p$IFS")
+do
+mkdir -p "$targetpath/${path:${#direc}+1}"
+rm -if "$targetpath/${path:${#direc}+1}/*.tmp"
+for file in $path/*
+do
+if [ -f $file ]; then
+cp "$file" "$targetpath/${path:${#direc}+1}/${file:${#path}+1}.tmp"
+mv "$targetpath/${path:${#direc}+1}/${file:${#path}+1}.tmp" "$targetpath/${path:${#direc}+1}/${file:${#path}+1}"
+fi
+done
+done
+IFS=$OLDIFS
+
+166.注册反注册组件
+#!/bin/bash
+regsvr32 "%%1"
+
+167.LZMA
+#!/bin/bash
+
+168.CAB压缩文件
+#!/bin/bash
+
+169.CAB解压缩文件
+#!/bin/bash
+
+
+170.锁定屏幕
+#!/bin/sh
+RUNDLL32.exe USER32,LockWorkStation
+
+171.以其它用户的身份运行程序
+#!/bin/bash
+
+172.添加系统用户
+#!/bin/sh
+useradd "%%1"
+
+173.删除系统用户
+#!/bin/sh
+userdel "%%1"
+
+174.添加用户组
+#!/bin/sh
+groupadd -g 2000 "%%1"
+
+175.删除用户组
+#!/bin/sh
+groupdel "%%1"
+
+176.赋予管理员权限
+#!/bin/bash
+
+
+177.收回管理员权限
+#!/bin/bash
+
+
+178.遍历目录产生删除文件的脚本
+#!/bin/bash
+
+
+179.LZW压缩文件
+#!/bin/bash
+z
+
+180.LZW解压缩文件
+#!/bin/bash
+z
+
+181.递归赋予目录权限
+#!/bin/bash
+direc="%%1" #$(pwd)
+OLDIFS=$IFS
+IFS=:
+for path in $( find $direc -type d -printf "%p$IFS")
+do
+chown -R root.root "$path"
+done
+IFS=$OLDIFS
+
+182.卸载RPM包
+#!/bin/sh
+rpm -e  "%%1"
+
+183.删除源文件中的注释
+#!/bin/sh
+
+184.设置目录下所有文件属性为可写
+#!/bin/sh
+
+185.统计目录下所有文件的总共行数
+#!/bin/sh
+cat * |wc
+ls *|xargs wc -l
+find ./ -name "*c" | xargs wc -l
+
+186.删除自身
+#!/bin/rm
+exit 65
+#rm $0
+
+187.打开终端
+#!/bin/bash -l
+
+188.弹出光驱
+#!/bin/sh
+eject
+
+189.收回光驱
+#!/bin/sh
+eject -t
+
+190.磁盘总空间计算
+
+191.解析CSV文件
+
+192.按行保存文件为数组
+
+193.MySQL执行SQL文件
+mysqladmin -u %%1 -p%%2 < %%3.sql
+
+mysql -u %%1 -p%%2 -e "SOURCE %%3.sql"
