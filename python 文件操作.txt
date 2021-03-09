@@ -1,0 +1,222 @@
+open(file, mode='r', buffering=-1, encoding=None, errors=None, newline=None, closefd=True, opener=None)
+
+参数说明:
+
+file: 必需，文件路径（相对或者绝对路径）。
+mode: 可选，文件打开模式
+buffering: 设置缓冲
+encoding: 一般使用utf8
+errors: 报错级别
+newline: 区分换行符
+closefd: 传入的file参数类型
+opener:
+
+open函数第一个参数是文件名称（包括路径），第二个参数是操作模式。
+
+　　对于第二个参数有如下的选择：
+
+　　w：向文件写入内容
+
+　　a：追加写入，就是不修改文件原来的内容，在文件后面写入
+
+　　r+：既可以读文件，又可以向文件写入内容
+
+　　w+：同上
+
+　　a+：同上
+
+　　rb：读取二进制文件，例如图片文件
+
+　　wb：写入二进制数据，例如保存图片的时候会用到
+
+　　ab：追加二进制数据
+
+　　rb+：二进制的读写模式，即可以读文件，又可以向文件写入内容
+
+　　wb+：同上
+
+　　ab+：同上
+
+　　总结：有符号+的就表示读写模式，第二个字母有b的就表示二进制相关的文件，r是读，w是写，a是在文件后面写
+
+open函数返回一个文件对象，这个对象有下面5个方法可以使用：
+
+　　1.file.read() 读取文件
+
+　　2.file.readline() #读取单独的一行，知道一个换行符出现，也读取这个换行符
+
+　　3.file.readlines() #读取文件中的所有行，并将其作为列表返回
+
+　　4.file.write() #往文件中写入一些内容
+
+　　5.file.close() #关闭这个文件
+
+例子1：写入一遍泰戈尔诗集
+ 1 # -*- coding: utf-8 -*-
+ 2 
+ 3 poem = '''
+ 4     作者：泰戈尔\n
+ 5     这世界一度是你的，也永远是你的。\n
+ 6     因为你无所企求，我的帝王，你的财富不足以使你快乐。\n
+ 7     你视财富如草芥。\n
+ 8     所以你在漫长的岁月中，把你的一切给予我，而在我内心不断地赢得你的王国。\n
+ 9     一天又一天，你从我的心头买得黎明，而且发现你的爱已经刻成了我的生命的形象。\n
+10     '''
+11 
+12 #没有这个文件的时候，自动创建一个新文件
+13 with open(u'采果集第77篇.txt', 'w') as f:
+14     f.write(poem)
+15     f.close()
+16 
+17 #写入新内容之后，打开文件看一看
+18 with open(u'采果集第77篇.txt', 'r') as f:
+19     content = f.read()
+20     f.close()
+21 
+22 #我在控制台上看，所有要转一下编码格式，不然看到的是乱码
+23 print content.decode('utf-8').encode('gbk')
+
+例子2：保存一张风景图片
+
+1 # -*- coding: utf-8 -*-
+ 2 import requests
+ 3 
+ 4 #在网上随便找一个图片的URL
+ 5 page = requests.get('https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1531405541704&di=6cfae0df4e75808bc70fe602d1a09daa&imgtype=0&src=http%3A%2F%2Fimg3.iqilu.com%2Fdata%2Fattachment%2Fforum%2F201304%2F11%2F11121140u0k3rr5ohrukr4.jpg')
+ 6 picture = page.content
+ 7 
+ 8 #图片是二进制格式，所有用wb模式写入，音乐文件同理
+ 9 with open(u'风景图.jpg', 'wb') as f:
+10     f.write(picture)
+11     f.close()
+
+
+3.
+import requests
+
+
+response = requests.get('https://www.baidu.com')
+
+
+with open('baidu.html', 'w+', encoding='utf-8') as f:
+    
+# response.content是bytes类型的内容，对bytes数据进行编码
+    
+
+f.write(response.content.decode('utf-8'))
+
+# 将二进制的内容写入文件
+with open('baiduBytes.html', 'wb+') as f:
+    
+f.write(response.content)
+
+
+4.
+一、os模块儿
+1、获取当前所在路径及路径下的文件
+
+os.getcwd()：获取当前路径，返回字符串
+os.listdir(path)：列举路径下所有文件，返回列表类型（用来判断文件夹是否为空）
+os.path.abspath(path)：返回path绝对路径，path为"."，表示当前目录，".."表示上一级目录
+os.path.dirname(path)：返回path中的文件夹部分，结果不包含'\'
+os.path.basename(path)：返回path的文件名
+
+#coding:utf-8
+import os
+#获取当前目录
+
+print os.getcwd()
+#获取目录下的所有文件，可用于判断目录是否为空
+
+print os.listdir(os.getcwd())
+
+#返回当前目录
+
+print os.path.abspath('.')
+
+#返回上一级目录
+
+print os.path.abspath('..')
+
+#返回path文件夹部分，结尾不包含\，就是把最后一级的"\"，左右分开，前边是dirname，后边是basename
+
+print os.path.dirname(os.getcwd())
+
+#返回path文件名部分
+
+print os.path.basename(os.getcwd())
+
+2、路径分解split，路径拼接join
+
+os.path.split(path)：将路径分解为文件名，文件夹，返回元组类型
+os.path.join(path1,path2,...)：将path进行组合，若有绝对路径，之前的path将被删除
+
+print os.path.join(os.getcwd(),'\kest') 
+#'/'之前的路径会被清除
+print os.path.join(os.getcwd(),'1','2','3')
+
+3、查看文件是否存在，创建目录
+
+
+os.path.exists(path)：判断文件/文件夹是否存在，返回true，false
+
+os.makedirs(path)：创建多层目录，递归创建
+
+os.mkdir(path)：一级一级创建目录，前提是前面目录已存在，不存在会报异常
+
+os.remove(path)：删除指定的文件
+
+os.rmdir(path)：删除文件夹（文件夹是空的才会被删除，如果不是空的会报错）
+
+os.path.isfile(path)：判断path是否是文件
+
+os.path.isdir(path)：判断path是否是目录
+
+
+import os
+ 
+if not os.path.exists(u'F:/test'):
+    os.makedirs('F:/test')
+
+
+example:
+
+import os
+ 
+
+#文件是否存在
+
+if os.path.exists(u'F:/test/test.txt'):
+    
+    print u'文件存在'
+    
+
+#文件夹是否存在
+
+path='F:\\xixixi'
+
+if not os.path.exists(u'F:/xixixi'):
+    
+    os.makedirs(u'F:/xixixi')
+    #创建多层目录
+   
+    #目录已有，open函数以写的方式打开文件，文件不存在则创建
+    
+    f=open(u'F:/xixixi/text.txt','w')
+    
+    #关闭文件
+    
+    f.close()
+    
+    #with as用法
+    
+    with open('F:/xixixi/text.txt') as f:
+        
+        print f.read()
+        
+
+print os.path.join(path,'text.txt')
+————————————————
+
+
+
