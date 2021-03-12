@@ -1,0 +1,136 @@
+https://docs.docker.com/engine/install/centos/
+
+OS requirements
+To install Docker Engine, you need a maintained version of CentOS 7 or 8. Archived versions aren¡¯t supported or tested.
+
+The centos-extras repository must be enabled. This repository is enabled by default, but if you have disabled it, you need to re-enable it (https://wiki.centos.org/AdditionalResources/Repositories).
+
+The overlay2 storage driver is recommended.
+
+Available Repositories for CentOS
+There are several repositories provided by CentOS and other 3rd party developers that offer software packages that are not included in the default base and updates repositories. While no list can be 100% complete, as anyone may announce an archive, it represents some major efforts and provides a summary of what each repository offers. These repositories have varying levels of stability, support and cooperation within the CentOS community.
+
+About 'enabled' and 'disabled' repository configuration files
+Please read man 5 yum.conf, particularly the discussion of enabled=0 versus enabled=1 . A line containing one of these options is recommended for each repository in each .conf file in the  /etc/yum.repos.d/  directory. This allows the administrator to more clearly specify whether a repository is or is not used for packages. After any edits of these files, in order to clear any cached information, and to make sure the changes are immediately recognized, as root run:
+
+
+# yum clean all
+
+Uninstall old versions
+Older versions of Docker were called docker or docker-engine. If these are installed, uninstall them, along with associated dependencies.
+
+ sudo yum remove docker \
+                  docker-client \
+                  docker-client-latest \
+                  docker-common \
+                  docker-latest \
+                  docker-latest-logrotate \
+                  docker-logrotate \
+                  docker-engine
+It¡¯s OK if yum reports that none of these packages are installed.
+
+The contents of /var/lib/docker/, including images, containers, volumes, and networks, are preserved. The Docker Engine package is now called docker-ce.
+
+
+Installation methods
+You can install Docker Engine in different ways, depending on your needs:
+
+Most users set up Docker¡¯s repositories and install from them, for ease of installation and upgrade tasks. This is the recommended approach.
+
+Some users download the RPM package and install it manually and manage upgrades completely manually. This is useful in situations such as installing Docker on air-gapped systems with no access to the internet.
+
+In testing and development environments, some users choose to use automated convenience scripts to install Docker.
+
+Install using the repository
+Before you install Docker Engine for the first time on a new host machine, you need to set up the Docker repository. Afterward, you can install and update Docker from the repository.
+
+SET UP THE REPOSITORY
+Install the yum-utils package (which provides the yum-config-manager utility) and set up the stable repository.
+
+ sudo yum install -y yum-utils
+ sudo yum-config-manager \
+    --add-repo \
+    https://download.docker.com/linux/centos/docker-ce.repo
+
+
+hese repositories are included in the docker.repo file above but are disabled by default. You can enable them alongside the stable repository. The following command enables the nightly repository.
+
+ sudo yum-config-manager --enable docker-ce-nightly
+To enable the test channel, run the following command:
+
+ sudo yum-config-manager --enable docker-ce-test
+You can disable the nightly or test repository by running the yum-config-manager command with the --disable flag. To re-enable it, use the --enable flag. The following command disables the nightly repository.
+
+ sudo yum-config-manager --disable docker-ce-nightly
+
+INSTALL DOCKER ENGINE
+Install the latest version of Docker Engine and containerd, or go to the next step to install a specific version:
+
+ sudo yum install docker-ce docker-ce-cli containerd.io
+If prompted to accept the GPG key, verify that the fingerprint matches 060A 61C5 1B55 8A7F 742B 77AA C52F EB6B 621E 9F35, and if so, accept it.
+
+
+Docker is installed but not started. The docker group is created, but no users are added to the group
+
+To install a specific version of Docker Engine, list the available versions in the repo, then select and install:
+
+a. List and sort the versions available in your repo. This example sorts results by version number, highest to lowest, and is truncated:
+
+ yum list docker-ce --showduplicates | sort -r
+
+3. start docker
+$ sudo systemctl start docker
+
+4. Verify that Docker Engine is installed correctly by running the hello-world image.
+$  sudo docker run hello-world
+Unable to find image 'hello-world:latest' locally
+latest: Pulling from library/hello-world
+b8dfde127a29: Pull complete
+Digest: sha256:308866a43596e83578c7dfa15e27a73011bdd402185a84c5cd7f32a88b501a24
+Status: Downloaded newer image for hello-world:latest
+
+Hello from Docker!
+This message shows that your installation appears to be working correctly.
+
+To generate this message, Docker took the following steps:
+ 1. The Docker client contacted the Docker daemon.
+ 2. The Docker daemon pulled the "hello-world" image from the Docker Hub.
+    (amd64)
+ 3. The Docker daemon created a new container from that image which runs the
+    executable that produces the output you are currently reading.
+ 4. The Docker daemon streamed that output to the Docker client, which sent it
+    to your terminal.
+
+To try something more ambitious, you can run an Ubuntu container with:
+ $ docker run -it ubuntu bash
+
+Share images, automate workflows, and more with a free Docker ID:
+ https://hub.docker.com/
+
+
+nstall from a package
+If you cannot use Docker¡¯s repository to install Docker, you can download the .rpm file for your release and install it manually. You need to download a new file each time you want to upgrade Docker Engine.
+
+Go to https://download.docker.com/linux/centos/ and choose your version of CentOS. Then browse to x86_64/stable/Packages/ and download the .rpm file for the Docker version you want to install.
+
+$sudo yum install /path/to/package.rpm
+
+
+Install using the convenience script
+Docker provides convenience scripts at get.docker.com and test.docker.com for installing edge and testing versions of Docker Engine - Community into development environments quickly and non-interactively. The source code for the scripts is in the docker-install repository. Using these scripts is not recommended for production environments, and you should understand the potential risks before you use them
+
+$ curl -fsSL https://get.docker.com -o get-docker.sh
+$ sudo sh get-docker.sh
+
+If you would like to use Docker as a non-root user, you should now consider adding your user to the ¡°docker¡± group with something like:
+
+$sudo usermod -aG docker <your-user>
+
+Uninstall Docker Engine
+$sudo yum remove docker-ce docker-ce-cli containerd.io
+
+Images, containers, volumes, or customized configuration files on your host are not automatically removed. To delete all images, containers, and volumes:
+$ sudo rm -rf /var/lib/docker
+$ sudo rm -rf /var/lib/containerd
+
+
