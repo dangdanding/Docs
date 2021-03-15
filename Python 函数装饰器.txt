@@ -1,0 +1,645 @@
+Python 函数装饰器
+
+装饰器本质上是一个Python函数，它可以让其他函数在不需要做任何代码变动的前提下增加额外功能，装饰器的返回值也是一个函数对象。它经常用于有切面需求的场景，比如：插入日志、性能测试、事务处理、缓存、权限校验等场景。装饰器是解决这类问题的绝佳设计，有了装饰器，我们就可以抽离出大量与函数功能本身无关的雷同代码并继续重用。
+
+概括的讲，装饰器的作用就是为已经存在的函数或对象添加额外的功能。
+
+
+装饰器(Decorators)是 Python 的一个重要部分。简单地说：他们是修改其他函数的功能的函数。他们有助于让我们的代码更简短，也更Pythonic（Python范儿）。大多数初学者不知道在哪儿使用它们，所以我将要分享下，哪些区域里装饰器可以让你的代码更简洁。 首先，让我们讨论下如何写你自己的装饰器。
+
+这可能是最难掌握的概念之一。我们会每次只讨论一个步骤，这样你能完全理解它。
+
+一切皆对象
+首先我们来理解下 Python 中的函数:
+
+def hi(name="yasoob"):
+    return "hi " + name
+ 
+print(hi())
+# output: 'hi yasoob'
+ 
+# 我们甚至可以将一个函数赋值给一个变量，比如
+greet = hi
+# 我们这里没有在使用小括号，因为我们并不是在调用hi函数
+# 而是在将它放在greet变量里头。我们尝试运行下这个
+ 
+print(greet())
+# output: 'hi yasoob'
+ 
+# 如果我们删掉旧的hi函数，看看会发生什么！
+del hi
+print(hi())
+#outputs: NameError
+ 
+print(greet())
+#outputs: 'hi yasoob'
+在函数中定义函数
+刚才那些就是函数的基本知识了。我们来让你的知识更进一步。在 Python 中我们可以在一个函数中定义另一个函数：
+
+def hi(name="yasoob"):
+    print("now you are inside the hi() function")
+ 
+    def greet():
+        return "now you are in the greet() function"
+ 
+    def welcome():
+        return "now you are in the welcome() function"
+ 
+    print(greet())
+    print(welcome())
+    print("now you are back in the hi() function")
+ 
+hi()
+#output:now you are inside the hi() function
+#       now you are in the greet() function
+#       now you are in the welcome() function
+#       now you are back in the hi() function
+ 
+# 上面展示了无论何时你调用hi(), greet()和welcome()将会同时被调用。
+# 然后greet()和welcome()函数在hi()函数之外是不能访问的，比如：
+ 
+greet()
+#outputs: NameError: name 'greet' is not defined
+那现在我们知道了可以在函数中定义另外的函数。也就是说：我们可以创建嵌套的函数。现在你需要再多学一点，就是函数也能返回函数。
+
+从函数中返回函数
+其实并不需要在一个函数里去执行另一个函数，我们也可以将其作为输出返回出来：
+
+def hi(name="yasoob"):
+    def greet():
+        return "now you are in the greet() function"
+ 
+    def welcome():
+        return "now you are in the welcome() function"
+ 
+    if name == "yasoob":
+        return greet
+    else:
+        return welcome
+ 
+a = hi()
+print(a)
+#outputs: <function greet at 0x7f2143c01500>
+ 
+#上面清晰地展示了`a`现在指向到hi()函数中的greet()函数
+#现在试试这个
+ 
+print(a())
+#outputs: now you are in the greet() function
+再次看看这个代码。在 if/else 语句中我们返回 greet 和 welcome，而不是 greet() 和 welcome()。为什么那样？这是因为当你把一对小括号放在后面，这个函数就会执行；然而如果你不放括号在它后面，那它可以被到处传递，并且可以赋值给别的变量而不去执行它。 你明白了吗？让我再稍微多解释点细节。
+
+当我们写下 a = hi()，hi() 会被执行，而由于 name 参数默认是 yasoob，所以函数 greet 被返回了。如果我们把语句改为 a = hi(name = "ali")，那么 welcome 函数将被返回。我们还可以打印出 hi()()，这会输出 now you are in the greet() function。
+
+将函数作为参数传给另一个函数
+def hi():
+    return "hi yasoob!"
+ 
+def doSomethingBeforeHi(func):
+    print("I am doing some boring work before executing hi()")
+    print(func())
+ 
+doSomethingBeforeHi(hi)
+#outputs:I am doing some boring work before executing hi()
+#        hi yasoob!
+现在你已经具备所有必需知识，来进一步学习装饰器真正是什么了。装饰器让你在一个函数的前后去执行代码。
+
+你的第一个装饰器
+在上一个例子里，其实我们已经创建了一个装饰器！现在我们修改下上一个装饰器，并编写一个稍微更有用点的程序：
+
+def a_new_decorator(a_func):
+ 
+    def wrapTheFunction():
+        print("I am doing some boring work before executing a_func()")
+ 
+        a_func()
+ 
+        print("I am doing some boring work after executing a_func()")
+ 
+    return wrapTheFunction
+ 
+def a_function_requiring_decoration():
+    print("I am the function which needs some decoration to remove my foul smell")
+ 
+a_function_requiring_decoration()
+#outputs: "I am the function which needs some decoration to remove my foul smell"
+ 
+a_function_requiring_decoration = a_new_decorator(a_function_requiring_decoration)
+#now a_function_requiring_decoration is wrapped by wrapTheFunction()
+ 
+a_function_requiring_decoration()
+#outputs:I am doing some boring work before executing a_func()
+#        I am the function which needs some decoration to remove my foul smell
+#        I am doing some boring work after executing a_func()
+你看明白了吗？我们刚刚应用了之前学习到的原理。这正是 python 中装饰器做的事情！它们封装一个函数，并且用这样或者那样的方式来修改它的行为。现在你也许疑惑，我们在代码里并没有使用 @ 符号？那只是一个简短的方式来生成一个被装饰的函数。这里是我们如何使用 @ 来运行之前的代码：
+
+@a_new_decorator
+def a_function_requiring_decoration():
+    """Hey you! Decorate me!"""
+    print("I am the function which needs some decoration to "
+          "remove my foul smell")
+ 
+a_function_requiring_decoration()
+#outputs: I am doing some boring work before executing a_func()
+#         I am the function which needs some decoration to remove my foul smell
+#         I am doing some boring work after executing a_func()
+ 
+#the @a_new_decorator is just a short way of saying:
+a_function_requiring_decoration = a_new_decorator(a_function_requiring_decoration)
+希望你现在对 Python 装饰器的工作原理有一个基本的理解。如果我们运行如下代码会存在一个问题：
+
+print(a_function_requiring_decoration.__name__)
+# Output: wrapTheFunction
+这并不是我们想要的！Ouput输出应该是"a_function_requiring_decoration"。这里的函数被warpTheFunction替代了。它重写了我们函数的名字和注释文档(docstring)。幸运的是Python提供给我们一个简单的函数来解决这个问题，那就是functools.wraps。我们修改上一个例子来使用functools.wraps：
+
+from functools import wraps
+ 
+def a_new_decorator(a_func):
+    @wraps(a_func)
+    def wrapTheFunction():
+        print("I am doing some boring work before executing a_func()")
+        a_func()
+        print("I am doing some boring work after executing a_func()")
+    return wrapTheFunction
+ 
+@a_new_decorator
+def a_function_requiring_decoration():
+    """Hey yo! Decorate me!"""
+    print("I am the function which needs some decoration to "
+          "remove my foul smell")
+ 
+print(a_function_requiring_decoration.__name__)
+# Output: a_function_requiring_decoration
+现在好多了。我们接下来学习装饰器的一些常用场景。
+
+蓝本规范:
+
+from functools import wraps
+def decorator_name(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if not can_run:
+            return "Function will not run"
+        return f(*args, **kwargs)
+    return decorated
+ 
+@decorator_name
+def func():
+    return("Function is running")
+ 
+can_run = True
+print(func())
+# Output: Function is running
+ 
+can_run = False
+print(func())
+# Output: Function will not run
+注意：@wraps接受一个函数来进行装饰，并加入了复制函数名称、注释文档、参数列表等等的功能。这可以让我们在装饰器里面访问在装饰之前的函数的属性。
+
+使用场景
+现在我们来看一下装饰器在哪些地方特别耀眼，以及使用它可以让一些事情管理起来变得更简单。
+
+授权(Authorization)
+装饰器能有助于检查某个人是否被授权去使用一个web应用的端点(endpoint)。它们被大量使用于Flask和Django web框架中。这里是一个例子来使用基于装饰器的授权：
+
+from functools import wraps
+ 
+def requires_auth(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        auth = request.authorization
+        if not auth or not check_auth(auth.username, auth.password):
+            authenticate()
+        return f(*args, **kwargs)
+    return decorated
+日志(Logging)
+日志是装饰器运用的另一个亮点。这是个例子：
+
+from functools import wraps
+ 
+def logit(func):
+    @wraps(func)
+    def with_logging(*args, **kwargs):
+        print(func.__name__ + " was called")
+        return func(*args, **kwargs)
+    return with_logging
+ 
+@logit
+def addition_func(x):
+   """Do some math."""
+   return x + x
+ 
+ 
+result = addition_func(4)
+# Output: addition_func was called
+我敢肯定你已经在思考装饰器的一个其他聪明用法了。
+
+带参数的装饰器
+来想想这个问题，难道@wraps不也是个装饰器吗？但是，它接收一个参数，就像任何普通的函数能做的那样。那么，为什么我们不也那样做呢？ 这是因为，当你使用@my_decorator语法时，你是在应用一个以单个函数作为参数的一个包裹函数。记住，Python里每个东西都是一个对象，而且这包括函数！记住了这些，我们可以编写一下能返回一个包裹函数的函数。
+
+在函数中嵌入装饰器
+我们回到日志的例子，并创建一个包裹函数，能让我们指定一个用于输出的日志文件。
+
+from functools import wraps
+ 
+def logit(logfile='out.log'):
+    def logging_decorator(func):
+        @wraps(func)
+        def wrapped_function(*args, **kwargs):
+            log_string = func.__name__ + " was called"
+            print(log_string)
+            # 打开logfile，并写入内容
+            with open(logfile, 'a') as opened_file:
+                # 现在将日志打到指定的logfile
+                opened_file.write(log_string + '\n')
+            return func(*args, **kwargs)
+        return wrapped_function
+    return logging_decorator
+ 
+@logit()
+def myfunc1():
+    pass
+ 
+myfunc1()
+# Output: myfunc1 was called
+# 现在一个叫做 out.log 的文件出现了，里面的内容就是上面的字符串
+ 
+@logit(logfile='func2.log')
+def myfunc2():
+    pass
+ 
+myfunc2()
+# Output: myfunc2 was called
+# 现在一个叫做 func2.log 的文件出现了，里面的内容就是上面的字符串
+装饰器类
+现在我们有了能用于正式环境的logit装饰器，但当我们的应用的某些部分还比较脆弱时，异常也许是需要更紧急关注的事情。比方说有时你只想打日志到一个文件。而有时你想把引起你注意的问题发送到一个email，同时也保留日志，留个记录。这是一个使用继承的场景，但目前为止我们只看到过用来构建装饰器的函数。
+
+幸运的是，类也可以用来构建装饰器。那我们现在以一个类而不是一个函数的方式，来重新构建logit。
+
+from functools import wraps
+ 
+class logit(object):
+    def __init__(self, logfile='out.log'):
+        self.logfile = logfile
+ 
+    def __call__(self, func):
+        @wraps(func)
+        def wrapped_function(*args, **kwargs):
+            log_string = func.__name__ + " was called"
+            print(log_string)
+            # 打开logfile并写入
+            with open(self.logfile, 'a') as opened_file:
+                # 现在将日志打到指定的文件
+                opened_file.write(log_string + '\n')
+            # 现在，发送一个通知
+            self.notify()
+            return func(*args, **kwargs)
+        return wrapped_function
+ 
+    def notify(self):
+        # logit只打日志，不做别的
+        pass
+这个实现有一个附加优势，在于比嵌套函数的方式更加整洁，而且包裹一个函数还是使用跟以前一样的语法：
+
+@logit()
+def myfunc1():
+    pass
+现在，我们给 logit 创建子类，来添加 email 的功能(虽然 email 这个话题不会在这里展开)。
+
+class email_logit(logit):
+    '''
+    一个logit的实现版本，可以在函数调用时发送email给管理员
+    '''
+    def __init__(self, email='admin@myproject.com', *args, **kwargs):
+        self.email = email
+        super(email_logit, self).__init__(*args, **kwargs)
+ 
+    def notify(self):
+        # 发送一封email到self.email
+        # 这里就不做实现了
+        pass
+从现在起，@email_logit 将会和 @logit 产生同样的效果，但是在打日志的基础上，还会多发送一封邮件给管理员。
+
+原文地址：https://eastlakeside.gitbooks.io/interpy-zh/content/decorators/
+
+高级一点的装饰器
+带参数的装饰器和类装饰器属于进阶的内容。在理解这些装饰器之前，最好对函数的闭包和装饰器的接口约定有一定了解。(参见Python的闭包)
+
+带参数的装饰器
+假设我们前文的装饰器需要完成的功能不仅仅是能在进入某个函数后打出log信息，而且还需指定log的级别，那么装饰器就会是这样的。
+
+def logging(level):
+    def wrapper(func):
+        def inner_wrapper(*args, **kwargs):
+            print "[{level}]: enter function {func}()".format(
+                level=level,
+                func=func.__name__)
+            return func(*args, **kwargs)
+        return inner_wrapper
+    return wrapper
+
+@logging(level='INFO')
+def say(something):
+    print "say {}!".format(something)
+
+# 如果没有使用@语法，等同于
+# say = logging(level='INFO')(say)
+
+@logging(level='DEBUG')
+def do(something):
+    print "do {}...".format(something)
+
+if __name__ == '__main__':
+    say('hello')
+    do("my work")
+是不是有一些晕？你可以这么理解，当带参数的装饰器被打在某个函数上时，比如@logging(level='DEBUG')，它其实是一个函数，会马上被执行，只要这个它返回的结果是一个装饰器时，那就没问题。细细再体会一下。
+
+基于类实现的装饰器
+装饰器函数其实是这样一个接口约束，它必须接受一个callable对象作为参数，然后返回一个callable对象。在Python中一般callable对象都是函数，但也有例外。只要某个对象重载了__call__()方法，那么这个对象就是callable的。
+
+class Test():
+    def __call__(self):
+        print 'call me!'
+
+t = Test()
+t()  # call me
+像__call__这样前后都带下划线的方法在Python中被称为内置方法，有时候也被称为魔法方法。重载这些魔法方法一般会改变对象的内部行为。上面这个例子就让一个类对象拥有了被调用的行为。
+
+回到装饰器上的概念上来，装饰器要求接受一个callable对象，并返回一个callable对象（不太严谨，详见后文）。那么用类来实现也是也可以的。我们可以让类的构造函数__init__()接受一个函数，然后重载__call__()并返回一个函数，也可以达到装饰器函数的效果。
+
+class logging(object):
+    def __init__(self, func):
+        self.func = func
+
+    def __call__(self, *args, **kwargs):
+        print "[DEBUG]: enter function {func}()".format(
+            func=self.func.__name__)
+        return self.func(*args, **kwargs)
+@logging
+def say(something):
+    print "say {}!".format(something)
+带参数的类装饰器
+如果需要通过类形式实现带参数的装饰器，那么会比前面的例子稍微复杂一点。那么在构造函数里接受的就不是一个函数，而是传入的参数。通过类把这些参数保存起来。然后在重载__call__方法是就需要接受一个函数并返回一个函数。
+
+class logging(object):
+    def __init__(self, level='INFO'):
+        self.level = level
+        
+    def __call__(self, func): # 接受函数
+        def wrapper(*args, **kwargs):
+            print "[{level}]: enter function {func}()".format(
+                level=self.level,
+                func=func.__name__)
+            func(*args, **kwargs)
+        return wrapper  #返回函数
+
+@logging(level='INFO')
+def say(something):
+    print "say {}!".format(something)
+内置的装饰器
+内置的装饰器和普通的装饰器原理是一样的，只不过返回的不是函数，而是类对象，所以更难理解一些。
+
+@property
+在了解这个装饰器前，你需要知道在不使用装饰器怎么写一个属性。
+
+def getx(self):
+    return self._x
+
+def setx(self, value):
+    self._x = value
+    
+def delx(self):
+   del self._x
+
+# create a property
+x = property(getx, setx, delx, "I am doc for x property")
+以上就是一个Python属性的标准写法，其实和Java挺像的，但是太罗嗦。有了@语法糖，能达到一样的效果但看起来更简单。
+
+@property
+def x(self): ...
+
+# 等同于
+
+def x(self): ...
+x = property(x)
+属性有三个装饰器：setter, getter, deleter ，都是在property()的基础上做了一些封装，因为setter和deleter是property()的第二和第三个参数，不能直接套用@语法。getter装饰器和不带getter的属性装饰器效果是一样的，估计只是为了凑数，本身没有任何存在的意义。经过@property装饰过的函数返回的不再是一个函数，而是一个property对象。
+
+>>> property()
+<property object at 0x10ff07940>
+@staticmethod，@classmethod
+有了@property装饰器的了解，这两个装饰器的原理是差不多的。@staticmethod返回的是一个staticmethod类对象，而@classmethod返回的是一个classmethod类对象。他们都是调用的是各自的__init__()构造函数。
+
+class classmethod(object):
+    """
+    classmethod(function) -> method
+    """    
+    def __init__(self, function): # for @classmethod decorator
+        pass
+    # ...
+class staticmethod(object):
+    """
+    staticmethod(function) -> method
+    """
+    def __init__(self, function): # for @staticmethod decorator
+        pass
+    # ...
+装饰器的@语法就等同调用了这两个类的构造函数。
+
+class Foo(object):
+
+    @staticmethod
+    def bar():
+        pass
+    
+    # 等同于 bar = staticmethod(bar)
+至此，我们上文提到的装饰器接口定义可以更加明确一些，装饰器必须接受一个callable对象，其实它并不关心你返回什么，可以是另外一个callable对象（大部分情况），也可以是其他类对象，比如property。
+
+装饰器里的那些坑
+装饰器可以让你代码更加优雅，减少重复，但也不全是优点，也会带来一些问题。
+
+位置错误的代码
+让我们直接看示例代码。
+
+def html_tags(tag_name):
+    print 'begin outer function.'
+    def wrapper_(func):
+        print "begin of inner wrapper function."
+        def wrapper(*args, **kwargs):
+            content = func(*args, **kwargs)
+            print "<{tag}>{content}</{tag}>".format(tag=tag_name, content=content)
+        print 'end of inner wrapper function.'
+        return wrapper
+    print 'end of outer function'
+    return wrapper_
+
+@html_tags('b')
+def hello(name='Toby'):
+    return 'Hello {}!'.format(name)
+
+hello()
+hello()
+在装饰器中我在各个可能的位置都加上了print语句，用于记录被调用的情况。你知道他们最后打印出来的顺序吗？如果你心里没底，那么最好不要在装饰器函数之外添加逻辑功能，否则这个装饰器就不受你控制了。以下是输出结果：
+
+begin outer function.
+end of outer function
+begin of inner wrapper function.
+end of inner wrapper function.
+<b>Hello Toby!</b>
+<b>Hello Toby!</b>
+错误的函数签名和文档
+装饰器装饰过的函数看上去名字没变，其实已经变了。
+
+def logging(func):
+    def wrapper(*args, **kwargs):
+        """print log before a function."""
+        print "[DEBUG] {}: enter {}()".format(datetime.now(), func.__name__)
+        return func(*args, **kwargs)
+    return wrapper
+
+@logging
+def say(something):
+    """say something"""
+    print "say {}!".format(something)
+
+print say.__name__  # wrapper
+为什么会这样呢？只要你想想装饰器的语法糖@代替的东西就明白了。@等同于这样的写法。
+
+say = logging(say)
+logging其实返回的函数名字刚好是wrapper，那么上面的这个语句刚好就是把这个结果赋值给say，say的__name__自然也就是wrapper了，不仅仅是name，其他属性也都是来自wrapper，比如doc，source等等。
+
+使用标准库里的functools.wraps，可以基本解决这个问题。
+
+from functools import wraps
+
+def logging(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        """print log before a function."""
+        print "[DEBUG] {}: enter {}()".format(datetime.now(), func.__name__)
+        return func(*args, **kwargs)
+    return wrapper
+
+@logging
+def say(something):
+    """say something"""
+    print "say {}!".format(something)
+
+print say.__name__  # say
+print say.__doc__ # say something
+看上去不错！主要问题解决了，但其实还不太完美。因为函数的签名和源码还是拿不到的。
+
+import inspect
+print inspect.getargspec(say)  # failed
+print inspect.getsource(say)  # failed
+如果要彻底解决这个问题可以借用第三方包，比如wrapt。后文有介绍。
+
+不能装饰@staticmethod 或者 @classmethod
+当你想把装饰器用在一个静态方法或者类方法时，不好意思，报错了。
+
+class Car(object):
+    def __init__(self, model):
+        self.model = model
+
+    @logging  # 装饰实例方法，OK
+    def run(self):
+        print "{} is running!".format(self.model)
+
+    @logging  # 装饰静态方法，Failed
+    @staticmethod
+    def check_model_for(obj):
+        if isinstance(obj, Car):
+            print "The model of your car is {}".format(obj.model)
+        else:
+            print "{} is not a car!".format(obj)
+
+"""
+Traceback (most recent call last):
+...
+  File "example_4.py", line 10, in logging
+    @wraps(func)
+  File "C:\Python27\lib\functools.py", line 33, in update_wrapper
+    setattr(wrapper, attr, getattr(wrapped, attr))
+AttributeError: 'staticmethod' object has no attribute '__module__'
+"""
+前面已经解释了@staticmethod这个装饰器，其实它返回的并不是一个callable对象，而是一个staticmethod对象，那么它是不符合装饰器要求的（比如传入一个callable对象），你自然不能在它之上再加别的装饰器。要解决这个问题很简单，只要把你的装饰器放在@staticmethod之前就好了，因为你的装饰器返回的还是一个正常的函数，然后再加上一个@staticmethod是不会出问题的。
+
+class Car(object):
+    def __init__(self, model):
+        self.model = model
+
+    @staticmethod
+    @logging  # 在@staticmethod之前装饰，OK
+    def check_model_for(obj):
+        pass
+如何优化你的装饰器
+嵌套的装饰函数不太直观，我们可以使用第三方包类改进这样的情况，让装饰器函数可读性更好。
+
+decorator.py
+decorator.py 是一个非常简单的装饰器加强包。你可以很直观的先定义包装函数wrapper()，再使用decorate(func, wrapper)方法就可以完成一个装饰器。
+
+from decorator import decorate
+
+def wrapper(func, *args, **kwargs):
+    """print log before a function."""
+    print "[DEBUG] {}: enter {}()".format(datetime.now(), func.__name__)
+    return func(*args, **kwargs)
+
+def logging(func):
+    return decorate(func, wrapper)  # 用wrapper装饰func
+你也可以使用它自带的@decorator装饰器来完成你的装饰器。
+
+from decorator import decorator
+
+@decorator
+def logging(func, *args, **kwargs):
+    print "[DEBUG] {}: enter {}()".format(datetime.now(), func.__name__)
+    return func(*args, **kwargs)
+decorator.py实现的装饰器能完整保留原函数的name，doc和args，唯一有问题的就是inspect.getsource(func)返回的还是装饰器的源代码，你需要改成inspect.getsource(func.__wrapped__)。
+
+wrapt
+wrapt是一个功能非常完善的包，用于实现各种你想到或者你没想到的装饰器。使用wrapt实现的装饰器你不需要担心之前inspect中遇到的所有问题，因为它都帮你处理了，甚至inspect.getsource(func)也准确无误。
+
+import wrapt
+
+# without argument in decorator
+@wrapt.decorator
+def logging(wrapped, instance, args, kwargs):  # instance is must
+    print "[DEBUG]: enter {}()".format(wrapped.__name__)
+    return wrapped(*args, **kwargs)
+
+@logging
+def say(something): pass
+使用wrapt你只需要定义一个装饰器函数，但是函数签名是固定的，必须是(wrapped, instance, args, kwargs)，注意第二个参数instance是必须的，就算你不用它。当装饰器装饰在不同位置时它将得到不同的值，比如装饰在类实例方法时你可以拿到这个类实例。根据instance的值你能够更加灵活的调整你的装饰器。另外，args和kwargs也是固定的，注意前面没有星号。在装饰器内部调用原函数时才带星号。
+
+如果你需要使用wrapt写一个带参数的装饰器，可以这样写。
+
+def logging(level):
+    @wrapt.decorator
+    def wrapper(wrapped, instance, args, kwargs):
+        print "[{}]: enter {}()".format(level, wrapped.__name__)
+        return wrapped(*args, **kwargs)
+    return wrapper
+
+@logging(level="INFO")
+def do(work): pass
+关于wrapt的使用，建议查阅官方文档，在此不在赘述。
+
+http://wrapt.readthedocs.io/en/latest/quick-start.html
+小结
+Python的装饰器和Java的注解（Annotation）并不是同一回事，和C#中的特性（Attribute）也不一样，完全是两个概念。
+
+装饰器的理念是对原函数、对象的加强，相当于重新封装，所以一般装饰器函数都被命名为wrapper()，意义在于包装。函数只有在被调用时才会发挥其作用。比如@logging装饰器可以在函数执行时额外输出日志，@cache装饰过的函数可以缓存计算结果等等。
+
+而注解和特性则是对目标函数或对象添加一些属性，相当于将其分类。这些属性可以通过反射拿到，在程序运行时对不同的特性函数或对象加以干预。比如带有Setup的函数就当成准备步骤执行，或者找到所有带有TestMethod的函数依次执行等等。
+
+至此我所了解的装饰器已经讲完，但是还有一些内容没有提到，比如装饰类的装饰器。有机会再补充。谢谢观看。
+
+了解更多
+说说Python中的闭包 - Closure
+Python装饰器的另类用法
+本文源码 https://github.com/tobyqin/python_decorator
+
+关于作者：Python技术爱好者，目前从事测试开发相关工作，转载请注明原文出处。
+
+欢迎关注我的博客 http://betacat.online，你可以到我的公众号中去当吃瓜群众。
+
+Betacat.online
