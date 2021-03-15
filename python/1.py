@@ -109,7 +109,6 @@ print('%010.3f' % pi) #用0填充空白
 print('%-10.3f' % pi) #左对齐
 print('%+f' % pi) #显示正负号 
                 
-
 def for_loop():
     for letter in 'Python':     # 第一个实例
         print ('当前字母 :', letter)
