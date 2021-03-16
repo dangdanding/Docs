@@ -1,20 +1,32 @@
-1.´´½¨ÎÄ¼ş¼Ğ
+å½“å‰ç›®å½•ä¸‹ æ‰€æœ‰.listç»“å°¾æ–‡ä»¶ï¼ŒæŸ¥æ‰¾æ–‡ä»¶ä¸­ä»¥Hostname1 - Hostname9 å¼€å§‹çš„è¡Œ
+for file in "*.list"; 
+do 
+    if [ -e $file ]; 
+    then 
+        cat $file | grep ^Hostname[1-9]; 
+    fi
+done
+ç¤ºä¾‹æ­£åˆ™è¡¨è¾¾å¼ ä¾‹å­ è¯´æ˜  [abc] åŒ¹é… â€œaâ€ã€â€œbâ€ã€â€œcâ€ ä¹‹ä¸€  [a-z] åŒ¹é…ä» â€œaâ€ åˆ° â€œzâ€ çš„ä»»ä½•ä¸€ä¸ªå°å†™å­—ç¬¦  [A-Z] åŒ¹é…ä» â€œAâ€ åˆ° â€œZâ€ çš„ä»»ä½•ä¸€ä¸ªå¤§å†™å­—ç¬¦  [0-9] åŒ¹é…ä» 0 åˆ° 9 çš„ä»»ä½•ä¸€ä¸ªæ•°å­—  [^0-9] åŒ¹é…ä»»ä½•é™¤äº† 0 åˆ° 9 æ•°å­—èŒƒå›´å†…çš„ä»»ä½•å­—ç¬¦  [-0-9] åŒ¹é…ä» 0 åˆ° 9 çš„ä»»ä½•æ•°å­—ï¼Œæˆ–è€…æ˜¯çŸ­æ¨ªçº¿ï¼ˆ-ï¼‰  [0-9-] åŒ¹é…ä» 0 åˆ° 9 çš„ä»»ä½•æ•°å­—ï¼Œæˆ–è€…æ˜¯çŸ­æ¨ªçº¿ï¼ˆ-ï¼‰  [^-0-9]åŒ¹é…é™¤ä» 0 åˆ° 9 çš„æ•°å­—å’ŒçŸ­æ¨ªçº¿ï¼ˆ-ï¼‰ä¹‹å¤–çš„ä»»ä½•å­—ç¬¦  [a-zA-Z0-9] åŒ¹é…ä»»ä½•å­—ç¬¦æˆ–æ•°å­—
+^ ç¬¦å·ï¼ˆ^ï¼‰è¡¨ç¤ºä¸€è¡Œçš„å¼€å§‹ï¼›$ ç¬¦å·ï¼ˆ$ï¼‰è¡¨ç¤ºä¸€è¡Œçš„ç»“æŸã€‚
+
+
+1.åˆ›å»ºæ–‡ä»¶å¤¹
 #!/bin/sh
 mkdir -m 777 "%%1"
 
-2.´´½¨ÎÄ¼ş
+2.åˆ›å»ºæ–‡ä»¶
 #!/bin/sh
 touch "%%1"
 
-3.É¾³ıÎÄ¼ş
+3.åˆ é™¤æ–‡ä»¶
 #!/bin/sh
 rm -if "%%1"
 
-4.É¾³ıÎÄ¼ş¼Ğ
+4.åˆ é™¤æ–‡ä»¶å¤¹
 #!/bin/sh
 rm -rf "%%1"
 
-5.É¾³ıÒ»¸öÄ¿Â¼ÏÂËùÓĞµÄÎÄ¼ş¼Ğ
+5.åˆ é™¤ä¸€ä¸ªç›®å½•ä¸‹æ‰€æœ‰çš„æ–‡ä»¶å¤¹
 #!/bin/bash
 direc="%%1" #$(pwd)
 for dir2del in $direc/* ; do
@@ -23,7 +35,7 @@ if [ -d $dir2del ]; then
 fi
 done
 
-6.Çå¿ÕÎÄ¼ş¼Ğ
+6.æ¸…ç©ºæ–‡ä»¶å¤¹
 #!/bin/bash
 direc="%%1" #$(pwd)
 rm -if $direc/*
@@ -33,36 +45,24 @@ if [ -d $dir2del ]; then
 fi
 done
 
-7.¶ÁÈ¡ÎÄ¼ş
+7.è¯»å–æ–‡ä»¶
 #!/bin/sh
-7.1.²Ù×÷ÏµÍ³Ä¬ÈÏ±àÂë
+7.1.æ“ä½œç³»ç»Ÿé»˜è®¤ç¼–ç 
 cat "%%1" | while read line; do
 echo $line;
 done
 
-7.2.UTF-8±àÂë
+7.2.UTF-8ç¼–ç 
 cat "%%1" | while read line; do
 echo $line;
 done
 
-7.3.·Ö¿é¶ÁÈ¡
+7.3.åˆ†å—è¯»å–
 cat "%%1" | while read line; do
 echo $line;
 done
 
-8.Ğ´ÈëÎÄ¼ş
-#!/bin/sh
-cat > "%%1" << EOF
-%%2
-EOF
-
-tee "%%1" > /dev/null << EOF
-%%2
-EOF
-
-#sed -i '$a %%2' %%2
-
-9.Ğ´ÈëËæ»úÎÄ¼ş
+8.å†™å…¥æ–‡ä»¶
 #!/bin/sh
 cat > "%%1" << EOF
 %%2
@@ -74,72 +74,84 @@ EOF
 
 #sed -i '$a %%2' %%2
 
-10.¶ÁÈ¡ÎÄ¼şÊôĞÔ
+9.å†™å…¥éšæœºæ–‡ä»¶
+#!/bin/sh
+cat > "%%1" << EOF
+%%2
+EOF
+
+tee "%%1" > /dev/null << EOF
+%%2
+EOF
+
+#sed -i '$a %%2' %%2
+
+10.è¯»å–æ–‡ä»¶å±æ€§
 #!/bin/bash
 file=%%1
-file=${file:?'±ØĞë¸ø³ö²ÎÊı'}
+file=${file:?'å¿…é¡»ç»™å‡ºå‚æ•°'}
 if [ ! -e $file ]; then
-    echo "$file ²»´æÔÚ"
+    echo "$file ä¸å­˜åœ¨"
     exit 1
 fi
 if [ -d $file ]; then
-    echo "$file ÊÇÒ»¸öÄ¿Â¼"
+    echo "$file æ˜¯ä¸€ä¸ªç›®å½•"
     if [ -x $file ]; then
-        echo "¿ÉÒÔ"
+        echo "å¯ä»¥"
     else
-        echo "²»¿ÉÒÔ"
+        echo "ä¸å¯ä»¥"
     fi
-    echo "¶Ô´Ë½øĞĞËÑË÷"  
+    echo "å¯¹æ­¤è¿›è¡Œæœç´¢"  
 elif [ -f $file ]; then
-    echo "$file ÊÇÒ»¸öÕı¹æÎÄ¼ş"
+    echo "$file æ˜¯ä¸€ä¸ªæ­£è§„æ–‡ä»¶"
 else
-    echo "$file²»ÊÇÒ»¸öÕı¹æÎÄ¼ş"
+    echo "$fileä¸æ˜¯ä¸€ä¸ªæ­£è§„æ–‡ä»¶"
 fi
 if [ -O $file ]; then
-    echo "ÄãÊÇ$fileµÄÓµÓĞÕß"
+    echo "ä½ æ˜¯$fileçš„æ‹¥æœ‰è€…"
 else
-    echo "Äã²»ÊÇ$fileµÄÓµÓĞÕß"
+    echo "ä½ ä¸æ˜¯$fileçš„æ‹¥æœ‰è€…"
 fi
 if [ -r $file ]; then
-    echo "Äã¶Ô$fileÓµÓĞ"
+    echo "ä½ å¯¹$fileæ‹¥æœ‰"
 else
-    echo "Äã²¢²»¶Ô$fileÓµÓĞ"
+    echo "ä½ å¹¶ä¸å¯¹$fileæ‹¥æœ‰"
 fi
-echo "¿É¶ÁÈ¨ÏŞ"
+echo "å¯è¯»æƒé™"
 if [ -w $file ]; then
-    echo "Äã¶Ô$fileÓµÓĞ"
+    echo "ä½ å¯¹$fileæ‹¥æœ‰"
 else
-    echo "Äã²¢²»¶Ô$fileÓµÓĞ"
+    echo "ä½ å¹¶ä¸å¯¹$fileæ‹¥æœ‰"
 fi
-echo "¿ÉĞ´È¨ÏŞ"
+echo "å¯å†™æƒé™"
 if [ -x $file -a ! -d $file ]; then
-    echo "ÄãÓµÓĞ¶Ô$file"
+    echo "ä½ æ‹¥æœ‰å¯¹$file"
 else
-    echo "Äã²¢²»ÓµÓĞ¶Ô$file"
+    echo "ä½ å¹¶ä¸æ‹¥æœ‰å¯¹$file"
 fi
-echo "¿ÉÖ´ĞĞµÄÈ¨ÏŞ"
+echo "å¯æ‰§è¡Œçš„æƒé™"
 
-11.Ğ´ÈëÎÄ¼şÊôĞÔ
+11.å†™å…¥æ–‡ä»¶å±æ€§
 #!/bin/bash
-#ĞŞ¸Ä´æ·ÅÔÚext2¡¢ext3¡¢ext4¡¢xfs¡¢ubifs¡¢reiserfs¡¢jfsµÈÎÄ¼şÏµÍ³ÉÏµÄÎÄ¼ş»òÄ¿Â¼ÊôĞÔ£¬Ê¹ÓÃÈ¨ÏŞ³¬¼¶ÓÃ»§¡£
-#Ò»Ğ©¹¦ÄÜÊÇÓÉLinuxÄÚºË°æ±¾À´Ö§³ÖµÄ£¬Èç¹ûLinuxÄÚºË°æ±¾µÍÓÚ2.2£¬ÄÇÃ´Ğí¶à¹¦ÄÜ²»ÄÜÊµÏÖ¡£Í¬Ñù£­D¼ì²éÑ¹ËõÎÄ¼şÖĞµÄ´íÎóµÄ¹¦ÄÜ£¬ĞèÒª2.5.19ÒÔÉÏÄÚºË²ÅÄÜÖ§³Ö¡£ÁíÍâ£¬Í¨¹ıchattrÃüÁîĞŞ¸ÄÊôĞÔÄÜ¹»Ìá¸ßÏµÍ³µÄ°²È«ĞÔ£¬µ«ÊÇËü²¢²»ÊÊºÏËùÓĞµÄÄ¿Â¼¡£chattrÃüÁî²»ÄÜ±£»¤/¡¢/dev¡¢/tmp¡¢/varÄ¿Â¼¡£
-chattr [-RV] [-+=AacDdijsSu] [-v version] ÎÄ¼ş»òÄ¿Â¼
-  £­R£ºµİ¹é´¦ÀíËùÓĞµÄÎÄ¼ş¼°×ÓÄ¿Â¼¡£
-  £­V£ºÏêÏ¸ÏÔÊ¾ĞŞ¸ÄÄÚÈİ£¬²¢´òÓ¡Êä³ö¡£
-  £­£ºÊ§Ğ§ÊôĞÔ¡£
-  £«£º¼¤»îÊôĞÔ¡£
-  = £ºÖ¸¶¨ÊôĞÔ¡£
-  A£ºAtime£¬¸æËßÏµÍ³²»ÒªĞŞ¸Ä¶ÔÕâ¸öÎÄ¼şµÄ×îºó·ÃÎÊÊ±¼ä¡£
-  S£ºSync£¬Ò»µ©Ó¦ÓÃ³ÌĞò¶ÔÕâ¸öÎÄ¼şÖ´ĞĞÁËĞ´²Ù×÷£¬Ê¹ÏµÍ³Á¢¿Ì°ÑĞŞ¸ÄµÄ½á¹ûĞ´µ½´ÅÅÌ¡£
-  a£ºAppend Only£¬ÏµÍ³Ö»ÔÊĞíÔÚÕâ¸öÎÄ¼şÖ®ºó×·¼ÓÊı¾İ£¬²»ÔÊĞíÈÎºÎ½ø³Ì¸²¸Ç»ò½Ø¶ÏÕâ¸öÎÄ¼ş¡£Èç¹ûÄ¿Â¼¾ßÓĞÕâ¸öÊôĞÔ£¬ÏµÍ³½«Ö»ÔÊĞíÔÚÕâ¸öÄ¿Â¼ÏÂ½¨Á¢ºÍĞŞ¸ÄÎÄ¼ş£¬¶ø²»ÔÊĞíÉ¾³ıÈÎºÎÎÄ¼ş¡£
-  i£ºImmutable£¬ÏµÍ³²»ÔÊĞí¶ÔÕâ¸öÎÄ¼ş½øĞĞÈÎºÎµÄĞŞ¸Ä¡£Èç¹ûÄ¿Â¼¾ßÓĞÕâ¸öÊôĞÔ£¬ÄÇÃ´ÈÎºÎµÄ½ø³ÌÖ»ÄÜĞŞ¸ÄÄ¿Â¼Ö®ÏÂµÄÎÄ¼ş£¬²»ÔÊĞí½¨Á¢ºÍÉ¾³ıÎÄ¼ş¡£
-  D£º¼ì²éÑ¹ËõÎÄ¼şÖĞµÄ´íÎó¡£
-  d£ºNo dump£¬ÔÚ½øĞĞÎÄ¼şÏµÍ³±¸·İÊ±£¬dump³ÌĞò½«ºöÂÔÕâ¸öÎÄ¼ş¡£
-  C£ºCompress£¬ÏµÍ³ÒÔÍ¸Ã÷µÄ·½Ê½Ñ¹ËõÕâ¸öÎÄ¼ş¡£´ÓÕâ¸öÎÄ¼ş¶ÁÈ¡Ê±£¬·µ»ØµÄÊÇ½âÑ¹Ö®ºóµÄÊı¾İ£»¶øÏòÕâ¸öÎÄ¼şÖĞĞ´ÈëÊı¾İÊ±£¬Êı¾İÊ×ÏÈ±»Ñ¹ËõÖ®ºó²ÅĞ´Èë´ÅÅÌ¡£
-  S£ºSecure Delete£¬ÈÃÏµÍ³ÔÚÉ¾³ıÕâ¸öÎÄ¼şÊ±£¬Ê¹ÓÃ0Ìî³äÎÄ¼şËùÔÚµÄÇøÓò¡£
-  u£ºUndelete£¬µ±Ò»¸öÓ¦ÓÃ³ÌĞòÇëÇóÉ¾³ıÕâ¸öÎÄ¼ş£¬ÏµÍ³»á±£ÁôÆäÊı¾İ¿éÒÔ±ãÒÔºóÄÜ¹»»Ö¸´É¾³ıÕâ¸öÎÄ¼ş¡£
+#ä¿®æ”¹å­˜æ”¾åœ¨ext2ã€ext3ã€ext4ã€xfsã€ubifsã€reiserfsã€jfsç­‰æ–‡ä»¶ç³»ç»Ÿä¸Šçš„æ–‡ä»¶æˆ–ç›®å½•å±æ€§ï¼Œä½¿ç”¨æƒé™è¶…çº§ç”¨æˆ·ã€‚
+#ä¸€äº›åŠŸèƒ½æ˜¯ç”±Linuxå†…æ ¸ç‰ˆæœ¬æ¥æ”¯æŒçš„ï¼Œå¦‚æœLinuxå†…æ ¸ç‰ˆæœ¬ä½äº2.2ï¼Œé‚£ä¹ˆè®¸å¤šåŠŸèƒ½ä¸èƒ½å®ç°ã€‚åŒæ ·ï¼Dæ£€æŸ¥å‹ç¼©æ–‡ä»¶ä¸­çš„é”™è¯¯çš„åŠŸèƒ½ï¼Œéœ€è¦2.5.19ä»¥ä¸Šå†…æ ¸æ‰èƒ½æ”¯æŒã€‚å¦å¤–ï¼Œé€šè¿‡chattrå‘½ä»¤ä¿®æ”¹å±æ€§èƒ½å¤Ÿæé«˜ç³»ç»Ÿçš„å®‰å…¨æ€§ï¼Œä½†æ˜¯å®ƒå¹¶ä¸é€‚åˆæ‰€æœ‰çš„ç›®å½•ã€‚chattrå‘½ä»¤ä¸èƒ½ä¿æŠ¤/ã€/devã€/tmpã€/varç›®å½•ã€‚
+chattr [-RV] [-+=AacDdijsSu] [-v version] æ–‡ä»¶æˆ–ç›®å½•
+  ï¼Rï¼šé€’å½’å¤„ç†æ‰€æœ‰çš„æ–‡ä»¶åŠå­ç›®å½•ã€‚
+  ï¼Vï¼šè¯¦ç»†æ˜¾ç¤ºä¿®æ”¹å†…å®¹ï¼Œå¹¶æ‰“å°è¾“å‡ºã€‚
+  ï¼ï¼šå¤±æ•ˆå±æ€§ã€‚
+  ï¼‹ï¼šæ¿€æ´»å±æ€§ã€‚
+  = ï¼šæŒ‡å®šå±æ€§ã€‚
+  Aï¼šAtimeï¼Œå‘Šè¯‰ç³»ç»Ÿä¸è¦ä¿®æ”¹å¯¹è¿™ä¸ªæ–‡ä»¶çš„æœ€åè®¿é—®æ—¶é—´ã€‚
+  Sï¼šSyncï¼Œä¸€æ—¦åº”ç”¨ç¨‹åºå¯¹è¿™ä¸ªæ–‡ä»¶æ‰§è¡Œäº†å†™æ“ä½œï¼Œä½¿ç³»ç»Ÿç«‹åˆ»æŠŠä¿®æ”¹çš„ç»“æœå†™åˆ°ç£ç›˜ã€‚
+  aï¼šAppend Onlyï¼Œç³»ç»Ÿåªå…è®¸åœ¨è¿™ä¸ªæ–‡ä»¶ä¹‹åè¿½åŠ æ•°æ®ï¼Œä¸å…è®¸ä»»ä½•è¿›ç¨‹è¦†ç›–æˆ–æˆªæ–­è¿™ä¸ªæ–‡ä»¶ã€‚å¦‚æœç›®å½•å…·æœ‰è¿™ä¸ªå±æ€§ï¼Œç³»ç»Ÿå°†åªå…è®¸åœ¨è¿™ä¸ªç›®å½•ä¸‹å»ºç«‹å’Œä¿®æ”¹æ–‡ä»¶ï¼Œè€Œä¸å…è®¸åˆ é™¤ä»»ä½•æ–‡ä»¶ã€‚
+  iï¼šImmutableï¼Œç³»ç»Ÿä¸å…è®¸å¯¹è¿™ä¸ªæ–‡ä»¶è¿›è¡Œä»»ä½•çš„ä¿®æ”¹ã€‚å¦‚æœç›®å½•å…·æœ‰è¿™ä¸ªå±æ€§ï¼Œé‚£ä¹ˆä»»ä½•çš„è¿›ç¨‹åªèƒ½ä¿®æ”¹ç›®å½•ä¹‹ä¸‹çš„æ–‡ä»¶ï¼Œä¸å…è®¸å»ºç«‹å’Œåˆ é™¤æ–‡ä»¶ã€‚
+  Dï¼šæ£€æŸ¥å‹ç¼©æ–‡ä»¶ä¸­çš„é”™è¯¯ã€‚
+  dï¼šNo dumpï¼Œåœ¨è¿›è¡Œæ–‡ä»¶ç³»ç»Ÿå¤‡ä»½æ—¶ï¼Œdumpç¨‹åºå°†å¿½ç•¥è¿™ä¸ªæ–‡ä»¶ã€‚
+  Cï¼šCompressï¼Œç³»ç»Ÿä»¥é€æ˜çš„æ–¹å¼å‹ç¼©è¿™ä¸ªæ–‡ä»¶ã€‚ä»è¿™ä¸ªæ–‡ä»¶è¯»å–æ—¶ï¼Œè¿”å›çš„æ˜¯è§£å‹ä¹‹åçš„æ•°æ®ï¼›è€Œå‘è¿™ä¸ªæ–‡ä»¶ä¸­å†™å…¥æ•°æ®æ—¶ï¼Œæ•°æ®é¦–å…ˆè¢«å‹ç¼©ä¹‹åæ‰å†™å…¥ç£ç›˜ã€‚
+  Sï¼šSecure Deleteï¼Œè®©ç³»ç»Ÿåœ¨åˆ é™¤è¿™ä¸ªæ–‡ä»¶æ—¶ï¼Œä½¿ç”¨0å¡«å……æ–‡ä»¶æ‰€åœ¨çš„åŒºåŸŸã€‚
+  uï¼šUndeleteï¼Œå½“ä¸€ä¸ªåº”ç”¨ç¨‹åºè¯·æ±‚åˆ é™¤è¿™ä¸ªæ–‡ä»¶ï¼Œç³»ç»Ÿä¼šä¿ç•™å…¶æ•°æ®å—ä»¥ä¾¿ä»¥åèƒ½å¤Ÿæ¢å¤åˆ é™¤è¿™ä¸ªæ–‡ä»¶ã€‚
 
-12.Ã¶¾ÙÒ»¸öÄ¿Â¼ÖĞµÄËùÓĞÎÄ¼ş¼Ğ
+12.æšä¸¾ä¸€ä¸ªç›®å½•ä¸­çš„æ‰€æœ‰æ–‡ä»¶å¤¹
 #!/bin/bash
 OLDIFS=$IFS
 IFS=:
@@ -149,11 +161,11 @@ do
 done
 IFS=$OLDIFS
 
-13.¸´ÖÆÎÄ¼ş¼Ğ
+13.å¤åˆ¶æ–‡ä»¶å¤¹
 #!/bin/sh
 cp -rf "%%1" "%%2"
 
-14.¸´ÖÆÒ»¸öÄ¿Â¼ÏÂËùÓĞµÄÎÄ¼ş¼Ğµ½ÁíÒ»¸öÄ¿Â¼ÏÂ
+14.å¤åˆ¶ä¸€ä¸ªç›®å½•ä¸‹æ‰€æœ‰çš„æ–‡ä»¶å¤¹åˆ°å¦ä¸€ä¸ªç›®å½•ä¸‹
 #!/bin/bash
 direc="%%1" #$(pwd)
 for dir2cp in $direc/* ; do
@@ -162,11 +174,11 @@ if [ -d $dir2cp ]; then
 fi
 done
 
-15.ÒÆ¶¯ÎÄ¼ş¼Ğ
+15.ç§»åŠ¨æ–‡ä»¶å¤¹
 #!/bin/sh
 mv -rf "%%1" "%%2"
 
-16.ÒÆ¶¯Ò»¸öÄ¿Â¼ÏÂËùÓĞµÄÎÄ¼ş¼Ğµ½ÁíÒ»¸öÄ¿Â¼ÏÂ
+16.ç§»åŠ¨ä¸€ä¸ªç›®å½•ä¸‹æ‰€æœ‰çš„æ–‡ä»¶å¤¹åˆ°å¦ä¸€ä¸ªç›®å½•ä¸‹
 #!/bin/bash
 direc="%%1" #$(pwd)
 for dir2mv in $direc/* ; do
@@ -175,7 +187,7 @@ if [ -d $dir2mv ]; then
 fi
 done
 
-17.ÒÔÒ»¸öÎÄ¼ş¼ĞµÄ¿ò¼ÜÔÚÁíÒ»¸öÄ¿Â¼ÏÂ´´½¨ÎÄ¼ş¼ĞºÍ¿ÕÎÄ¼ş
+17.ä»¥ä¸€ä¸ªæ–‡ä»¶å¤¹çš„æ¡†æ¶åœ¨å¦ä¸€ä¸ªç›®å½•ä¸‹åˆ›å»ºæ–‡ä»¶å¤¹å’Œç©ºæ–‡ä»¶
 #!/bin/bash
 direc="%%1" #$(pwd)
 OLDIFS=$IFS
@@ -187,41 +199,41 @@ done
 IFS=$OLDIFS
 #cp -a "%%1" "%%2"
 
-±í´ïÊ½ º¬Òå
+è¡¨è¾¾å¼ å«ä¹‰
 ${#string}
 {#string}
-1£¬È¡µÃ×Ö·û´®³¤¶È
-string=abc12342341          //µÈºÅ¶ş±ß²»ÒªÓĞ¿Õ¸ñ
-echo ${#string}             //½á¹û11
-expr length $string         //½á¹û11
-expr "$string" : ".*"       //½á¹û11 ·ÖºÅ¶ş±ßÒªÓĞ¿Õ¸ñ,ÕâÀïµÄ:¸ùmatchµÄÓÃ·¨²î²»¶à2£¬×Ö·û´®ËùÔÚÎ»ÖÃ
-expr index $string '123'    //½á¹û4 ×Ö·û´®¶ÔÓ¦µÄÏÂ±êÊÇ´Ó0¿ªÊ¼µÄÕâ¸ö·½·¨ÈÃÎÒÏëÆğÀ´ÁËjsµÄindexOf£¬¸÷ÖÖÓïÑÔ¶Ô×Ö·û´®µÄ²Ù×÷·½·¨´ó·½Ïò¶¼²î²»¶à£¬Èç¹ûÓĞÓïÑÔ»ù´¡µÄ»°£¬Ñ§Ï°shell»áºÜ¿ìµÄ¡£
-3£¬´Ó×Ö·û´®¿ªÍ·µ½×Ó´®µÄ×î´ó³¤¶È
-expr match $string 'abc.*3' //½á¹û9¸öÈË¾õµÃÕâ¸öº¯ÊıµÄÓÃ´¦²»´ó£¬ÎªÊ²Ã´Òª´Ó¿ªÍ·¿ªÊ¼ÄØ¡£
-4£¬×Ö·û´®½ØÈ¡
-echo ${string:4}      //2342341  ´ÓµÚ4Î»¿ªÊ¼½ØÈ¡ºóÃæËùÓĞ×Ö·û´®
-echo ${string:3:3}    //123      ´ÓµÚ3Î»¿ªÊ¼½ØÈ¡ºóÃæ3Î»
-echo ${string:3:6}    //123423   ´ÓµÚ3Î»¿ªÊ¼½ØÈ¡ºóÃæ6Î»
-echo ${string: -4}    //2341  £ºÓÒ±ßÓĞ¿Õ¸ñ   ½ØÈ¡ºó4Î»
-echo ${string:(-4)}   //2341  Í¬ÉÏ
-expr substr $string 3 3   //123  ´ÓµÚ3Î»¿ªÊ¼½ØÈ¡ºóÃæ3Î»ÉÏÃæµÄ·½·¨ÈÃÎÒÏëÆğÁË£¬phpµÄsubstrº¯Êı£¬ºóÃæ½ØÈ¡µÄ¹æÔòÊÇÒ»ÑùµÄ¡£
-5£¬Æ¥ÅäÏÔÊ¾ÄÚÈİ
-//Àı3ÖĞÒ²ÓĞmatchºÍÕâÀïµÄmatch²»Í¬£¬ÉÏÃæÏÔÊ¾µÄÊÇÆ¥Åä×Ö·ûµÄ³¤¶È£¬¶øÏÂÃæµÄÊÇÆ¥ÅäµÄÄÚÈİ
+1ï¼Œå–å¾—å­—ç¬¦ä¸²é•¿åº¦
+string=abc12342341          //ç­‰å·äºŒè¾¹ä¸è¦æœ‰ç©ºæ ¼
+echo ${#string}             //ç»“æœ11
+expr length $string         //ç»“æœ11
+expr "$string" : ".*"       //ç»“æœ11 åˆ†å·äºŒè¾¹è¦æœ‰ç©ºæ ¼,è¿™é‡Œçš„:æ ¹matchçš„ç”¨æ³•å·®ä¸å¤š2ï¼Œå­—ç¬¦ä¸²æ‰€åœ¨ä½ç½®
+expr index $string '123'    //ç»“æœ4 å­—ç¬¦ä¸²å¯¹åº”çš„ä¸‹æ ‡æ˜¯ä»0å¼€å§‹çš„è¿™ä¸ªæ–¹æ³•è®©æˆ‘æƒ³èµ·æ¥äº†jsçš„indexOfï¼Œå„ç§è¯­è¨€å¯¹å­—ç¬¦ä¸²çš„æ“ä½œæ–¹æ³•å¤§æ–¹å‘éƒ½å·®ä¸å¤šï¼Œå¦‚æœæœ‰è¯­è¨€åŸºç¡€çš„è¯ï¼Œå­¦ä¹ shellä¼šå¾ˆå¿«çš„ã€‚
+3ï¼Œä»å­—ç¬¦ä¸²å¼€å¤´åˆ°å­ä¸²çš„æœ€å¤§é•¿åº¦
+expr match $string 'abc.*3' //ç»“æœ9ä¸ªäººè§‰å¾—è¿™ä¸ªå‡½æ•°çš„ç”¨å¤„ä¸å¤§ï¼Œä¸ºä»€ä¹ˆè¦ä»å¼€å¤´å¼€å§‹å‘¢ã€‚
+4ï¼Œå­—ç¬¦ä¸²æˆªå–
+echo ${string:4}      //2342341  ä»ç¬¬4ä½å¼€å§‹æˆªå–åé¢æ‰€æœ‰å­—ç¬¦ä¸²
+echo ${string:3:3}    //123      ä»ç¬¬3ä½å¼€å§‹æˆªå–åé¢3ä½
+echo ${string:3:6}    //123423   ä»ç¬¬3ä½å¼€å§‹æˆªå–åé¢6ä½
+echo ${string: -4}    //2341  ï¼šå³è¾¹æœ‰ç©ºæ ¼   æˆªå–å4ä½
+echo ${string:(-4)}   //2341  åŒä¸Š
+expr substr $string 3 3   //123  ä»ç¬¬3ä½å¼€å§‹æˆªå–åé¢3ä½ä¸Šé¢çš„æ–¹æ³•è®©æˆ‘æƒ³èµ·äº†ï¼Œphpçš„substrå‡½æ•°ï¼Œåé¢æˆªå–çš„è§„åˆ™æ˜¯ä¸€æ ·çš„ã€‚
+5ï¼ŒåŒ¹é…æ˜¾ç¤ºå†…å®¹
+//ä¾‹3ä¸­ä¹Ÿæœ‰matchå’Œè¿™é‡Œçš„matchä¸åŒï¼Œä¸Šé¢æ˜¾ç¤ºçš„æ˜¯åŒ¹é…å­—ç¬¦çš„é•¿åº¦ï¼Œè€Œä¸‹é¢çš„æ˜¯åŒ¹é…çš„å†…å®¹
 expr match $string '\([a-c]*[0-9]*\)'  //abc12342341
 expr $string : '\([a-c]*[0-9]\)'       //abc1
-expr $string : '.*\([0-9][0-9][0-9]\)' //341 ÏÔÊ¾À¨ºÅÖĞÆ¥ÅäµÄÄÚÈİÕâÀïÀ¨ºÅµÄÓÃ·¨£¬ÊÇ²»ÊÇ¸ùÆäËûµÄÀ¨ºÅÓÃ·¨ÓĞÏàËÆÖ®´¦ÄØ£¬
-6£¬½ØÈ¡²»Æ¥ÅäµÄÄÚÈİ
-echo ${string#a*3}     //42341  ´Ó$string×ó±ß¿ªÊ¼£¬È¥µô×î¶ÌÆ¥Åä×Ó´®
-echo ${string#c*3}     //abc12342341  ÕâÑùÊ²Ã´Ò²Ã»ÓĞÆ¥Åäµ½
-echo ${string#*c1*3}   //42341  ´Ó$string×ó±ß¿ªÊ¼£¬È¥µô×î¶ÌÆ¥Åä×Ó´®
-echo ${string##a*3}    //41     ´Ó$string×ó±ß¿ªÊ¼£¬È¥µô×î³¤Æ¥Åä×Ó´®
-echo ${string%3*1}     //abc12342  ´Ó$stringÓÒ±ß¿ªÊ¼£¬È¥µô×î¶ÌÆ¥Åä×Ó´®
-echo ${string%%3*1}    //abc12     ´Ó$stringÓÒ±ß¿ªÊ¼£¬È¥µô×î³¤Æ¥Åä×Ó´®ÕâÀïÒª×¢Òâ£¬±ØĞë´Ó×Ö·û´®µÄµÚÒ»¸ö×Ö·û¿ªÊ¼£¬»òÕß´Ó×îºóÒ»¸ö¿ªÊ¼£¬
-7£¬Æ¥Åä²¢ÇÒÌæ»»
-echo ${string/23/bb}   //abc1bb42341  Ìæ»»Ò»´Î
-echo ${string//23/bb}  //abc1bb4bb41  Ë«Ğ±¸ÜÌæ»»ËùÓĞÆ¥Åä
-echo ${string/#abc/bb} //bb12342341   #ÒÔÊ²Ã´¿ªÍ·À´Æ¥Åä£¬¸ùphpÖĞµÄ^ÓĞµãÏñ
-echo ${string/%41/bb}  //abc123423bb  %ÒÔÊ²Ã´½áÎ²À´Æ¥Åä£¬¸ùphpÖĞµÄ$ÓĞµãÏñ
+expr $string : '.*\([0-9][0-9][0-9]\)' //341 æ˜¾ç¤ºæ‹¬å·ä¸­åŒ¹é…çš„å†…å®¹è¿™é‡Œæ‹¬å·çš„ç”¨æ³•ï¼Œæ˜¯ä¸æ˜¯æ ¹å…¶ä»–çš„æ‹¬å·ç”¨æ³•æœ‰ç›¸ä¼¼ä¹‹å¤„å‘¢ï¼Œ
+6ï¼Œæˆªå–ä¸åŒ¹é…çš„å†…å®¹
+echo ${string#a*3}     //42341  ä»$stringå·¦è¾¹å¼€å§‹ï¼Œå»æ‰æœ€çŸ­åŒ¹é…å­ä¸²
+echo ${string#c*3}     //abc12342341  è¿™æ ·ä»€ä¹ˆä¹Ÿæ²¡æœ‰åŒ¹é…åˆ°
+echo ${string#*c1*3}   //42341  ä»$stringå·¦è¾¹å¼€å§‹ï¼Œå»æ‰æœ€çŸ­åŒ¹é…å­ä¸²
+echo ${string##a*3}    //41     ä»$stringå·¦è¾¹å¼€å§‹ï¼Œå»æ‰æœ€é•¿åŒ¹é…å­ä¸²
+echo ${string%3*1}     //abc12342  ä»$stringå³è¾¹å¼€å§‹ï¼Œå»æ‰æœ€çŸ­åŒ¹é…å­ä¸²
+echo ${string%%3*1}    //abc12     ä»$stringå³è¾¹å¼€å§‹ï¼Œå»æ‰æœ€é•¿åŒ¹é…å­ä¸²è¿™é‡Œè¦æ³¨æ„ï¼Œå¿…é¡»ä»å­—ç¬¦ä¸²çš„ç¬¬ä¸€ä¸ªå­—ç¬¦å¼€å§‹ï¼Œæˆ–è€…ä»æœ€åä¸€ä¸ªå¼€å§‹ï¼Œ
+7ï¼ŒåŒ¹é…å¹¶ä¸”æ›¿æ¢
+echo ${string/23/bb}   //abc1bb42341  æ›¿æ¢ä¸€æ¬¡
+echo ${string//23/bb}  //abc1bb4bb41  åŒæ–œæ æ›¿æ¢æ‰€æœ‰åŒ¹é…
+echo ${string/#abc/bb} //bb12342341   #ä»¥ä»€ä¹ˆå¼€å¤´æ¥åŒ¹é…ï¼Œæ ¹phpä¸­çš„^æœ‰ç‚¹åƒ
+echo ${string/%41/bb}  //abc123423bb  %ä»¥ä»€ä¹ˆç»“å°¾æ¥åŒ¹é…ï¼Œæ ¹phpä¸­çš„$æœ‰ç‚¹åƒ
 
 #!/bin/bash
 direc=$(pwd)
@@ -280,11 +292,11 @@ done
 done
 IFS=$OLDIFS
 
-18.¸´ÖÆÎÄ¼ş
+18.å¤åˆ¶æ–‡ä»¶
 #!/bin/sh
 cp %%1 %%2
 
-19.¸´ÖÆÒ»¸öÄ¿Â¼ÏÂËùÓĞµÄÎÄ¼şµ½ÁíÒ»¸öÄ¿Â¼
+19.å¤åˆ¶ä¸€ä¸ªç›®å½•ä¸‹æ‰€æœ‰çš„æ–‡ä»¶åˆ°å¦ä¸€ä¸ªç›®å½•
 #!/bin/bash
 direc="%%1" $(pwd)
 for file in "$direc/*"
@@ -292,31 +304,31 @@ do
 cp "$file" "%%1"
 done
 
-20.ÌáÈ¡À©Õ¹Ãû
+20.æå–æ‰©å±•å
 #!/bin/sh
 %%2=${%%1##.}
 
-21.ÌáÈ¡ÎÄ¼şÃû
+21.æå–æ–‡ä»¶å
 #!/bin/sh
 %%2="$(basename %%1)"
 
-22.ÌáÈ¡ÎÄ¼şÂ·¾¶
+22.æå–æ–‡ä»¶è·¯å¾„
 #!/bin/sh
 %%2="$(dirname %%1)"
 
-23.Ìæ»»À©Õ¹Ãû
+23.æ›¿æ¢æ‰©å±•å
 #!/bin/sh
 %%3="$(basename %%1)$%%2"
 
-24.×·¼ÓÂ·¾¶
+24.è¿½åŠ è·¯å¾„
 #!/bin/sh
 %%3="$(dirname %%1)/$%%2"
 
-25.ÒÆ¶¯ÎÄ¼ş
+25.ç§»åŠ¨æ–‡ä»¶
 #!/bin/sh
 mv "%%1" "%%2"
 
-26.ÒÆ¶¯Ò»¸öÄ¿Â¼ÏÂËùÓĞÎÄ¼şµ½ÁíÒ»¸öÄ¿Â¼
+26.ç§»åŠ¨ä¸€ä¸ªç›®å½•ä¸‹æ‰€æœ‰æ–‡ä»¶åˆ°å¦ä¸€ä¸ªç›®å½•
 #!/bin/bash
 direc="%%1" #$(pwd)
 OLDIFS=$IFS
@@ -327,15 +339,15 @@ mv "$file" "%%1"
 done
 IFS=$OLDIFS
 
-27.Ö¸¶¨Ä¿Â¼ÏÂËÑË÷ÎÄ¼ş
+27.æŒ‡å®šç›®å½•ä¸‹æœç´¢æ–‡ä»¶
 #!/bin/sh
 find -name "%%1"
 
-28.´ò¿ªÎÄ¼ş¶Ô»°¿ò
+28.æ‰“å¼€æ–‡ä»¶å¯¹è¯æ¡†
 #!/bin/sh
 %%1="$(Xdialog --fselect '~/' 0 0 2>&1)"
 
-29.ÎÄ¼ş·Ö¸î
+29.æ–‡ä»¶åˆ†å‰²
 #!/bin/sh
 split -b 2k "%%1"
 
@@ -362,25 +374,25 @@ done
 
 
 
-ÆäÖĞhttperr8007.logÎªÄãÏë·Ö¸îµÄ´óÎÄ¼ş£¬file_$file.log  Îª·Ö¸îºóµÄÎÄ¼ş£¬×îºóÎªfile_1.log£¬file_2.log£¬file_3.log¡­¡­,·Ö¸îÍêºóµÄÃ¿¸öÎÄ¼şÖ»ÓĞ1000ĞĞ£¨²ÎÊı¿ÉÒÔ×Ô¼ºÉèÖÃ£©
+å…¶ä¸­httperr8007.logä¸ºä½ æƒ³åˆ†å‰²çš„å¤§æ–‡ä»¶ï¼Œfile_$file.log  ä¸ºåˆ†å‰²åçš„æ–‡ä»¶ï¼Œæœ€åä¸ºfile_1.logï¼Œfile_2.logï¼Œfile_3.logâ€¦â€¦,åˆ†å‰²å®Œåçš„æ¯ä¸ªæ–‡ä»¶åªæœ‰1000è¡Œï¼ˆå‚æ•°å¯ä»¥è‡ªå·±è®¾ç½®ï¼‰
 
-split ²ÎÊı£º
--b  £ººóÃæ¿É½ÓÓû·Ö¸î³ÉµÄµµ°¸´óĞ¡£¬¿É¼Óµ¥Î»£¬ÀıÈç b, k, m µÈ£»
--l  £ºÒÔĞĞÊıÀ´½øĞĞ·Ö¸î£»
+split å‚æ•°ï¼š
+-b  ï¼šåé¢å¯æ¥æ¬²åˆ†å‰²æˆçš„æ¡£æ¡ˆå¤§å°ï¼Œå¯åŠ å•ä½ï¼Œä¾‹å¦‚ b, k, m ç­‰ï¼›
+-l  ï¼šä»¥è¡Œæ•°æ¥è¿›è¡Œåˆ†å‰²ï¼›
 
 
 
-#°´Ã¿¸öÎÄ¼ş1000ĞĞÀ´·Ö¸î³ı
+#æŒ‰æ¯ä¸ªæ–‡ä»¶1000è¡Œæ¥åˆ†å‰²é™¤
 
 split -l 1000 httperr8007.log httperr
 
-httpaa£¬httpab£¬httpac ........
+httpaaï¼Œhttpabï¼Œhttpac ........
 
-#°´ÕÕÃ¿¸öÎÄ¼ş100KÀ´·Ö¸î
+#æŒ‰ç…§æ¯ä¸ªæ–‡ä»¶100Kæ¥åˆ†å‰²
 
 split -b 100k httperr8007.log http
 
-httpaa£¬httpab£¬httpac ........
+httpaaï¼Œhttpabï¼Œhttpac ........
 
 #!/bin/bash
 if [ $# -ne 2 ]; then
@@ -432,7 +444,7 @@ echo " let i=$i+1" >> merge
 echo "done" >> merge
 chmod u+x merge'
 
-30.ÎÄ¼şºÏ²¢
+30.æ–‡ä»¶åˆå¹¶
 #!/bin/sh
 cp "%%1"+"%%2" "%%3"
 
@@ -493,21 +505,21 @@ echo " let i=$i+1" >> merge
 echo "done" >> merge
 chmod u+x merge'
 
-31.ÎÄ¼ş¼òµ¥¼ÓÃÜ
+31.æ–‡ä»¶ç®€å•åŠ å¯†
 #!/bin/bash
 #make test && make strings && sudo make install
 shc -r -f %%1.sh
 #%%1.x
 #%%1.x.c
 
-32.ÎÄ¼ş¼òµ¥½âÃÜ
+32.æ–‡ä»¶ç®€å•è§£å¯†
 #!/bin/bash
 #make test && make strings && sudo make install
 shc -r -f %%1.sh
 #%%1.x
 #%%1.x.c
 
-33.¶ÁÈ¡iniÎÄ¼şÊôĞÔ
+33.è¯»å–iniæ–‡ä»¶å±æ€§
 #!/bin/bash
 if [ "$%%3" = "" ];then
    sed -n "/\[$%%2\]/,/\[.*\]/{
@@ -537,7 +549,7 @@ else
        fi
 fi
 
-34.ºÏ²¢Ò»¸öÎÄ¼şÏÂËùÓĞµÄÎÄ¼ş
+34.åˆå¹¶ä¸€ä¸ªæ–‡ä»¶ä¸‹æ‰€æœ‰çš„æ–‡ä»¶
 #!/bin/sh
 cat $(ls |grep -E '%%1\.') > %%1
 
@@ -565,9 +577,9 @@ f1=fopen("a1.txt","r");
 f2=fopen("a2.txt","r");
 f3=fopen("a3.txt","w");
 int a,b;
-a=getw(f1);   /*´Óa1.txtºÍa2.txtÖĞ·Ö±ğÈ¡×îĞ¡µÄÊıaºÍb*/
+a=getw(f1);   /*ä»a1.txtå’Œa2.txtä¸­åˆ†åˆ«å–æœ€å°çš„æ•°aå’Œb*/
 b=getw(f2);
-while(!feof(f1)&&!feof(f2))  /*Á½¸öÎÄ¼ş¶¼Ã»½áÊøÊ±£¬Ö´ĞĞÑ­»·¡¢±È½Ï*/
+while(!feof(f1)&&!feof(f2))  /*ä¸¤ä¸ªæ–‡ä»¶éƒ½æ²¡ç»“æŸæ—¶ï¼Œæ‰§è¡Œå¾ªç¯ã€æ¯”è¾ƒ*/
 {
 if(a<=b)
 {
@@ -579,12 +591,12 @@ else
 b=getw(f2);
 }
    }
-if(feof(f1))  /*ÎÄ¼şa1.txt½áÊøÊ±£¬°Ña2.txtÖĞµÄÊıÈ«²¿ÊäÈëa3.txt*/
+if(feof(f1))  /*æ–‡ä»¶a1.txtç»“æŸæ—¶ï¼ŒæŠŠa2.txtä¸­çš„æ•°å…¨éƒ¨è¾“å…¥a3.txt*/
 {putw(b,f3);
 while((b=getw(f2))!=EOF)
 putw(b,f3);
 }
-if(feof(f2))   /*Í¬ÉÏ*/
+if(feof(f2))   /*åŒä¸Š*/
 {
 putw(a,f3);
 while((a=getw(f1))!=EOF)
@@ -593,7 +605,7 @@ putw(a,f3);
 fclose(f1);
 fclose(f2);
 fclose(f3);
-printf("ÒÑÍê³É!");
+printf("å·²å®Œæˆ!");
 return 0;
 }
 EOF
@@ -604,7 +616,7 @@ else
 echo 'Compile ERROR'
 fi
 
-35.Ğ´ÈëiniÎÄ¼şÊôĞÔ
+35.å†™å…¥iniæ–‡ä»¶å±æ€§
 #!/bin/bash
 if [ "$%%3" = "" ];then
    sed -n "/\[$%%2\]/,/\[.*\]/{
@@ -634,31 +646,31 @@ else
        fi
 fi
 
-36.»ñµÃµ±Ç°Â·¾¶
+36.è·å¾—å½“å‰è·¯å¾„
 #!/bin/sh
 %%1=$(pwd)
 
-37.¶ÁÈ¡XMLÊı¾İ¿â
+37.è¯»å–XMLæ•°æ®åº“
 
-ÈçºÎÍ¨¹ıshellÃüÁîĞĞ¶ÁÈ¡xmlÎÄ¼şÖĞÄ³¸öÊôĞÔËù¶ÔÓ¦µÄÖµ£¿
-ÀıÈç£º
+å¦‚ä½•é€šè¿‡shellå‘½ä»¤è¡Œè¯»å–xmlæ–‡ä»¶ä¸­æŸä¸ªå±æ€§æ‰€å¯¹åº”çš„å€¼ï¼Ÿ
+ä¾‹å¦‚ï¼š
 <key>BuildVersion</key> <string>5</string>
-ÎÒÏ£ÍûÄÜ¹»Í¨¹ıUnix shellÃüÁî¶ÔÊôĞÔ¼üµÄÃû³ÆBuildVersion½øĞĞ²éÑ¯£¬·µ»ØµÄ½á¹ûÊÇ5£¬ÈçºÎÊµÏÖÑ½£¿
+æˆ‘å¸Œæœ›èƒ½å¤Ÿé€šè¿‡Unix shellå‘½ä»¤å¯¹å±æ€§é”®çš„åç§°BuildVersionè¿›è¡ŒæŸ¥è¯¢ï¼Œè¿”å›çš„ç»“æœæ˜¯5ï¼Œå¦‚ä½•å®ç°å‘€ï¼Ÿ
 #!/bin/bash
 grep BuildVersion|sed 's/.*<.*>\([^<].*\)<.*>.*/\1/'
 
-½á¹û·µ»ØµÄÊÇ¡°BuildVersion¡±£¬¶ø²»ÊÇ¡°5¡±£¬Èç¹ûÒª²éÑ¯BuildVersion×Ô¶¯·µ»ØÊıÖµ5Ó¦µ±ÈçºÎĞ´£¿
+ç»“æœè¿”å›çš„æ˜¯â€œBuildVersionâ€ï¼Œè€Œä¸æ˜¯â€œ5â€ï¼Œå¦‚æœè¦æŸ¥è¯¢BuildVersionè‡ªåŠ¨è¿”å›æ•°å€¼5åº”å½“å¦‚ä½•å†™ï¼Ÿ
 
-Ó¦¸ÃÃ»´íµÄ¡£ÊÔÒ»ÏÂ£º echo "<key>BuildVersion</key> <string>5</string>"|grep BuildVersion|sed 's/.*<.*>\([^<].*\)<.*>.*/\1/'ÎÒÔÚSLµÄÖÕ¶ËÀïÊÔ£¬·µ»ØÖµÊÇ5
+åº”è¯¥æ²¡é”™çš„ã€‚è¯•ä¸€ä¸‹ï¼š echo "<key>BuildVersion</key> <string>5</string>"|grep BuildVersion|sed 's/.*<.*>\([^<].*\)<.*>.*/\1/'æˆ‘åœ¨SLçš„ç»ˆç«¯é‡Œè¯•ï¼Œè¿”å›å€¼æ˜¯5
 
-Ä¿Ç°ĞèÒª´ÓxmlÎÄ¼şÌáÈ¡Êı¾İ£¬Ïë×öÒ»¸öxmlparser.sh
-xml ÀàËÆÕâÑù
+ç›®å‰éœ€è¦ä»xmlæ–‡ä»¶æå–æ•°æ®ï¼Œæƒ³åšä¸€ä¸ªxmlparser.sh
+xml ç±»ä¼¼è¿™æ ·
 <result>
    <shareinfo hostip="192.168.0.1" sharename="abcd" password="abc123"></shareinfo>
 </result>
 
 
-Ï£ÍûÊäÈë xmlparser.sh a.xml hostip¿ÉÒÔ·µ»Ø192.168.0.1
+å¸Œæœ›è¾“å…¥ xmlparser.sh a.xml hostipå¯ä»¥è¿”å›192.168.0.1
 
 
 #!/bin/sh
@@ -671,33 +683,33 @@ fi
 grep $2 $1|awk '{print $2}'|grep -o "[0-9.]*"
 
 
-°Ñ
+æŠŠ
 grep $2 $1|awk '{print $2}'|grep -o "[0-9.]*"
-¸Ä³É
+æ”¹æˆ
 grep $2 $1|awk '{print $2}'|grep -Eo "[0-9.]+"
-Â¥ÉÏÕâ¸öÓĞÎÊÌâ£¬Èç¹ûÎÒÒªµÃµ½µÄÊÇ
+æ¥¼ä¸Šè¿™ä¸ªæœ‰é—®é¢˜ï¼Œå¦‚æœæˆ‘è¦å¾—åˆ°çš„æ˜¯
 <result>
    <shareinfo hostip="192.168.0.1" sharename="abcd" password="abc123"></shareinfo>
 </result>
-ÖĞµÄsharename£¬ÄÇÃ´£¬ºÇºÇ£¬¾Í´íÁË
+ä¸­çš„sharenameï¼Œé‚£ä¹ˆï¼Œå‘µå‘µï¼Œå°±é”™äº†
 
-ÎÒ¾õµÃÓ¦¸ÃÏÈ¶¨Î»µ½µÚ¶ş¸ö²ÎÊı¡°$2¡±µÄÎ»ÖÃ£¬È»ºóÔÙÌáÈ¡¡°=¡±ºóÃæµÄÄÚÈİ
+æˆ‘è§‰å¾—åº”è¯¥å…ˆå®šä½åˆ°ç¬¬äºŒä¸ªå‚æ•°â€œ$2â€çš„ä½ç½®ï¼Œç„¶åå†æå–â€œ=â€åé¢çš„å†…å®¹
 
-ÕâÀïÓĞ¸öÍêÕûµÄÊµÏÖ£º
-Parse Simple XML Files using Bash ¨C Extract Name Value Pairs and Attributes
+è¿™é‡Œæœ‰ä¸ªå®Œæ•´çš„å®ç°ï¼š
+Parse Simple XML Files using Bash â€“ Extract Name Value Pairs and Attributes
 http://www.humbug.in/2010/parse-simple-xml-files-using-bash-extract-name-value-pairs-and-attributes/
 
 
-²»¹ıĞèÒª°²×°xmllint.
+ä¸è¿‡éœ€è¦å®‰è£…xmllint.
 
-Éè¼Æµ½¶Ô¶à¸öxmlÎÄ¼ş½øĞĞelementµÄ¶ÁÈ¡ºÍÁĞ±í¡£ÓĞÈË×ö¹ıÃ´£¿
-¾Ù¸öÀı×Ó£¬
-¶à¸öxmlÎÄ¼şÀïÃæ¶¼ÓĞ
+è®¾è®¡åˆ°å¯¹å¤šä¸ªxmlæ–‡ä»¶è¿›è¡Œelementçš„è¯»å–å’Œåˆ—è¡¨ã€‚æœ‰äººåšè¿‡ä¹ˆï¼Ÿ
+ä¸¾ä¸ªä¾‹å­ï¼Œ
+å¤šä¸ªxmlæ–‡ä»¶é‡Œé¢éƒ½æœ‰
 <article>
         <title>xxx</titlel>
 </article>
 
-Í¨¹ıshell¶ÁÈ¡£¬È»ºóºÏ²¢µ½Ò»Æğ£¬ÔÙÉú³ÉÒ»¸öĞÂµÄxml£¬µ«ÊÇÆäËûÔªËØ²»±ä¡£
+é€šè¿‡shellè¯»å–ï¼Œç„¶ååˆå¹¶åˆ°ä¸€èµ·ï¼Œå†ç”Ÿæˆä¸€ä¸ªæ–°çš„xmlï¼Œä½†æ˜¯å…¶ä»–å…ƒç´ ä¸å˜ã€‚
 <article>
         <title>aaa</titlel>
 </article>
@@ -705,11 +717,11 @@ http://www.humbug.in/2010/parse-simple-xml-files-using-bash-extract-name-value-p
         <title>bbb</titlel>
 </article>
 
-Èç¹û¸ñÊ½Òì³£¼òµ¥£¬Ã»ÓĞÌØÀı£¬ÄÇÃ´¿ÉÒÔÓÃshellÊµÏÖ
-Èç¹ûÓĞ¿ÉÄÜ¸ñÊ½¸´ÔÓ£¬ÒòÎªshellµÄÃüÁîËùÊ¹ÓÃµÄÕıÔò±í´ïÊ½¶¼²»Ö§³Ö¿çĞĞÆ¥Åä£¬ËùÒÔÓÃshellÀ´½â¾öÕâ¸öÎÊÌâ¾ÍÈÆÈ¦×ÓÁË¡£
-ÓÃperlÀ´×÷Õâ¸ö¹¤×÷×îÖ±½Ó¡¢¼òµ¥¡£perlµÄXML:DOMÄ£¿éÊÇ×¨ÃÅ´¦ÀíXMLÎÄ¼şµÄ¡£
+å¦‚æœæ ¼å¼å¼‚å¸¸ç®€å•ï¼Œæ²¡æœ‰ç‰¹ä¾‹ï¼Œé‚£ä¹ˆå¯ä»¥ç”¨shellå®ç°
+å¦‚æœæœ‰å¯èƒ½æ ¼å¼å¤æ‚ï¼Œå› ä¸ºshellçš„å‘½ä»¤æ‰€ä½¿ç”¨çš„æ­£åˆ™è¡¨è¾¾å¼éƒ½ä¸æ”¯æŒè·¨è¡ŒåŒ¹é…ï¼Œæ‰€ä»¥ç”¨shellæ¥è§£å†³è¿™ä¸ªé—®é¢˜å°±ç»•åœˆå­äº†ã€‚
+ç”¨perlæ¥ä½œè¿™ä¸ªå·¥ä½œæœ€ç›´æ¥ã€ç®€å•ã€‚perlçš„XML:DOMæ¨¡å—æ˜¯ä¸“é—¨å¤„ç†XMLæ–‡ä»¶çš„ã€‚
 
-Å¼µ¹ÊÇ¾õµÃ,ÓÃPHPĞ´ScriptsÒ²ºÜ·½±ã,¹¦ÄÜÇ¿´ó,¶øÇÒ,¿çÆ½Ì¨,
+å¶å€’æ˜¯è§‰å¾—,ç”¨PHPå†™Scriptsä¹Ÿå¾ˆæ–¹ä¾¿,åŠŸèƒ½å¼ºå¤§,è€Œä¸”,è·¨å¹³å°,
 
 #!/bin/sh
 
@@ -734,14 +746,14 @@ n
 }'
 
 
-ÕâĞ¡¶Î´úÂëÄÜ°ÑÒ»¸öxmlÎÄ¼şÖĞ,ÄãÒªµÄ¶«Î÷ÄÃ³öÀ´.
-Äã¿ÉÒÔÓÃfor file in $*°ÑÕâĞ©ĞÅÏ¢¶¼>>tmpfileÖĞ.
-È»ºóÓÃsed ÔÚÖ¸¶¨ÎÄ¼şµÄÖ¸¶¨Î»ÖÃÓÃrÃüÁî°ÑtmpfileÕ³Ìù½øÀ´~~~~
+è¿™å°æ®µä»£ç èƒ½æŠŠä¸€ä¸ªxmlæ–‡ä»¶ä¸­,ä½ è¦çš„ä¸œè¥¿æ‹¿å‡ºæ¥.
+ä½ å¯ä»¥ç”¨for file in $*æŠŠè¿™äº›ä¿¡æ¯éƒ½>>tmpfileä¸­.
+ç„¶åç”¨sed åœ¨æŒ‡å®šæ–‡ä»¶çš„æŒ‡å®šä½ç½®ç”¨rå‘½ä»¤æŠŠtmpfileç²˜è´´è¿›æ¥~~~~
 
-´óË¼Â·Èç´Ë^_^  ÎÒÏëÓĞÕâ¸ö¶«Î÷(Ö»ÒªÄÜÕıÈ·µÄÅÜ³ö½á¹û)ºóÃæ¾Í²»ÄÑÁË°É...
+å¤§æ€è·¯å¦‚æ­¤^_^  æˆ‘æƒ³æœ‰è¿™ä¸ªä¸œè¥¿(åªè¦èƒ½æ­£ç¡®çš„è·‘å‡ºç»“æœ)åé¢å°±ä¸éš¾äº†å§...
 
 Name
-xmllint ¡ª command line XML tool
+xmllint â€” command line XML tool
 
 Synopsis
 xmllint [[--version] | [--debug] | [--shell] | [--debugent] | [--copy] | [--recover] | [--noent] | [--noout] | [--nonet] | [--htmlout] | [--nowrap] | [--valid] | [--postvalid] | [--dtdvalid URL] | [--dtdvalidfpi FPI] | [--timing] | [--output file] | [--repeat] | [--insert] | [--compress] | [--html] | [--xmlout] | [--push] | [--memory] | [--maxmem nbbytes] | [--nowarning] | [--noblanks] | [--nocdata] | [--format] | [--encode encoding] | [--dropdtd] | [--nsclean] | [--testIO] | [--catalogs] | [--nocatalogs] | [--auto] | [--xinclude] | [--noxincludenode] | [--loaddtd] | [--dtdattr] | [--stream] | [--walker] | [--pattern patternvalue] | [--chkregister] | [--relaxng] | [--schema] | [--c14n]] [xmlfile]
@@ -909,7 +921,7 @@ Error in Reader registration (generated when [--chkregister] option is used)
 9
 Out of memory error
 
-Parse Simple XML Files using Bash ¨C Extract Name Value Pairs and Attributes
+Parse Simple XML Files using Bash â€“ Extract Name Value Pairs and Attributes
 
 
 2 Comments
@@ -922,7 +934,7 @@ Tweet
 Pratik Sinha | July 31, 2010
 
 
-I have written up a simple routine par***ML to parse simple XML files to extract unique name values pairs and their attributes. The script extracts all xml tags of the format <abc arg1="hello">xyz</abc> and dynamically creates bash variables which hold values of the attributes as well as the elements. This is a good solution, if you don¡¯t wish to use xpath for some simple xml files. However you will need xmllint installed on your system to use the script. Here¡¯s a sample script which uses the par***ML function
+I have written up a simple routine par***ML to parse simple XML files to extract unique name values pairs and their attributes. The script extracts all xml tags of the format <abc arg1="hello">xyz</abc> and dynamically creates bash variables which hold values of the attributes as well as the elements. This is a good solution, if you donâ€™t wish to use xpath for some simple xml files. However you will need xmllint installed on your system to use the script. Hereâ€™s a sample script which uses the par***ML function
 #!/bin/bash
 xmlFile=$1
 
@@ -973,7 +985,7 @@ The XML File used for the above script example is:
 </status>
 
 
-The root tag, which in this case is ¡°status¡±, is used as a suffix for all variables. Once the XML file is passed to the function, it dynamically creates the variables $status_xyz, $status_abc, $status_pqr, $status_xyz_arg1, $status_abc_arg2, $status_pqr_arg3 and $status_pqr_arg4.
+The root tag, which in this case is â€œstatusâ€, is used as a suffix for all variables. Once the XML file is passed to the function, it dynamically creates the variables $status_xyz, $status_abc, $status_pqr, $status_xyz_arg1, $status_abc_arg2, $status_pqr_arg3 and $status_pqr_arg4.
 
 The output when the script is ran with the xml file as an argument is
 @$ bash  par***ML.sh test.xml
@@ -988,7 +1000,7 @@ status_pqr_arg4='a phrase'
 status_xyz=a
 status_xyz_arg1=1
 
-This script won¡¯t work for XML files like the one below with duplicate element names.
+This script wonâ€™t work for XML files like the one below with duplicate element names.
 <?xml version="1.0"?>
 <status>
   <test arg1="1"> a </test>
@@ -997,7 +1009,7 @@ This script won¡¯t work for XML files like the one below with duplicate element 
 </status>
 
 
-This script also won¡¯t be able to extract attributes of elements without any CDATA. For eg, the script won¡¯t be able to create variables corresponding to <test arg1="1">. It will only create the variables corresponding to <test1 arg2="2">abc</test1>.
+This script also wonâ€™t be able to extract attributes of elements without any CDATA. For eg, the script wonâ€™t be able to create variables corresponding to <test arg1="1">. It will only create the variables corresponding to <test1 arg2="2">abc</test1>.
 <?xml version="1.0"?>
 <status>
   <test arg1="1">
@@ -1005,24 +1017,24 @@ This script also won¡¯t be able to extract attributes of elements without any CD
   </test>
 </status>
 
-38.Ğ´ÈëXMLÊı¾İ¿â
+38.å†™å…¥XMLæ•°æ®åº“
 #!/bin/bash
 
-39.ZIPÑ¹ËõÎÄ¼ş
+39.ZIPå‹ç¼©æ–‡ä»¶
 #!/bin/sh
 zip -r "/%%1" "%%2"
 
-40.ZIP½âÑ¹Ëõ
+40.ZIPè§£å‹ç¼©
 #!/bin/sh
 unzip -x "/%%1" "%%2"
 
-41.»ñµÃÓ¦ÓÃ³ÌĞòÍêÕûÂ·¾¶
+41.è·å¾—åº”ç”¨ç¨‹åºå®Œæ•´è·¯å¾„
 #!/bin/bash
 
-42.ZIPÑ¹ËõÎÄ¼ş¼Ğ
+42.ZIPå‹ç¼©æ–‡ä»¶å¤¹
 #!/bin/bash
 
-43.µİ¹éÉ¾³ıÄ¿Â¼ÏÂµÄÎÄ¼ş
+43.é€’å½’åˆ é™¤ç›®å½•ä¸‹çš„æ–‡ä»¶
 #!/bin/bash
 rm -if "%%1/*"
 OLDIFS=$IFS
@@ -1038,10 +1050,10 @@ done
 done
 IFS=$OLDIFS
 
-44.IDEA¼ÓÃÜËã·¨
+44.IDEAåŠ å¯†ç®—æ³•
 #!/bin/bash
 
-45.RC6Ëã·¨
+45.RC6ç®—æ³•
 #!/bin/bash
 cat <<'EOF'> rc6.c
 #include<stdio.h>
@@ -1182,24 +1194,24 @@ fi
 #!/bin/bash
 grep -qE %%1 %%2
 
-47.Ö±½Ó´´½¨¶à¼¶Ä¿Â¼
+47.ç›´æ¥åˆ›å»ºå¤šçº§ç›®å½•
 #!/bin/bash
 mkdir -p %%1
 
-48.ÅúÁ¿ÖØÃüÃû
+48.æ‰¹é‡é‡å‘½å
 #!/bin/bash
 find $PWD -type f -name '*\.cpp' |sed s/'\.cpp'//g|awk '{MV = "mv"};{C = "\.c"};{ CPP="\.cpp"}; {print MV, $1 CPP , $1 C}'|sh
-ls | awk -F '-' '{print "mv "$0" "$2}' #È¥µô´ø'-'µÄÇ°×º
+ls | awk -F '-' '{print "mv "$0" "$2}' #å»æ‰å¸¦'-'çš„å‰ç¼€
 
-49.ÎÄ±¾²éÕÒÌæ»»
+49.æ–‡æœ¬æŸ¥æ‰¾æ›¿æ¢
 #!/bin/bash
 sed -e 's:%%2:%%3:g' %%1
 #sed -e 's/%%2/%%3/g' %%1
 
-50.ÎÄ¼ş¹ØÁª
+50.æ–‡ä»¶å…³è”
 #!/bin/bash
 
-51.ÅúÁ¿×ª»»±àÂë´ÓGB2312µ½Unicode
+51.æ‰¹é‡è½¬æ¢ç¼–ç ä»GB2312åˆ°Unicode
 #!/bin/bash
 scode="gbk"
 dcode="ucs2"
@@ -1217,7 +1229,7 @@ chown $Fuser.$Fgrp $FILE
 fi
 done
 
-52.ÉèÖÃJDK»·¾³±äÁ¿
+52.è®¾ç½®JDKç¯å¢ƒå˜é‡
 #!/bin/bash
 find "$PWD" -type f \( -iname '*.bin' \) -print0 | xargs -0 chmod +x
 find -type f \( -iname '*.bin' \) -print |
@@ -1339,7 +1351,7 @@ sed -i '$a export PATH=$PATH:$CATALINA_HOME/bin' ~/TestBash.txt #~/.bashrc
 fi
 IFS=$OLDIFS
 
-53.ÅúÁ¿×ª»»±àÂë´ÓUnicodeµ½GB2312
+53.æ‰¹é‡è½¬æ¢ç¼–ç ä»Unicodeåˆ°GB2312
 #!/bin/bash
 scode="ucs2"
 dcode="gbk"
@@ -1357,27 +1369,27 @@ chown $Fuser.$Fgrp $FILE
 fi
 done
 
-54.É¾³ı¿ÕÎÄ¼ş¼Ğ
+54.åˆ é™¤ç©ºæ–‡ä»¶å¤¹
 #!/bin/bash
 rmdir -p %%1
 
-55.GB2312ÎÄ¼ş×ªUTF-8¸ñÊ½
+55.GB2312æ–‡ä»¶è½¬UTF-8æ ¼å¼
 #!/bin/bash
 iconv -f gbk -t utf8 %%1 -o %%2
 
-56.UTF-8ÎÄ¼ş×ªGB2312¸ñÊ½
+56.UTF-8æ–‡ä»¶è½¬GB2312æ ¼å¼
 #!/bin/bash
 iconv -f utf8 -t  gbk %%1 -o %%2
 
-57.»ñÈ¡ÎÄ¼şÂ·¾¶µÄ¸¸Â·¾¶
+57.è·å–æ–‡ä»¶è·¯å¾„çš„çˆ¶è·¯å¾„
 #!/bin/bash
 %%1=basename $PWD
 
-58.UnicodeÎÄ¼ş×ªUTF-8¸ñÊ½
+58.Unicodeæ–‡ä»¶è½¬UTF-8æ ¼å¼
 #!/bin/bash
 iconv -f ucs2 -t  utf-8 %%1 -o %%2
 
-59.CRCÑ­»·ÈßÓàĞ£Ñé
+59.CRCå¾ªç¯å†—ä½™æ ¡éªŒ
 #!/bin/bash
 cat <<'EOF'> crc.c
 #include<stdio.h>
@@ -1390,7 +1402,7 @@ unsigned long int Reflect(unsigned long int ref, char ch)
 
   {     unsigned long int value(0); 
 
-        // ½»»»bit0ºÍbit7£¬bit1ºÍbit6£¬ÀàÍÆ 
+        // äº¤æ¢bit0å’Œbit7ï¼Œbit1å’Œbit6ï¼Œç±»æ¨ 
 
         for(int i = 1; i < (ch + 1); i++) 
 
@@ -1408,7 +1420,7 @@ init_crc32_table()
 
   {     unsigned long int crc,temp; 
 
-        // 256¸öÖµ 
+        // 256ä¸ªå€¼ 
 
         for(int i = 0; i <= 0xFF; i++) 
 
@@ -1453,21 +1465,21 @@ unsigned long GenerateCRC32(char xdata * DataBuf,unsigned long  len)
 
          char c,t; 
 
-        oldcrc32 = 0x00000000; //³õÖµÎª0 
+        oldcrc32 = 0x00000000; //åˆå€¼ä¸º0 
 
      charcnt=0; 
 
          while (len--) { 
 
-                 t= (oldcrc32 >> 24) & 0xFF;   //ÒªÒÆ³öµÄ×Ö½ÚµÄÖµ 
+                 t= (oldcrc32 >> 24) & 0xFF;   //è¦ç§»å‡ºçš„å­—èŠ‚çš„å€¼ 
 
-     oldcrc=crc_32_tab[t];         //¸ù¾İÒÆ³öµÄ×Ö½ÚµÄÖµ²é±í 
+     oldcrc=crc_32_tab[t];         //æ ¹æ®ç§»å‡ºçš„å­—èŠ‚çš„å€¼æŸ¥è¡¨ 
 
-                 c=DataBuf[charcnt];          //ĞÂÒÆ½øÀ´µÄ×Ö½ÚÖµ 
+                 c=DataBuf[charcnt];          //æ–°ç§»è¿›æ¥çš„å­—èŠ‚å€¼ 
 
-                 oldcrc32= (oldcrc32 << 8) | c;   //½«ĞÂÒÆ½øÀ´µÄ×Ö½ÚÖµÌíÔÚ¼Ä´æÆ÷Ä©×Ö½ÚÖĞ 
+                 oldcrc32= (oldcrc32 << 8) | c;   //å°†æ–°ç§»è¿›æ¥çš„å­—èŠ‚å€¼æ·»åœ¨å¯„å­˜å™¨æœ«å­—èŠ‚ä¸­ 
 
-                 oldcrc32=oldcrc32^oldcrc;     //½«¼Ä´æÆ÷Óë²é³öµÄÖµ½øĞĞxorÔËËã 
+                 oldcrc32=oldcrc32^oldcrc;     //å°†å¯„å­˜å™¨ä¸æŸ¥å‡ºçš„å€¼è¿›è¡Œxorè¿ç®— 
 
                  charcnt++; 
 
@@ -1479,7 +1491,7 @@ unsigned long GenerateCRC32(char xdata * DataBuf,unsigned long  len)
 
 } 
 
-²ÎÊı±í¿ÉÒÔÏÈÔÚPC»úÉÏËã³öÀ´£¬Ò²¿ÉÔÚ³ÌĞò³õÊ¼»¯Ê±Íê³É¡£ÏÂÃæÊÇÓÃÓÚ¼ÆËã²ÎÊı±íµÄcÓïÑÔ×Ó³ÌĞò£¬ÔÚVisual C++ 6.0ÏÂ±àÒëÍ¨¹ı¡£ 
+å‚æ•°è¡¨å¯ä»¥å…ˆåœ¨PCæœºä¸Šç®—å‡ºæ¥ï¼Œä¹Ÿå¯åœ¨ç¨‹åºåˆå§‹åŒ–æ—¶å®Œæˆã€‚ä¸‹é¢æ˜¯ç”¨äºè®¡ç®—å‚æ•°è¡¨çš„cè¯­è¨€å­ç¨‹åºï¼Œåœ¨Visual C++ 6.0ä¸‹ç¼–è¯‘é€šè¿‡ã€‚ 
 
 #include <stdio.h> 
 
@@ -1491,7 +1503,7 @@ unsigned long int Reflect(unsigned long int ref, char ch)
 
   {     unsigned long int value(0); 
 
-        // ½»»»bit0ºÍbit7£¬bit1ºÍbit6£¬ÀàÍÆ 
+        // äº¤æ¢bit0å’Œbit7ï¼Œbit1å’Œbit6ï¼Œç±»æ¨ 
 
         for(int i = 1; i < (ch + 1); i++) 
 
@@ -1508,7 +1520,7 @@ int main()
 {
      unsigned long int crc,temp; 
 
-        // 256¸öÖµ 
+        // 256ä¸ªå€¼ 
 
         for(int i = 0; i <= 0xFF; i++) 
 
@@ -1547,15 +1559,15 @@ else
 echo 'Compile ERROR'
 fi
 
-60.ÅĞ¶ÏÊÇ·ñÎª¿ÕÎÄ¼ş
+60.åˆ¤æ–­æ˜¯å¦ä¸ºç©ºæ–‡ä»¶
 #!/bin/bash
 
-61.ÖÕÖ¹³ÌĞò
+61.ç»ˆæ­¢ç¨‹åº
 #!/bin/sh
 kill -KILL pidof %%1 -s
 #killall %%1
 
-62.¶¨Ê±¹Ø»ú
+62.å®šæ—¶å…³æœº
 #!/bin/sh
 shutdown -h %%1 & #23:00
 #shutdown -h now
@@ -1563,238 +1575,238 @@ shutdown -h %%1 & #23:00
 #/sbin/poweroff
 #init 0
 
-63.ÏÔÊ¾½ø³ÌÁĞ±í
+63.æ˜¾ç¤ºè¿›ç¨‹åˆ—è¡¨
 #!/bin/sh
 ps aux
 #fuser -l
 
-64.±éÀúÎÄ¼ş¼ĞÁĞ³öÎÄ¼ş´óĞ¡
+64.éå†æ–‡ä»¶å¤¹åˆ—å‡ºæ–‡ä»¶å¤§å°
 #!/bin/sh
 du -sH "%%1/*"
 
-65.GOSTËã·¨
+65.GOSTç®—æ³•
 #!/bin/bash
 
-66.¶ÔÄ¿±êÑ¹ËõÎÄ¼ş½âÑ¹Ëõµ½Ö¸¶¨ÎÄ¼ş¼Ğ
+66.å¯¹ç›®æ ‡å‹ç¼©æ–‡ä»¶è§£å‹ç¼©åˆ°æŒ‡å®šæ–‡ä»¶å¤¹
 #!/bin/bash
 
-67.±£´æÎÄ¼şÊ±ÖØÃû×Ô¶¯Éú³ÉĞÂÎÄ¼ş
+67.ä¿å­˜æ–‡ä»¶æ—¶é‡åè‡ªåŠ¨ç”Ÿæˆæ–°æ–‡ä»¶
 #!/bin/bash
 
-68.´ò¿ªÍøÒ³
+68.æ‰“å¼€ç½‘é¡µ
 #!/bin/sh
 lynx %%1
 
-69.É¾³ı¿ÕÎÄ¼ş¼ĞÕûºÏ²Ù×÷
+69.åˆ é™¤ç©ºæ–‡ä»¶å¤¹æ•´åˆæ“ä½œ
 #!/bin/bash
 
-70.»ñÈ¡´ÅÅÌËùÓĞ·ÖÇø
+70.è·å–ç£ç›˜æ‰€æœ‰åˆ†åŒº
 #!/bin/sh
 df -k
 
-71.¼¤»îÒ»¸ö³ÌĞò»ò³ÌĞò¹ØÁªµÄÎÄ¼ş
+71.æ¿€æ´»ä¸€ä¸ªç¨‹åºæˆ–ç¨‹åºå…³è”çš„æ–‡ä»¶
 #!/bin/bash
 
-72.MP3²¥·Å
+72.MP3æ’­æ”¾
 #!/bin/sh
 amp "%%1"
 
-73.WAV²¥·Å
+73.WAVæ’­æ”¾
 #!/bin/sh
 amp "%%1"
 
-74.Ğ´Í¼Ïñµ½¼ôÇĞ°å
+74.å†™å›¾åƒåˆ°å‰ªåˆ‡æ¿
 #!/bin/bash
 
-75.´Ó¼ôÌù°å¸´ÖÆÍ¼Ïñµ½´°Ìå
+75.ä»å‰ªè´´æ¿å¤åˆ¶å›¾åƒåˆ°çª—ä½“
 #!/bin/bash
 
-76.É¾³ıÎÄ¼ş¼ĞÏÂµÄËùÓĞÎÄ¼şÇÒ²»É¾³ıÎÄ¼ş¼ĞÏÂµÄÎÄ¼ş¼Ğ
+76.åˆ é™¤æ–‡ä»¶å¤¹ä¸‹çš„æ‰€æœ‰æ–‡ä»¶ä¸”ä¸åˆ é™¤æ–‡ä»¶å¤¹ä¸‹çš„æ–‡ä»¶å¤¹
 #!/bin/sh
 rm -if "%%1/*"
 
-77.XML±éÀú½áµãÊôĞÔÖµ
+77.XMLéå†ç»“ç‚¹å±æ€§å€¼
 #!/bin/bash
 
-78.UnicodeÎÄ¼ş×ªGB2312¸ñÊ½
+78.Unicodeæ–‡ä»¶è½¬GB2312æ ¼å¼
 #!/bin/sh
 iconv -f ucs2 -t  gbk %%1 -o %%2
 
-79.¿ªÔ´³ÌĞò¿âXercesc-C++´úÂë¹¤³ÌÖĞÄÚÁª80.ÌáÈ¡°üº¬Í·ÎÄ¼şÁĞ±í
+79.å¼€æºç¨‹åºåº“Xercesc-C++ä»£ç å·¥ç¨‹ä¸­å†…è”80.æå–åŒ…å«å¤´æ–‡ä»¶åˆ—è¡¨
 #!/bin/bash
 
-81.GB2312ÎÄ¼ş×ªUnicode¸ñÊ½
+81.GB2312æ–‡ä»¶è½¬Unicodeæ ¼å¼
 #!/bin/sh
 iconv -f gbk -t  ucs2 %%1 -o %%2
 
-82.Java³ÌĞò´ò°ü
+82.Javaç¨‹åºæ‰“åŒ…
 #!/bin/bash
 
-83.UTF-8ÎÄ¼ş×ªUnicode¸ñÊ½
+83.UTF-8æ–‡ä»¶è½¬Unicodeæ ¼å¼
 #!/bin/bash
 iconv -f utf8 -t  ucs2 %%1 -o %%2
 
-84.´´½¨PDFÎÄµµ
+84.åˆ›å»ºPDFæ–‡æ¡£
 #!/bin/bash
 
-85.´´½¨WordÎÄµµ
+85.åˆ›å»ºWordæ–‡æ¡£
 #!/bin/bash
 
-86.¿ìËÙ¸ßĞ§µÄÎÄ¼ş¼ÓÃÜ
+86.å¿«é€Ÿé«˜æ•ˆçš„æ–‡ä»¶åŠ å¯†
 #!/bin/bash
 
-87.´ÓCSVÎÄ¼ş¹¹ÔìXMLÎÄµµ
+87.ä»CSVæ–‡ä»¶æ„é€ XMLæ–‡æ¡£
 #!/bin/bash
 
-88.´ÓXMLÎÄµµÉú³ÉCSVÎÄ¼ş
+88.ä»XMLæ–‡æ¡£ç”ŸæˆCSVæ–‡ä»¶
 #!/bin/bash
 
-89.Ä£Äâ¼üÅÌÊäÈë×Ö·û´®
+89.æ¨¡æ‹Ÿé”®ç›˜è¾“å…¥å­—ç¬¦ä¸²
 #!/bin/bash
 
-90.ÌáÈ¡PDFÎÄ¼şÖĞµÄÎÄ±¾
+90.æå–PDFæ–‡ä»¶ä¸­çš„æ–‡æœ¬
 #!/bin/bash
 
-91.²Ù×÷ÄÚ´æÓ³ÉäÎÄ¼ş
+91.æ“ä½œå†…å­˜æ˜ å°„æ–‡ä»¶
 #!/bin/bash
-91.1·¢ËÍÄÚ´æÓ³ÉäÊı¾İ
-#!/bin/bash
-
-91.2½ÓÊÕÄÚ´æÓ³ÉäÊı¾İ
+91.1å‘é€å†…å­˜æ˜ å°„æ•°æ®
 #!/bin/bash
 
-92.ÖØ¶¨Ïòwindows¿ØÖÆÌ¨³ÌĞòµÄÊä³öĞÅÏ¢
+91.2æ¥æ”¶å†…å­˜æ˜ å°„æ•°æ®
 #!/bin/bash
 
-93.»ùÊı×ªĞòÊı
+92.é‡å®šå‘windowsæ§åˆ¶å°ç¨‹åºçš„è¾“å‡ºä¿¡æ¯
 #!/bin/bash
 
-94.Êı×ÖÔÂ·İ×ªÓ¢ÎÄ
+93.åŸºæ•°è½¬åºæ•°
 #!/bin/bash
 
-95.±¨±íÏà¹Ø
+94.æ•°å­—æœˆä»½è½¬è‹±æ–‡
 #!/bin/bash
 
-96.¸ù¾İ½ø³ÌÃû»ñÈ¡½ø³ÌID
+95.æŠ¥è¡¨ç›¸å…³
+#!/bin/bash
+
+96.æ ¹æ®è¿›ç¨‹åè·å–è¿›ç¨‹ID
 #!/bin/bash
 pidof %%1 -s
 
-96.BCPµ¼Èë
+96.BCPå¯¼å…¥
 #!/bin/bash
 
-97.BCPµ¼³ö
+97.BCPå¯¼å‡º
 #!/bin/bash
 
 
-98.¼ÆËãÎÄ¼şMD5Öµ
+98.è®¡ç®—æ–‡ä»¶MD5å€¼
 #!/bin/bash
 md5sum "%%1"
 
-99.¼ÆËã»ñÈ¡ÎÄ¼ş¼ĞÖĞÎÄ¼şµÄMD5Öµ
+99.è®¡ç®—è·å–æ–‡ä»¶å¤¹ä¸­æ–‡ä»¶çš„MD5å€¼
 #!/bin/bash
 
-100.¸´ÖÆÒ»¸öÄ¿Â¼ÏÂËùÓĞÎÄ¼şµ½Ò»¸öÎÄ¼ş¼ĞÖĞ
+100.å¤åˆ¶ä¸€ä¸ªç›®å½•ä¸‹æ‰€æœ‰æ–‡ä»¶åˆ°ä¸€ä¸ªæ–‡ä»¶å¤¹ä¸­
 #!/bin/bash
 cp $(find "%%1" -name *.*) "%%2"
 
-101.ÒÆ¶¯Ò»¸öÄ¿Â¼ÏÂËùÓĞÎÄ¼şµ½Ò»¸öÎÄ¼ş¼ĞÖĞ
+101.ç§»åŠ¨ä¸€ä¸ªç›®å½•ä¸‹æ‰€æœ‰æ–‡ä»¶åˆ°ä¸€ä¸ªæ–‡ä»¶å¤¹ä¸­
 #!/bin/bash
 mv $(find "%%1" -name *.*) "%%2"
 
-102.ÎÄ¼şRSA¸ß¼¶¼ÓÃÜ
-Ê®½øÖÆµ½Ê®Áù½øÖÆ
+102.æ–‡ä»¶RSAé«˜çº§åŠ å¯†
+åè¿›åˆ¶åˆ°åå…­è¿›åˆ¶
 typeset -i16 BASE_16_NUM
 BASE_16_NUM=%%1
 echo $BASE_16_NUM
 
-°Ë½øÖÆµ½Ê®Áù½øÖÆ
+å…«è¿›åˆ¶åˆ°åå…­è¿›åˆ¶
 #!/bin/bash
 typeset -i16 BASE_16_NUM
 BASE_16_NUM=8#%%1
 echo $BASE_16_NUM
 
-Ê®½øÖÆµ½°Ë½øÖÆ
+åè¿›åˆ¶åˆ°å…«è¿›åˆ¶
 #!/bin/bash
 printf %o %%1; echo
 
-Ê®½øÖÆµ½Ê®Áù½øÖÆ
+åè¿›åˆ¶åˆ°åå…­è¿›åˆ¶
 #!/bin/bash
 printf %x %%1; echo
 
-103.¼ÆËãÎÄ¼ş´óĞ¡
+103.è®¡ç®—æ–‡ä»¶å¤§å°
 #!/bin/bash
 wc "%%1"
 
-104.¼ÆËãÎÄ¼ş¼ĞµÄ´óĞ¡
+104.è®¡ç®—æ–‡ä»¶å¤¹çš„å¤§å°
 #!/sbin/ksh
 dir=%%1
 (cd $dir;pwd)
 find $dir -type d -print | du | awk '{print $2, "== ("$1/2"kb)"}' |sort -f |
 sed -e "s,[^ /]*/([^ /]*) ==,|--1," -e"s,[^ /]*/,| ,g"
 
-105.¿ìËÙ»ñµÃµ±Ç°³ÌĞòµÄÇı¶¯Æ÷¡¢Â·¾¶¡¢ÎÄ¼şÃûºÍÀ©Õ¹Ãû
+105.å¿«é€Ÿè·å¾—å½“å‰ç¨‹åºçš„é©±åŠ¨å™¨ã€è·¯å¾„ã€æ–‡ä»¶åå’Œæ‰©å±•å
 
-106.´ÅÅÌÊ£Óà¿Õ¼ä¼ÆËã
+106.ç£ç›˜å‰©ä½™ç©ºé—´è®¡ç®—
 #!/bin/bash
 df -k
 
-107.»ñÈ¡µ±Ç°³ÌĞò½ø³ÌID
+107.è·å–å½“å‰ç¨‹åºè¿›ç¨‹ID
 #!/bin/bash
 pidof %%1 -s
 
-108.È«ÅÌËÑË÷ÎÄ¼ş
+108.å…¨ç›˜æœç´¢æ–‡ä»¶
 #!/bin/bash
 #updatedb
 #locate %%1
 slocate %%1
 
-109.»ñµÃµ±Ç°µÇÂ¼µÄÓÃ»§Ãû
+109.è·å¾—å½“å‰ç™»å½•çš„ç”¨æˆ·å
 #!/bin/bash
 whoami
 
-110.»ñµÃËùÓĞÓÃ»§Ãû
+110.è·å¾—æ‰€æœ‰ç”¨æˆ·å
 #!/bin/bash
 who
 
-111.´´½¨MySQL¹ÜÀíÓÃ»§
+111.åˆ›å»ºMySQLç®¡ç†ç”¨æˆ·
 #!/bin/bash
 mysqladmin -u root password %%1
 
-112.¹ÜÀíMySQLÊı¾İ¿â·şÎñÆ÷
+112.ç®¡ç†MySQLæ•°æ®åº“æœåŠ¡å™¨
 #!/bin/bash
-112.1.Æô¶¯MySQLÊı¾İ¿â·şÎñÆ÷
+112.1.å¯åŠ¨MySQLæ•°æ®åº“æœåŠ¡å™¨
 mysqld -console
 
-112.2.µÇÂ¼MySQLÊı¾İ¿â·şÎñÆ÷
-112.2.1.µÇÂ¼±¾µØMySQLÊı¾İ¿â·şÎñÆ÷
+112.2.ç™»å½•MySQLæ•°æ®åº“æœåŠ¡å™¨
+112.2.1.ç™»å½•æœ¬åœ°MySQLæ•°æ®åº“æœåŠ¡å™¨
 mysql -uroot -p%%1
 
-112.2.2.µÇÂ¼Ô¶³ÌMySQLÊı¾İ¿â·şÎñÆ÷
+112.2.2.ç™»å½•è¿œç¨‹MySQLæ•°æ®åº“æœåŠ¡å™¨
 mysql -h %%1 -u %%2 -p%%3
 
-112.3.¹Ø±ÕMySQLÊı¾İ¿â·şÎñÆ÷
+112.3.å…³é—­MySQLæ•°æ®åº“æœåŠ¡å™¨
 mysqladmin -u root shutdown
 #pkill -9 mysql
 
-112.4.²âÊÔMySQLÊı¾İ¿â·şÎñÆ÷
+112.4.æµ‹è¯•MySQLæ•°æ®åº“æœåŠ¡å™¨
 mysqlshow || mysqlshow -u root mysql || mysqladmin version status || mysql test
 
-113.MySQLÖ´ĞĞ²éÑ¯
+113.MySQLæ‰§è¡ŒæŸ¥è¯¢
 #!/bin/sh
 mysqladmin -u %%1 -p%%2 SELECT * INTO OUTFILE './bestlovesky.xls' FROM bestlovesky WHERE 1 ORDER BY id DESC  LIMIT 0, 50;
 
 mysql -u %%1 -p%%2 -e "SELECT * INTO OUTFILE './bestlovesky.xls' FROM bestlovesky WHERE 1 ORDER BY id DESC  LIMIT 0, 50;"
 
-114.´´½¨Oracle¹ÜÀíÓÃ»§
+114.åˆ›å»ºOracleç®¡ç†ç”¨æˆ·
 #!/bin/sh
-114.1.´´½¨ĞÂÓÃ»§
+114.1.åˆ›å»ºæ–°ç”¨æˆ·
 create user test identified by test default tablespace ts_test temporary
 tablespace temp;
 
-114.2.¸øÓÃ»§½ÇÉ«ÌØÈ¨
+114.2.ç»™ç”¨æˆ·è§’è‰²ç‰¹æƒ
 grant connect,resource to test;
 
-115.µÇÂ¼OracleÊı¾İ¿â
+115.ç™»å½•Oracleæ•°æ®åº“
 #!/bin/bash
 sqlplusw
 sqlplus /nolog
@@ -1802,211 +1814,211 @@ conn username/password@Oranet
 conn system/systempwd@whfc
 conn sys/syspwd@whfc as sysdba
 
-115.´´½¨Oracle±í¿Õ¼ä
+115.åˆ›å»ºOracleè¡¨ç©ºé—´
 #!/bin/bash
 conn system@whfc01
 create tablespace ts_test datafile '/data2/oradata/ciis/ts_test01.dbf' size
 
-116.Ìí¼ÓOracleÊı¾İÎÄ¼ş
+116.æ·»åŠ Oracleæ•°æ®æ–‡ä»¶
 #!/bin/bash
 alter tablespace ts_test add datafile '/data2/oradata/ciis/ts_test02.dbf' size
 
-117.²é¿´Oracle±í¿Õ¼ä´óĞ¡
+117.æŸ¥çœ‹Oracleè¡¨ç©ºé—´å¤§å°
 #!/bin/bash
 desc DBA_DATA_FILES
 
-118.²é¿´OracleÊ£Óà±í¿Õ¼ä´óĞ¡
+118.æŸ¥çœ‹Oracleå‰©ä½™è¡¨ç©ºé—´å¤§å°
 #!/bin/bash
 desc DBA_FREE_SPACE
 
-119.²é¿´Oracleµ±Ç°ÓÃ»§±íÃû
+119.æŸ¥çœ‹Oracleå½“å‰ç”¨æˆ·è¡¨å
 #!/bin/bash
 select * from tab;
 
-120.Oracle´´½¨Ë÷Òı
+120.Oracleåˆ›å»ºç´¢å¼•
 #!/bin/bash
 CREATE INDEX idx_book_bookid ON book(bookname);
 
-121.Oracle´´½¨Ö÷¼üÔ¼Êø
+121.Oracleåˆ›å»ºä¸»é”®çº¦æŸ
 #!/bin/bash
 ALTER TABLE book ADD CONSTRAINT pk_book_bookid PRIMARY KEY (bookid);
 
-122.OracleÏÔÊ¾±í½á¹¹
+122.Oracleæ˜¾ç¤ºè¡¨ç»“æ„
 #!/bin/bash
 desc book
 
-123.Oracle²é¿´±íµÄË÷Òı
+123.OracleæŸ¥çœ‹è¡¨çš„ç´¢å¼•
 #!/bin/bash
 column index_name format a30
 select table_name, index_name from user_indexes;
 
-124.Oracle²é¿´Ë÷ÒıÁĞ
+124.OracleæŸ¥çœ‹ç´¢å¼•åˆ—
 #!/bin/bash
 select table_name, index_name, column_name, column_position from user_ind_columns;
 
-125.Oracle²é¿´Êı¾İ¶ÎÕ¼¿Õ¼ä´óĞ¡
+125.OracleæŸ¥çœ‹æ•°æ®æ®µå ç©ºé—´å¤§å°
 #!/bin/bash
 desc user_segments
 
-126.Oracle²é¿´±íÕ¼¿Õ¼ä´óĞ¡
+126.OracleæŸ¥çœ‹è¡¨å ç©ºé—´å¤§å°
 #!/bin/bash
 select segment_name,segment_type,bytes from user_segments where segment_type='TABLE';
 
-127.°²È«É¾³ıUSB
+127.å®‰å…¨åˆ é™¤USB
 #!/bin/bash
 rundll32.exe shell32.dll,Control_RunDLL hotplug.dll
 
-128.´ò¿ªSQL Server Management Studio
+128.æ‰“å¼€SQL Server Management Studio
 #!/bin/bash
 sqlwb %%1.sql
 
-129.MySQLÊı¾İ¿âµ¼³ö±¸·İ
+129.MySQLæ•°æ®åº“å¯¼å‡ºå¤‡ä»½
 #!/bin/bash
 mysqldump -u %%1 -p %%2 %%3>%%4.sql
-mysqldump --opt test > mysql.test //½«Êı¾İ¿âtestµ¼³öµ½mysql.testÎÄ¼ş£¬ºóÃæÊÇÒ»¸öÎÄ±¾ÎÄ¼ş
-mysqldump -u root -p123456 --databases dbname > mysql.dbname //¾ÍÊÇ°ÑÊı¾İ¿âdbnameµ¼³öµ½ÎÄ¼şmysql.dbnameÖĞ¡£
+mysqldump --opt test > mysql.test //å°†æ•°æ®åº“testå¯¼å‡ºåˆ°mysql.testæ–‡ä»¶ï¼Œåé¢æ˜¯ä¸€ä¸ªæ–‡æœ¬æ–‡ä»¶
+mysqldump -u root -p123456 --databases dbname > mysql.dbname //å°±æ˜¯æŠŠæ•°æ®åº“dbnameå¯¼å‡ºåˆ°æ–‡ä»¶mysql.dbnameä¸­ã€‚
 
-130.MySQLÊı¾İ¿âÊı¾İµ¼Èë
+130.MySQLæ•°æ®åº“æ•°æ®å¯¼å…¥
 mysql -u %%1 -p %%2 %%3<%%4.sql
 mysqlimport -u root -p123456 < mysql.dbname
-½«ÎÄ±¾Êı¾İµ¼ÈëÊı¾İ¿â£º
-ÎÄ±¾Êı¾İµÄ×Ö¶ÎÖ®¼äÓÃtab¼ü¸ô¿ª
+å°†æ–‡æœ¬æ•°æ®å¯¼å…¥æ•°æ®åº“ï¼š
+æ–‡æœ¬æ•°æ®çš„å­—æ®µä¹‹é—´ç”¨tabé”®éš”å¼€
 use test
-load data local infile "ÎÄ¼şÃû" into table ±íÃû£»
+load data local infile "æ–‡ä»¶å" into table è¡¨åï¼›
 eg: load data local infile "D:/mysql.txt" into table mytable;
-µ¼Èë.sql ÎÄ¼şÃüÁî
+å¯¼å…¥.sql æ–‡ä»¶å‘½ä»¤
 use database
 source d:/mysql.sql;
 
-131.MySQLÊı¾İ¿â¼ì²é
+131.MySQLæ•°æ®åº“æ£€æŸ¥
 mysqlcheck -o %%3 -u %%1 -p %%2
 
-132.MySQLÊı¾İ±íÎÄ¼şĞŞ¸´
+132.MySQLæ•°æ®è¡¨æ–‡ä»¶ä¿®å¤
 myisamchk -B -o %%1.myd
 
-1,²é¿´Êı¾İ¿â×´Ì¬ ¼°Æô¶¯Í£Ö¹
+1,æŸ¥çœ‹æ•°æ®åº“çŠ¶æ€ åŠå¯åŠ¨åœæ­¢
 /etc/init.d/mysqld status
 /etc/init.d/mysqld start
 /etc/init.d/mysqld stop
 
-2,¸øÓÃ»§ÅäÖÃ³õÊ¼ÃÜÂë123456£º
+2,ç»™ç”¨æˆ·é…ç½®åˆå§‹å¯†ç 123456ï¼š
 mysqladmin -u root -password 123456
 
-3,ĞŞ¸ÄrootÓÃ»§ÃÜÂëÎª abc123
+3,ä¿®æ”¹rootç”¨æˆ·å¯†ç ä¸º abc123
 mysqladmin -u root -p123456 password abc123
 
-4,Èç¹ûÏëÈ¥µôÃÜÂë£º
+4,å¦‚æœæƒ³å»æ‰å¯†ç ï¼š
 mysqladmin -u root -pabc123 password ""
 
-5,rootÁ¬½ÓÊı¾İ¿âÓĞÃÜÂëºÍÎŞÃÜÂë£º
+5,rootè¿æ¥æ•°æ®åº“æœ‰å¯†ç å’Œæ— å¯†ç ï¼š
 mysql -u root(-uroot) -p
 mysql
 
-6,Ôö¼ÓÓÃ»§ test1 ÃÜÂë abc,ÈÃËü¿ÉÒÔÔÚÈÎºÎÖ÷»úÉÏµÇÂ¼£¬²¢¶ÔËùÓĞÊı¾İ¿âÓĞ²éÑ¯£¬²åÈë£¬ĞŞ¸Ä£¬É¾³ıµÄÈ¨ÏŞ£º
-¸ñÊ½£º grant select on Êı¾İ¿â.* to ÓÃ»§Ãû@µÇÂ¼Ö÷»ú identified by "ÃÜÂë"
+6,å¢åŠ ç”¨æˆ· test1 å¯†ç  abc,è®©å®ƒå¯ä»¥åœ¨ä»»ä½•ä¸»æœºä¸Šç™»å½•ï¼Œå¹¶å¯¹æ‰€æœ‰æ•°æ®åº“æœ‰æŸ¥è¯¢ï¼Œæ’å…¥ï¼Œä¿®æ”¹ï¼Œåˆ é™¤çš„æƒé™ï¼š
+æ ¼å¼ï¼š grant select on æ•°æ®åº“.* to ç”¨æˆ·å@ç™»å½•ä¸»æœº identified by "å¯†ç "
 grant select,insert,update,delete on *.* to test1@"%" Identified by "abc";
 
-8,Ôö¼ÓÒ»¸öÓÃ»§test2,ÈÃËüÖ»¿ÉÒÔÔÚlocalhostÉÏµÇÂ¼£¬²¢¿ÉÒÔ¶ÔÊı¾İ¿âmydb½øĞĞ²éÑ¯£¬²åÈë£¬ĞŞ¸Ä£¬É¾³ıµÄ²Ù×÷£¬
-ÕâÑùÓÃ»§¼´Ê¹Ê¹ÓÃÖªµÀtest2µÄÃÜÂë£¬ËûÒ²ÎŞ·¨´Óinternet ÉÏÖ±½Ó·ÃÎÊÊı¾İ¿â£¬Ö»ÄÜÍ¨¹ımysqlÖ÷»úÉÏµÄwebÒ³ÃæÀ´·ÃÎÊ¡£
+8,å¢åŠ ä¸€ä¸ªç”¨æˆ·test2,è®©å®ƒåªå¯ä»¥åœ¨localhostä¸Šç™»å½•ï¼Œå¹¶å¯ä»¥å¯¹æ•°æ®åº“mydbè¿›è¡ŒæŸ¥è¯¢ï¼Œæ’å…¥ï¼Œä¿®æ”¹ï¼Œåˆ é™¤çš„æ“ä½œï¼Œ
+è¿™æ ·ç”¨æˆ·å³ä½¿ä½¿ç”¨çŸ¥é“test2çš„å¯†ç ï¼Œä»–ä¹Ÿæ— æ³•ä»internet ä¸Šç›´æ¥è®¿é—®æ•°æ®åº“ï¼Œåªèƒ½é€šè¿‡mysqlä¸»æœºä¸Šçš„webé¡µé¢æ¥è®¿é—®ã€‚
 grant select,insert,update,delete on mydb.* to test2@localhost identified by "abc";
-grant select,insert,update,delete on mydb.* to test2@localhost identified by ""; ÉèÖÃÎŞÃÜÂë
+grant select,insert,update,delete on mydb.* to test2@localhost identified by ""; è®¾ç½®æ— å¯†ç 
 
-9,ÏÔÊ¾Êı¾İ¿âÁĞ±í£º
+9,æ˜¾ç¤ºæ•°æ®åº“åˆ—è¡¨ï¼š
 show databases;
-use mysql ´ò¿ª¿â
+use mysql æ‰“å¼€åº“
 show tables;
 
-10,±íµÄ²Ù×÷
-describle ±íÃû£» ÏÔÊ¾Êı¾İ±íµÄ½á¹¹
-create database ¿âÃû£»
-drop database ¿âÃû£»
-create table ±íÃû(×Ö¶ÎÉè¶¨ÁĞ±í£©
-drop table ±íÃû£»
-delete from ±íÃû£»Çå¿Õ±í¼ÇÂ¼
-select * from ±íÃû£» ÏÔÊ¾±íÖĞµÄ¼ÇÂ¼
-insert into ±íÃû values(£¬ £¬)
+10,è¡¨çš„æ“ä½œ
+describle è¡¨åï¼› æ˜¾ç¤ºæ•°æ®è¡¨çš„ç»“æ„
+create database åº“åï¼›
+drop database åº“åï¼›
+create table è¡¨å(å­—æ®µè®¾å®šåˆ—è¡¨ï¼‰
+drop table è¡¨åï¼›
+delete from è¡¨åï¼›æ¸…ç©ºè¡¨è®°å½•
+select * from è¡¨åï¼› æ˜¾ç¤ºè¡¨ä¸­çš„è®°å½•
+insert into è¡¨å values(ï¼Œ ï¼Œ)
 
-alter table ±íÃû add column <×Ö¶ÎÃû><×Ö¶ÎÑ¡Ïî>
+alter table è¡¨å add column <å­—æ®µå><å­—æ®µé€‰é¡¹>
 
-133.¼ì²é¶Ë¿ÚÕ¼ÓÃ
+133.æ£€æŸ¥ç«¯å£å ç”¨
 #!/bin/bash
 netstat -ano
 
-134.LinuxÏÂ¼ì²éApacheÊÇ·ñ°²×°
+134.Linuxä¸‹æ£€æŸ¥Apacheæ˜¯å¦å®‰è£…
 #!/bin/bash
 rpm -qa | grep httpd
 
-135.LinuxÏÂÆô¶¯Apache·şÎñ
+135.Linuxä¸‹å¯åŠ¨ApacheæœåŠ¡
 #!/bin/bash
 service httpd start
 
-136.LinuxÏÂÍ£Ö¹Apache·şÎñ
+136.Linuxä¸‹åœæ­¢ApacheæœåŠ¡
 #!/bin/bash
 service httpd stop
 
-137.LinuxÏÂÖØĞÂÆô¶¯Apache·şÎñ
+137.Linuxä¸‹é‡æ–°å¯åŠ¨ApacheæœåŠ¡
 #!/bin/bash
 service httpd restart
 
-138.LinuxÏÂ×Ô¶¯¼ÓÔØApache ·şÎñ
+138.Linuxä¸‹è‡ªåŠ¨åŠ è½½Apache æœåŠ¡
 #!/bin/bash
 chkconfig - level 3 httpd on
 
-139.LinuxÏÂ²»×Ô¶¯¼ÓÔØApache ·şÎñ
+139.Linuxä¸‹ä¸è‡ªåŠ¨åŠ è½½Apache æœåŠ¡
 #!/bin/bash
 chkconfig - level 3 httpd off
 
-140.LinuxÏÂ¼ì²éVSFTPÊÇ·ñ°²×°
+140.Linuxä¸‹æ£€æŸ¥VSFTPæ˜¯å¦å®‰è£…
 #!/bin/bash
 rpm -qa | grep vsftpd
 
-141.LinuxÏÂÆô¶¯VSFTP·şÎñ
+141.Linuxä¸‹å¯åŠ¨VSFTPæœåŠ¡
 #!/bin/bash
 service vsftpd start
 
-142.LinuxÏÂÍ£Ö¹VSFTP·şÎñ
+142.Linuxä¸‹åœæ­¢VSFTPæœåŠ¡
 #!/bin/bash
 service vsftpd stop
 
-143.LinuxÏÂÖØĞÂÆô¶¯VSFTP·şÎñ
+143.Linuxä¸‹é‡æ–°å¯åŠ¨VSFTPæœåŠ¡
 #!/bin/bash
 service vsftpd restart
 
-144.LinuxÏÂ¼ì²éVSFTPÊÇ·ñ±»Æô¶¯
+144.Linuxä¸‹æ£€æŸ¥VSFTPæ˜¯å¦è¢«å¯åŠ¨
 #!/bin/bash
 pstree | grep vsftpd
 
-145.LinuxÏÂ¼ì²éSendmailÊÇ·ñ°²×°
+145.Linuxä¸‹æ£€æŸ¥Sendmailæ˜¯å¦å®‰è£…
 #!/bin/bash
 rpm -qa | grep sendmail
 
-146.LinuxÏÂÆô¶¯Sendmail·şÎñ
+146.Linuxä¸‹å¯åŠ¨SendmailæœåŠ¡
 #!/bin/bash
 service sendmail start
 
-147.LinuxÏÂÍ£Ö¹Sendmail·şÎñ
+147.Linuxä¸‹åœæ­¢SendmailæœåŠ¡
 #!/bin/bash
 service sendma stop
 
-148.LinuxÏÂÖØĞÂÆô¶¯Sendmail·şÎñ
+148.Linuxä¸‹é‡æ–°å¯åŠ¨SendmailæœåŠ¡
 #!/bin/bash
 service sendmail restart
 
-149.LinuxÏÂ×Ô¶¯¼ÓÔØSendmail ·şÎñ
+149.Linuxä¸‹è‡ªåŠ¨åŠ è½½Sendmail æœåŠ¡
 #!/bin/bash
 chkconfig - level 3 sendmail on
 
-150.LinuxÏÂ²»×Ô¶¯¼ÓÔØSendmail ·şÎñ
+150.Linuxä¸‹ä¸è‡ªåŠ¨åŠ è½½Sendmail æœåŠ¡
 #!/bin/bash
 chkconfig - level 3 sendmail off
 
-151.LinuxÏÂÎÄ±¾Í¼ĞÎ½çÃæÅäÖÃÆô¶¯·şÎñ
+151.Linuxä¸‹æ–‡æœ¬å›¾å½¢ç•Œé¢é…ç½®å¯åŠ¨æœåŠ¡
 #!/bin/bash
 ntsysv
 
-152.ÒÔÊı×éµÄ·½Ê½É¾³ıÎÄ¼ş¼Ğ
+152.ä»¥æ•°ç»„çš„æ–¹å¼åˆ é™¤æ–‡ä»¶å¤¹
 
-153.GCCÅúÁ¿±àÒë
+153.GCCæ‰¹é‡ç¼–è¯‘
 #!/bin/bash
 find -type f \( -iname '*.c' -o -iname '*.cpp' \) -print |
 while read filename
@@ -2021,7 +2033,7 @@ do
     esac
 done
 
-154.ÅúÁ¿¸³Óè¿ÉÖ´ĞĞÈ¨ÏŞ
+154.æ‰¹é‡èµ‹äºˆå¯æ‰§è¡Œæƒé™
 #!/bin/bash
 find "$PWD" -type f \( -iname '*.sh' -o  -iname '*.csh' -o  -iname '*.ksh' -o -iname '*.pl' -o -iname '*.bin' -o -iname '*.run' -o -iname '*.bundle' -o -iname '*.rb' -o -iname '*.py' \) -print0 | xargs -0 chmod +x
 
@@ -2045,7 +2057,7 @@ done
 done
 IFS=$OLDIFS
 
-155.ÅúÁ¿Ö´ĞĞ
+155.æ‰¹é‡æ‰§è¡Œ
 #!/bin/bash
 find -type f \( -iname '*.sh' -o  -iname '*.csh' -o  -iname '*.ksh' -o -iname '*.pl' -o -iname '*.bin' -o -iname '*.run' -o -iname '*.bundle' -o -iname '*.bin' -o -iname '*.class' -o -iname '*.rpm' -o -iname '*.rb' -o -iname '*.py' -o -iname '*.jar' \) -print |
 while read filename
@@ -2098,16 +2110,16 @@ do
     esac
 done
 
-156.»ñÈ¡²Ù×÷ÏµÍ³°æ±¾
+156.è·å–æ“ä½œç³»ç»Ÿç‰ˆæœ¬
 #!/bin/bash
 uname -r
 #uname -a
 
-157.×ÔÉí¸´ÖÆ
+157.è‡ªèº«å¤åˆ¶
 #!/bin/bash
 cp $0 "%%1"
 
-158.GCCÅúÁ¿´´½¨¾²Ì¬¿â
+158.GCCæ‰¹é‡åˆ›å»ºé™æ€åº“
 #!/bin/bash
 find -type f \( -iname '*.c' -o -iname '*.cpp' \) -print |
 while read filename
@@ -2130,7 +2142,7 @@ done
 IFS=$OLDIFS
 find "$PWD" -type f \( -iname '*.o' \) -print0 | xargs -0 rm -if
 
-159.JavaÅúÁ¿´ò°üEJB
+159.Javaæ‰¹é‡æ‰“åŒ…EJB
 #!/bin/bash
 find "$PWD" -type f \( -iname '*.java' \) -print0 | xargs -0 javac
 OLDIFS=$IFS
@@ -2143,17 +2155,17 @@ IFS=$OLDIFS
 
 find "$PWD" -type f \( -iname '*.class' \) -print0 | xargs -0 rm -if
 
-160.»ñÈ¡»·¾³±äÁ¿
+160.è·å–ç¯å¢ƒå˜é‡
 
 161.dd
 #!/bin/bash
 dd
 
-162.ÏÔÊ¾Ö»ÓĞĞ¡Ğ´×ÖÄ¸µÄÎÄ¼ş
+162.æ˜¾ç¤ºåªæœ‰å°å†™å­—æ¯çš„æ–‡ä»¶
 #!/bin/bash
 ls -1|awk '/^[[:lower:]].*/'
 
-163.ZipÑ¹ËõÄ¿Â¼ÖĞµÄËùÓĞÎÄ¼ş
+163.Zipå‹ç¼©ç›®å½•ä¸­çš„æ‰€æœ‰æ–‡ä»¶
 #!/bin/bash
 direc="%%1" #$(pwd)
 targetpath="%%2"
@@ -2171,7 +2183,7 @@ done
 done
 IFS=$OLDIFS
 
-164.Zip½âÑ¹ËõÄ¿Â¼ÖĞµÄËùÓĞÎÄ¼ş
+164.Zipè§£å‹ç¼©ç›®å½•ä¸­çš„æ‰€æœ‰æ–‡ä»¶
 #!/bin/bash
 direc="%%1" #$(pwd)
 targetpath="%%2"
@@ -2184,7 +2196,7 @@ unzip -x "$path/*.zip" -d "$targetpath/${path:${#direc}+1}"
 done
 IFS=$OLDIFS
 
-165.·Ö²¼Ê½¸´ÖÆÎÄ¼ş¼Ğ
+165.åˆ†å¸ƒå¼å¤åˆ¶æ–‡ä»¶å¤¹
 #!/bin/bash
 direc="%%1" #$(pwd)
 targetpath="%%2"
@@ -2204,64 +2216,64 @@ done
 done
 IFS=$OLDIFS
 
-166.×¢²á·´×¢²á×é¼ş
+166.æ³¨å†Œåæ³¨å†Œç»„ä»¶
 #!/bin/bash
 regsvr32 "%%1"
 
 167.LZMA
 #!/bin/bash
 
-168.CABÑ¹ËõÎÄ¼ş
+168.CABå‹ç¼©æ–‡ä»¶
 #!/bin/bash
 
-169.CAB½âÑ¹ËõÎÄ¼ş
+169.CABè§£å‹ç¼©æ–‡ä»¶
 #!/bin/bash
 
 
-170.Ëø¶¨ÆÁÄ»
+170.é”å®šå±å¹•
 #!/bin/sh
 RUNDLL32.exe USER32,LockWorkStation
 
-171.ÒÔÆäËüÓÃ»§µÄÉí·İÔËĞĞ³ÌĞò
+171.ä»¥å…¶å®ƒç”¨æˆ·çš„èº«ä»½è¿è¡Œç¨‹åº
 #!/bin/bash
 
-172.Ìí¼ÓÏµÍ³ÓÃ»§
+172.æ·»åŠ ç³»ç»Ÿç”¨æˆ·
 #!/bin/sh
 useradd "%%1"
 
-173.É¾³ıÏµÍ³ÓÃ»§
+173.åˆ é™¤ç³»ç»Ÿç”¨æˆ·
 #!/bin/sh
 userdel "%%1"
 
-174.Ìí¼ÓÓÃ»§×é
+174.æ·»åŠ ç”¨æˆ·ç»„
 #!/bin/sh
 groupadd -g 2000 "%%1"
 
-175.É¾³ıÓÃ»§×é
+175.åˆ é™¤ç”¨æˆ·ç»„
 #!/bin/sh
 groupdel "%%1"
 
-176.¸³Óè¹ÜÀíÔ±È¨ÏŞ
+176.èµ‹äºˆç®¡ç†å‘˜æƒé™
 #!/bin/bash
 
 
-177.ÊÕ»Ø¹ÜÀíÔ±È¨ÏŞ
+177.æ”¶å›ç®¡ç†å‘˜æƒé™
 #!/bin/bash
 
 
-178.±éÀúÄ¿Â¼²úÉúÉ¾³ıÎÄ¼şµÄ½Å±¾
+178.éå†ç›®å½•äº§ç”Ÿåˆ é™¤æ–‡ä»¶çš„è„šæœ¬
 #!/bin/bash
 
 
-179.LZWÑ¹ËõÎÄ¼ş
-#!/bin/bash
-z
-
-180.LZW½âÑ¹ËõÎÄ¼ş
+179.LZWå‹ç¼©æ–‡ä»¶
 #!/bin/bash
 z
 
-181.µİ¹é¸³ÓèÄ¿Â¼È¨ÏŞ
+180.LZWè§£å‹ç¼©æ–‡ä»¶
+#!/bin/bash
+z
+
+181.é€’å½’èµ‹äºˆç›®å½•æƒé™
 #!/bin/bash
 direc="%%1" #$(pwd)
 OLDIFS=$IFS
@@ -2272,45 +2284,45 @@ chown -R root.root "$path"
 done
 IFS=$OLDIFS
 
-182.Ğ¶ÔØRPM°ü
+182.å¸è½½RPMåŒ…
 #!/bin/sh
 rpm -e  "%%1"
 
-183.É¾³ıÔ´ÎÄ¼şÖĞµÄ×¢ÊÍ
+183.åˆ é™¤æºæ–‡ä»¶ä¸­çš„æ³¨é‡Š
 #!/bin/sh
 
-184.ÉèÖÃÄ¿Â¼ÏÂËùÓĞÎÄ¼şÊôĞÔÎª¿ÉĞ´
+184.è®¾ç½®ç›®å½•ä¸‹æ‰€æœ‰æ–‡ä»¶å±æ€§ä¸ºå¯å†™
 #!/bin/sh
 
-185.Í³¼ÆÄ¿Â¼ÏÂËùÓĞÎÄ¼şµÄ×Ü¹²ĞĞÊı
+185.ç»Ÿè®¡ç›®å½•ä¸‹æ‰€æœ‰æ–‡ä»¶çš„æ€»å…±è¡Œæ•°
 #!/bin/sh
 cat * |wc
 ls *|xargs wc -l
 find ./ -name "*c" | xargs wc -l
 
-186.É¾³ı×ÔÉí
+186.åˆ é™¤è‡ªèº«
 #!/bin/rm
 exit 65
 #rm $0
 
-187.´ò¿ªÖÕ¶Ë
+187.æ‰“å¼€ç»ˆç«¯
 #!/bin/bash -l
 
-188.µ¯³ö¹âÇı
+188.å¼¹å‡ºå…‰é©±
 #!/bin/sh
 eject
 
-189.ÊÕ»Ø¹âÇı
+189.æ”¶å›å…‰é©±
 #!/bin/sh
 eject -t
 
-190.´ÅÅÌ×Ü¿Õ¼ä¼ÆËã
+190.ç£ç›˜æ€»ç©ºé—´è®¡ç®—
 
-191.½âÎöCSVÎÄ¼ş
+191.è§£æCSVæ–‡ä»¶
 
-192.°´ĞĞ±£´æÎÄ¼şÎªÊı×é
+192.æŒ‰è¡Œä¿å­˜æ–‡ä»¶ä¸ºæ•°ç»„
 
-193.MySQLÖ´ĞĞSQLÎÄ¼ş
+193.MySQLæ‰§è¡ŒSQLæ–‡ä»¶
 mysqladmin -u %%1 -p%%2 < %%3.sql
 
 mysql -u %%1 -p%%2 -e "SOURCE %%3.sql"
