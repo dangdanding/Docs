@@ -1,4 +1,4 @@
-åœ¨Linux / UNIXæ“ä½œç³»ç»Ÿä¸‹ï¼Œå¦‚ä½•ä½¿ç”¨bash for loopé‡å¤æ‰§è¡ŒæŸäº›ä»»åŠ¡ï¼Ÿ
+ÔÚLinux / UNIX²Ù×÷ÏµÍ³ÏÂ£¬ÈçºÎÊ¹ÓÃbash for loopÖØ¸´Ö´ÐÐÄ³Ð©ÈÎÎñ£¿
 
 for file in "*.list"; 
 do 
@@ -7,20 +7,20 @@ do
         cat $file | grep ^Hostname[0-9]; 
     fi
 done
-ç¤ºä¾‹æ­£åˆ™è¡¨è¾¾å¼ ä¾‹å­ è¯´æ˜Ž  [abc] åŒ¹é… â€œaâ€ã€â€œbâ€ã€â€œcâ€ ä¹‹ä¸€  [a-z] åŒ¹é…ä»Ž â€œaâ€ åˆ° â€œzâ€ çš„ä»»ä½•ä¸€ä¸ªå°å†™å­—ç¬¦  [A-Z] åŒ¹é…ä»Ž â€œAâ€ åˆ° â€œZâ€ çš„ä»»ä½•ä¸€ä¸ªå¤§å†™å­—ç¬¦  [0-9] åŒ¹é…ä»Ž 0 åˆ° 9 çš„ä»»ä½•ä¸€ä¸ªæ•°å­—  [^0-9] åŒ¹é…ä»»ä½•é™¤äº† 0 åˆ° 9 æ•°å­—èŒƒå›´å†…çš„ä»»ä½•å­—ç¬¦  [-0-9] åŒ¹é…ä»Ž 0 åˆ° 9 çš„ä»»ä½•æ•°å­—ï¼Œæˆ–è€…æ˜¯çŸ­æ¨ªçº¿ï¼ˆ-ï¼‰  [0-9-] åŒ¹é…ä»Ž 0 åˆ° 9 çš„ä»»ä½•æ•°å­—ï¼Œæˆ–è€…æ˜¯çŸ­æ¨ªçº¿ï¼ˆ-ï¼‰  [^-0-9]åŒ¹é…é™¤ä»Ž 0 åˆ° 9 çš„æ•°å­—å’ŒçŸ­æ¨ªçº¿ï¼ˆ-ï¼‰ä¹‹å¤–çš„ä»»ä½•å­—ç¬¦  [a-zA-Z0-9] åŒ¹é…ä»»ä½•å­—ç¬¦æˆ–æ•°å­—
-^ ç¬¦å·ï¼ˆ^ï¼‰è¡¨ç¤ºä¸€è¡Œçš„å¼€å§‹ï¼›$ ç¬¦å·ï¼ˆ$ï¼‰è¡¨ç¤ºä¸€è¡Œçš„ç»“æŸã€‚
+Ê¾ÀýÕýÔò±í´ïÊ½ Àý×Ó ËµÃ÷  [abc] Æ¥Åä ¡°a¡±¡¢¡°b¡±¡¢¡°c¡± Ö®Ò»  [a-z] Æ¥Åä´Ó ¡°a¡± µ½ ¡°z¡± µÄÈÎºÎÒ»¸öÐ¡Ð´×Ö·û  [A-Z] Æ¥Åä´Ó ¡°A¡± µ½ ¡°Z¡± µÄÈÎºÎÒ»¸ö´óÐ´×Ö·û  [0-9] Æ¥Åä´Ó 0 µ½ 9 µÄÈÎºÎÒ»¸öÊý×Ö  [^0-9] Æ¥ÅäÈÎºÎ³ýÁË 0 µ½ 9 Êý×Ö·¶Î§ÄÚµÄÈÎºÎ×Ö·û  [-0-9] Æ¥Åä´Ó 0 µ½ 9 µÄÈÎºÎÊý×Ö£¬»òÕßÊÇ¶ÌºáÏß£¨-£©  [0-9-] Æ¥Åä´Ó 0 µ½ 9 µÄÈÎºÎÊý×Ö£¬»òÕßÊÇ¶ÌºáÏß£¨-£©  [^-0-9]Æ¥Åä³ý´Ó 0 µ½ 9 µÄÊý×ÖºÍ¶ÌºáÏß£¨-£©Ö®ÍâµÄÈÎºÎ×Ö·û  [a-zA-Z0-9] Æ¥ÅäÈÎºÎ×Ö·û»òÊý×Ö
+^ ·ûºÅ£¨^£©±íÊ¾Ò»ÐÐµÄ¿ªÊ¼£»$ ·ûºÅ£¨$£©±íÊ¾Ò»ÐÐµÄ½áÊø¡£
 
 
-å¦‚ä½•ä½¿ç”¨forè¯­å¥è®¾ç½®æ— é™å¾ªçŽ¯ï¼Ÿ
+ÈçºÎÊ¹ÓÃforÓï¾äÉèÖÃÎÞÏÞÑ­»·£¿
 
-å¦‚ä½•ä½¿ç”¨ä¸‰å‚æ•°è¿›è¡Œå¾ªçŽ¯æŽ§åˆ¶è¡¨è¾¾å¼ï¼Ÿ
+ÈçºÎÊ¹ÓÃÈý²ÎÊý½øÐÐÑ­»·¿ØÖÆ±í´ïÊ½£¿
 
-â€œ forå¾ªçŽ¯â€æ˜¯bashç¼–ç¨‹è¯­è¨€çš„è¯­å¥ï¼Œå®ƒå…è®¸é‡å¤æ‰§è¡Œä»£ç ã€‚ forå¾ªçŽ¯è¢«å½’ç±»ä¸ºè¿­ä»£è¯­å¥ï¼Œå³bashè„šæœ¬ä¸­è¿›ç¨‹çš„é‡å¤ã€‚
+¡° forÑ­»·¡±ÊÇbash±à³ÌÓïÑÔµÄÓï¾ä£¬ËüÔÊÐíÖØ¸´Ö´ÐÐ´úÂë¡£ forÑ­»·±»¹éÀàÎªµü´úÓï¾ä£¬¼´bash½Å±¾ÖÐ½ø³ÌµÄÖØ¸´¡£
 
-ä¾‹å¦‚ï¼Œæ‚¨å¯ä»¥è¿è¡ŒUNIXå‘½ä»¤æˆ–ä»»åŠ¡5æ¬¡ï¼Œæˆ–ä½¿ç”¨forå¾ªçŽ¯è¯»å–å’Œå¤„ç†æ–‡ä»¶åˆ—è¡¨ã€‚ å¯ä»¥åœ¨shellæç¤ºç¬¦ä¸‹æˆ–åœ¨shellè„šæœ¬æœ¬èº«å†…ä½¿ç”¨forå¾ªçŽ¯ã€‚
+ÀýÈç£¬Äú¿ÉÒÔÔËÐÐUNIXÃüÁî»òÈÎÎñ5´Î£¬»òÊ¹ÓÃforÑ­»·¶ÁÈ¡ºÍ´¦ÀíÎÄ¼þÁÐ±í¡£ ¿ÉÒÔÔÚshellÌáÊ¾·ûÏÂ»òÔÚshell½Å±¾±¾ÉíÄÚÊ¹ÓÃforÑ­»·¡£
 
-forå¾ªçŽ¯è¯­æ³•
-æ•°å­—èŒƒå›´çš„è¯­æ³•å¦‚ä¸‹:
+forÑ­»·Óï·¨
+Êý×Ö·¶Î§µÄÓï·¨ÈçÏÂ:
 
 for VARIABLE in 1 2 3 4 5 .. N
 do
@@ -28,7 +28,7 @@ do
 	command2
 	commandN
 done
-æˆ–
+»ò
 
 for VARIABLE in file1 file2 file3
 do
@@ -36,7 +36,7 @@ do
 	command2
 	commandN
 done
-æˆ–
+»ò
 
  
 for OUTPUT in $(Linux-Or-Unix-Command-Here)
@@ -45,22 +45,22 @@ do
 	command2 on $OUTPUT
 	commandN
 done
-å®žä¾‹
-è¿™ç§forå¾ªçŽ¯çš„ç‰¹å¾æ˜¯è®¡æ•°ã€‚èŒƒå›´ç”±å¼€å§‹(#1)å’Œç»“æŸæ•°å­—(#5)æŒ‡å®šã€‚forå¾ªçŽ¯ä¸ºé¡¹åˆ—è¡¨ä¸­çš„æ¯ä¸ªæˆå‘˜æ‰§è¡Œä¸€ç³»åˆ—å‘½ä»¤ã€‚ä¸‹é¢æ˜¯BASHä¸­çš„ä¸€ä¸ªå…¸åž‹ç¤ºä¾‹ï¼Œå®ƒä½¿ç”¨forå¾ªçŽ¯æ˜¾ç¤ºæ¬¢è¿Žæ¶ˆæ¯5æ¬¡
+ÊµÀý
+ÕâÖÖforÑ­»·µÄÌØÕ÷ÊÇ¼ÆÊý¡£·¶Î§ÓÉ¿ªÊ¼(#1)ºÍ½áÊøÊý×Ö(#5)Ö¸¶¨¡£forÑ­»·ÎªÏîÁÐ±íÖÐµÄÃ¿¸ö³ÉÔ±Ö´ÐÐÒ»ÏµÁÐÃüÁî¡£ÏÂÃæÊÇBASHÖÐµÄÒ»¸öµäÐÍÊ¾Àý£¬ËüÊ¹ÓÃforÑ­»·ÏÔÊ¾»¶Ó­ÏûÏ¢5´Î
 
 #!/bin/bash
 for i in 1 2 3 4 5
 do
    echo "Welcome $i times"
 done
-æœ‰æ—¶æ‚¨å¯èƒ½éœ€è¦è®¾ç½®ä¸€ä¸ªstepå€¼(ä¾‹å¦‚å…è®¸ä¸€ä¸ªæŒ‰ä¸¤ä¸ªsè®¡æ•°æˆ–å‘åŽè®¡æ•°)ã€‚æœ€æ–°çš„bash 3.0+ç‰ˆæœ¬å†…ç½®äº†å¯¹è®¾ç½®èŒƒå›´çš„æ”¯æŒ
+ÓÐÊ±Äú¿ÉÄÜÐèÒªÉèÖÃÒ»¸östepÖµ(ÀýÈçÔÊÐíÒ»¸ö°´Á½¸ös¼ÆÊý»òÏòºó¼ÆÊý)¡£×îÐÂµÄbash 3.0+°æ±¾ÄÚÖÃÁË¶ÔÉèÖÃ·¶Î§µÄÖ§³Ö
 
 #!/bin/bash
 for i in {1..5}
 do
    echo "Welcome $i times"
 done
-Bash v4.0+å†…ç½®äº†å¯¹ä½¿ç”¨{START..END..å¢žé‡}è¯­æ³•
+Bash v4.0+ÄÚÖÃÁË¶ÔÊ¹ÓÃ{START..END..ÔöÁ¿}Óï·¨
 
 #!/bin/bash
 echo "Bash version ${BASH_VERSION}..."
@@ -68,7 +68,7 @@ for i in {0..10..2}
   do 
      echo "Welcome $i times"
  done
-è¾“å‡ºç»“æžœ:
+Êä³ö½á¹û:
 
 Bash version 4.0.33(0)-release...
 Welcome 0 times
@@ -77,20 +77,20 @@ Welcome 4 times
 Welcome 6 times
 Welcome 8 times
 Welcome 10 times
-seqå‘½ä»¤(è¿‡æ—¶çš„)
-è­¦å‘Š!seqå‘½ä»¤æ‰“å°ä¸€ä¸ªæ•°å­—åºåˆ—ï¼Œç”±äºŽåŽ†å²åŽŸå› ï¼Œå®ƒå‡ºçŽ°åœ¨è¿™é‡Œã€‚ä»¥ä¸‹ç¤ºä¾‹ä»…é€‚ç”¨äºŽè¾ƒæ—§çš„bashç‰ˆæœ¬ã€‚å»ºè®®æ‰€æœ‰ç”¨æˆ·(bash v3.x+)ä½¿ç”¨ä¸Šè¿°è¯­æ³•ã€‚
+seqÃüÁî(¹ýÊ±µÄ)
+¾¯¸æ!seqÃüÁî´òÓ¡Ò»¸öÊý×ÖÐòÁÐ£¬ÓÉÓÚÀúÊ·Ô­Òò£¬Ëü³öÏÖÔÚÕâÀï¡£ÒÔÏÂÊ¾Àý½öÊÊÓÃÓÚ½Ï¾ÉµÄbash°æ±¾¡£½¨ÒéËùÓÐÓÃ»§(bash v3.x+)Ê¹ÓÃÉÏÊöÓï·¨¡£
 
-seqå‘½ä»¤å¯æŒ‰å¦‚ä¸‹æ–¹å¼ä½¿ç”¨ã€‚seqä¸­çš„ä¸€ä¸ªå…¸åž‹ä¾‹å­å¦‚ä¸‹
+seqÃüÁî¿É°´ÈçÏÂ·½Ê½Ê¹ÓÃ¡£seqÖÐµÄÒ»¸öµäÐÍÀý×ÓÈçÏÂ
 
 #!/bin/bash
 for i in $(seq 1 2 20)
 do
    echo "Welcome $i times"
 done
-æ²¡æœ‰å¾ˆå¥½çš„ç†ç”±ä½¿ç”¨è¯¸å¦‚seqä¹‹ç±»çš„å¤–éƒ¨å‘½ä»¤æ¥è®¡æ•°å’Œé€’å¢žforå¾ªçŽ¯ä¸­çš„æ•°å­—ï¼Œå› æ­¤å»ºè®®æ‚¨é¿å…ä½¿ç”¨seqã€‚å†…ç½®å‘½ä»¤æ˜¯å¿«é€Ÿçš„ã€‚
+Ã»ÓÐºÜºÃµÄÀíÓÉÊ¹ÓÃÖîÈçseqÖ®ÀàµÄÍâ²¿ÃüÁîÀ´¼ÆÊýºÍµÝÔöforÑ­»·ÖÐµÄÊý×Ö£¬Òò´Ë½¨ÒéÄú±ÜÃâÊ¹ÓÃseq¡£ÄÚÖÃÃüÁîÊÇ¿ìËÙµÄ¡£
 
-ä¸‰å…ƒè¡¨è¾¾å¼bash forå¾ªçŽ¯è¯­æ³•
-è¿™ç§forå¾ªçŽ¯ä¸ŽCç¼–ç¨‹è¯­è¨€æœ‰ä¸€ä¸ªå…±åŒçš„ä¼ ç»Ÿã€‚å…¶ç‰¹å¾æ˜¯ä¸€ä¸ªä¸‰å‚æ•°å¾ªçŽ¯æŽ§åˆ¶è¡¨è¾¾å¼;ç”±ä¸€ä¸ªåˆå§‹åŒ–å™¨(EXP1)ã€ä¸€ä¸ªå¾ªçŽ¯æµ‹è¯•æˆ–æ¡ä»¶(EXP2)å’Œä¸€ä¸ªè®¡æ•°è¡¨è¾¾å¼(EXP3)ç»„æˆã€‚
+ÈýÔª±í´ïÊ½bash forÑ­»·Óï·¨
+ÕâÖÖforÑ­»·ÓëC±à³ÌÓïÑÔÓÐÒ»¸ö¹²Í¬µÄ´«Í³¡£ÆäÌØÕ÷ÊÇÒ»¸öÈý²ÎÊýÑ­»·¿ØÖÆ±í´ïÊ½;ÓÉÒ»¸ö³õÊ¼»¯Æ÷(EXP1)¡¢Ò»¸öÑ­»·²âÊÔ»òÌõ¼þ(EXP2)ºÍÒ»¸ö¼ÆÊý±í´ïÊ½(EXP3)×é³É¡£
 
 for (( EXP1; EXP2; EXP3 ))
 do
@@ -98,30 +98,30 @@ do
 	command2
 	command3
 done
-ä¸‹é¢æ˜¯bashä¸­çš„ä¸€ä¸ªå…¸åž‹çš„ä¸‰å…ƒè¡¨è¾¾å¼ç¤ºä¾‹
+ÏÂÃæÊÇbashÖÐµÄÒ»¸öµäÐÍµÄÈýÔª±í´ïÊ½Ê¾Àý
 
 #!/bin/bash
 for (( c=1; c<=5; c++ ))
 do  
    echo "Welcome $c times"
 done
-è¾“å‡ºç»“æžœ:
+Êä³ö½á¹û:
 
 Welcome 1 times
 Welcome 2 times
 Welcome 3 times
 Welcome 4 times
 Welcome 5 times
-å¦‚ä½•ä½¿ç”¨forä½œä¸ºæ— é™å¾ªçŽ¯?
-å¯ä»¥ä½¿ç”¨ç©ºè¡¨è¾¾å¼åˆ›å»ºInfinite forå¾ªçŽ¯ï¼Œæ¯”å¦‚
+ÈçºÎÊ¹ÓÃfor×÷ÎªÎÞÏÞÑ­»·?
+¿ÉÒÔÊ¹ÓÃ¿Õ±í´ïÊ½´´½¨Infinite forÑ­»·£¬±ÈÈç
 
 #!/bin/bash
 for (( ; ; ))
 do
    echo "infinite loops [ hit CTRL+C to stop]"
 done
-å¸¦æ–­ç‚¹çš„æ¡ä»¶é€€å‡º
-æ‚¨å¯ä»¥åœ¨forå¾ªçŽ¯ä¸­ä½¿ç”¨breakè¯­å¥æå‰é€€å‡ºã€‚æ‚¨å¯ä»¥ä½¿ç”¨breakä»ŽFORã€WHILEæˆ–UNTILå¾ªçŽ¯ä¸­é€€å‡ºã€‚forå¾ªçŽ¯ä¸­çš„General breakè¯­å¥
+´ø¶ÏµãµÄÌõ¼þÍË³ö
+Äú¿ÉÒÔÔÚforÑ­»·ÖÐÊ¹ÓÃbreakÓï¾äÌáÇ°ÍË³ö¡£Äú¿ÉÒÔÊ¹ÓÃbreak´ÓFOR¡¢WHILE»òUNTILÑ­»·ÖÐÍË³ö¡£forÑ­»·ÖÐµÄGeneral breakÓï¾ä
 
 for I in 1 2 3 4 5
 do
@@ -133,7 +133,7 @@ do
   fi
   statements3          #While good and, no disaster-condition.
 done
-ä»¥ä¸‹shellè„šæœ¬å°†é€šè¿‡æ‰€æœ‰å­˜å‚¨åœ¨/ etcç›®å½•ä¸­çš„æ–‡ä»¶ã€‚ æ‰¾åˆ°/etc/resolv.confæ–‡ä»¶æ—¶ï¼Œå°†è·³å‡ºforå¾ªçŽ¯ã€‚
+ÒÔÏÂshell½Å±¾½«Í¨¹ýËùÓÐ´æ´¢ÔÚ/ etcÄ¿Â¼ÖÐµÄÎÄ¼þ¡£ ÕÒµ½/etc/resolv.confÎÄ¼þÊ±£¬½«Ìø³öforÑ­»·¡£
 
 #!/bin/bash
 for file in /etc/*
@@ -145,8 +145,8 @@ do
 		break
 	fi
 done
-ä½¿ç”¨continueè¯­å¥
-è‹¥è¦ç»§ç»­å°é—­FORã€WHILEæˆ–UNTILå¾ªçŽ¯çš„ä¸‹ä¸€ä¸ªè¿­ä»£ï¼Œè¯·ä½¿ç”¨continueè¯­å¥ã€‚
+Ê¹ÓÃcontinueÓï¾ä
+ÈôÒª¼ÌÐø·â±ÕFOR¡¢WHILE»òUNTILÑ­»·µÄÏÂÒ»¸öµü´ú£¬ÇëÊ¹ÓÃcontinueÓï¾ä¡£
 for I in 1 2 3 4 5
 do
   statements1      #Executed for all values of ''I'', up to a disaster-condition if any.
@@ -157,7 +157,7 @@ do
   fi
   statements3
 done
-æ­¤è„šæœ¬å¤‡ä»½å‘½ä»¤è¡Œä¸­æŒ‡å®šçš„æ‰€æœ‰æ–‡ä»¶åã€‚å¦‚æžœ.bakæ–‡ä»¶å­˜åœ¨ï¼Œå®ƒå°†è·³è¿‡cpå‘½ä»¤ã€‚
+´Ë½Å±¾±¸·ÝÃüÁîÐÐÖÐÖ¸¶¨µÄËùÓÐÎÄ¼þÃû¡£Èç¹û.bakÎÄ¼þ´æÔÚ£¬Ëü½«Ìø¹ýcpÃüÁî¡£
 
 #!/bin/bash
 FILES="$@"
@@ -172,25 +172,25 @@ do
         # we are here means no backup file exists, just use cp command to copy file
 	/bin/cp $f $f.bak
 done
-æ”¾åœ¨ä¸€èµ·
-Bash forå¾ªçŽ¯å¯¹äºŽè‡ªåŠ¨åŒ–ITä¸­çš„é‡å¤ä»»åŠ¡éžå¸¸æœ‰ç”¨ã€‚è®©æˆ‘ä»¬çœ‹çœ‹å¦‚ä½•åœ¨å¤šä¸ªLinuxæˆ–UnixæœåŠ¡å™¨ä¸Šè¿è¡Œä¸€ä¸ªç®€å•çš„å‘½ä»¤(ä¾‹å¦‚æ­£å¸¸è¿è¡Œæ—¶é—´)
+·ÅÔÚÒ»Æð
+Bash forÑ­»·¶ÔÓÚ×Ô¶¯»¯ITÖÐµÄÖØ¸´ÈÎÎñ·Ç³£ÓÐÓÃ¡£ÈÃÎÒÃÇ¿´¿´ÈçºÎÔÚ¶à¸öLinux»òUnix·þÎñÆ÷ÉÏÔËÐÐÒ»¸ö¼òµ¥µÄÃüÁî(ÀýÈçÕý³£ÔËÐÐÊ±¼ä)
 
 for s in server1 server2 server3
 do
     ssh vivek@${s} "uptime"
 done
-æˆ–è€…å°†echoå‘½ä»¤ä¸Žå‘½ä»¤æ›¿æ¢åˆå¹¶ï¼Œå¦‚ä¸‹æ‰€ç¤º
+»òÕß½«echoÃüÁîÓëÃüÁîÌæ»»ºÏ²¢£¬ÈçÏÂËùÊ¾
 
 for s in server1 server2 server3
 do
     echo "Server ${s}: $(ssh vivek@${s} uptime)"
 done
-è¾“å‡ºç»“æžœ
+Êä³ö½á¹û
 
 Server server1:  09:34:46 up 12 days, 21:57,  0 users,  load average: 0.08, 0.09, 0.09
 Server server2:  09:34:50 up 17 days,  2:30,  0 users,  load average: 0.03, 0.03, 0.00
 Server server3:  09:34:53 up 17 days,  2:31,  0 users,  load average: 0.04, 0.04, 0.00
-åœ¨æ­¤æ ‡å‡†bash for loopç¤ºä¾‹ä¸­ï¼Œå¦‚æžœæˆ‘ä»¬æœ‰åŸºäºŽDebian / Ubuntuçš„æœåŠ¡å™¨ï¼Œæˆ‘ä»¬å°†ä½¿ç”¨yumå‘½ä»¤æˆ–aptå‘½ä»¤/ apt-getå‘½ä»¤æ›´æ–°æ‰€æœ‰åŸºäºŽCentOS / RHELçš„æœåŠ¡å™¨ï¼š
+ÔÚ´Ë±ê×¼bash for loopÊ¾ÀýÖÐ£¬Èç¹ûÎÒÃÇÓÐ»ùÓÚDebian / UbuntuµÄ·þÎñÆ÷£¬ÎÒÃÇ½«Ê¹ÓÃyumÃüÁî»òaptÃüÁî/ apt-getÃüÁî¸üÐÂËùÓÐ»ùÓÚCentOS / RHELµÄ·þÎñÆ÷£º
 
 ## CENTOS/RHEL example (for fedora replace yum with dnf) ##
 for s in server0{1..8}
@@ -198,7 +198,7 @@ do
     echo "*** Patching and updating ${s} ***"
     ssh root@${s} -- "yum -y update"
 done
-è¿™æ˜¯ç®€å•ä½†æœ‰ç”¨çš„shellè„šæœ¬ç¤ºä¾‹
+ÕâÊÇ¼òµ¥µ«ÓÐÓÃµÄshell½Å±¾Ê¾Àý
 
 #!/usr/bin/env bash
 # Purpose: Update all my Linode servers powered by Debian/Ubuntu Linux
@@ -213,9 +213,9 @@ do
    ssh root@${s} -- DEBIAN_FRONTEND=noninteractive apt-get -y -q upgrade >>"${log}"
 done
 echo "Check $log file for details."
-äº†è§£ä¸ºä»€ä¹ˆæˆ‘ä»¬ä½¿ç”¨DEBIAN_FRONTEND apt-getå˜é‡æ¥é¿å…æ›´æ–°æœŸé—´å‡ºçŽ°ä»»ä½•æç¤ºã€‚ æœ€å¥½æ˜¯å‡ºäºŽè‡ªåŠ¨åŒ–ç›®çš„è®¾ç½®sshå¯†é’¥æˆ–ä»ŽLinux / Unix cronä½œä¸šè¿è¡Œè„šæœ¬ã€‚
+ÁË½âÎªÊ²Ã´ÎÒÃÇÊ¹ÓÃDEBIAN_FRONTEND apt-get±äÁ¿À´±ÜÃâ¸üÐÂÆÚ¼ä³öÏÖÈÎºÎÌáÊ¾¡£ ×îºÃÊÇ³öÓÚ×Ô¶¯»¯Ä¿µÄÉèÖÃsshÃÜÔ¿»ò´ÓLinux / Unix cron×÷ÒµÔËÐÐ½Å±¾¡£
 
-æ€»ç»“
-æ‚¨é€šè¿‡å„ç§ç¤ºä¾‹å­¦ä¹ äº†å¦‚ä½•ä½¿ç”¨bash for loopã€‚ Forå¾ªçŽ¯å¯ä»¥èŠ‚çœæ—¶é—´ï¼Œå¹¶å¯ä»¥å¸®åŠ©æ‚¨è‡ªåŠ¨å®Œæˆå¾®å°çš„ä»»åŠ¡ã€‚ ä½†æ˜¯ï¼Œå¯¹äºŽå¤æ‚çš„ITè‡ªåŠ¨åŒ–ä»»åŠ¡ï¼Œæ‚¨åº”è¯¥ä½¿ç”¨Ansibleï¼ŒSaltï¼ŒChefï¼Œpsshç­‰å·¥å…·ã€‚ 
+×Ü½á
+ÄúÍ¨¹ý¸÷ÖÖÊ¾ÀýÑ§Ï°ÁËÈçºÎÊ¹ÓÃbash for loop¡£ ForÑ­»·¿ÉÒÔ½ÚÊ¡Ê±¼ä£¬²¢¿ÉÒÔ°ïÖúÄú×Ô¶¯Íê³ÉÎ¢Ð¡µÄÈÎÎñ¡£ µ«ÊÇ£¬¶ÔÓÚ¸´ÔÓµÄIT×Ô¶¯»¯ÈÎÎñ£¬ÄúÓ¦¸ÃÊ¹ÓÃAnsible£¬Salt£¬Chef£¬psshµÈ¹¤¾ß¡£ 
 
  
