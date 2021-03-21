@@ -1,0 +1,57 @@
+Robot Framework安装教程，需要安装以下：
+
+
+1，Python2.7以上版本—这里用的是 Python3.8
+2，pip 和 setuptools （Python 的套件管理程式，最新版的Python 2.7.13已包含）
+
+3，Robot Framework （此工具本身）
+
+4，wxPython （Python 非常有名的一个GUI 库，支撑Ride的运行库）
+
+5，robotframework-ride
+
+6，selenium2library （selenium2测试库，基于webdriver驱动）
+
+7，geckodriver, chromedriver 和 IEDriverServer （浏览器驱动，据说45以上的版本Firefox驱动也不再是默认包含）
+
+8，AutoItLibrary （autoit库包，用于进行Windows GUI的自动化操作）
+
+9，pywin32 （AutoIt的运行环境）
+
+10，autoit （autoit客户端程序，实际运用中，必须装了autoit才能用AutoItLibrary ）
+11, robotframework-sshlibrary安装命令：pip install robotframework-sshlibrary
+
+pip无法连接或连接超时解决方案
+设置超时时间：pip --default-timeout=600 install  XXX
+或者制定国内镜像站
+设置超时时间：pip --default-timeout=600 install  XXX -i http://pypi.douban.com/simple --trusted-host 
+mirrors:
+http://mirrors.aliyun.com/pypi/simple/
+https://mirrors.bfsu.edu.cn/pypi/web/simple/
+https://pypi.tuna.tsinghua.edu.cn/simple/
+https://pypi.mirrors.ustc.edu.cn/simple/
+
+example:
+[root@centos script]# cat test.robot
+*** Settings ***
+Library     OperatingSystem
+#Settings
+
+*** Variables ***
+${MESSAGE}  Hello,world!
+
+*** Keywords ***
+My Keyword
+    [Arguments]  ${path}
+    DIRECTORY SHOULD EXIST  ${path}
+
+*** Test Cases ***
+Testcase_001
+    [Documentation]     Example test
+    log  ${message}
+    log to console    ${message}
+    Should match Regexp    ${message}    worl
+
+Testcase_002
+    should be equal     ${message}  Hello,world!
+

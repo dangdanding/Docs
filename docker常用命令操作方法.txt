@@ -1,0 +1,156 @@
+docker常用命令操作方法
+
+一、镜像相关
+
+1.1 列出本机所有镜像
+[root@localhost ~]# docker images -a
+REPOSITORY               TAG       IMAGE ID       CREATED        SIZE
+docker/getting-started   latest    3ba8f2ff0727   43 hours ago   27.9MB
+ligato/vpp-agent         latest    24d9a5659548   10 days ago    316MB
+hello-world              latest    d1165f221234   2 weeks ago    13.3kB
+centos                   latest    300e315adb2f   3 months ago   209MB
+quay.io/coreos/etcd      latest    61ad63875109   2 years ago    39.5MB
+[root@localhost ~]#
+
+
+1.2 删除镜像
+
+docker rmi ImageId
+
+docker rmi --help
+
+二、容器相关
+
+2.1 最基本的启动
+
+docker run -it ubuntu
+
+参数-it的含义，可以用docker run --help查看
+
+2.2 启动后执行命令
+
+docker run -it ubuntu echo 'hello world'
+2.3 启动时指定容器名称
+
+docker run -it --name 'myubuntu' ubuntu
+
+docker run -it --name centos -h centos centos /bin/bash
+
+容器名称是一个很有意思的东东，后面马上会讲到。上面的命令运行完以后，先用exit退出，以便后面学习其它命令。
+
+
+2.4 查看最近运行过的所有容器
+
+docker ps -a
+
+[root@localhost ~]# docker ps -a
+CONTAINER ID   IMAGE                    COMMAND                  CREATED         STATUS                   PORTS     NAMES
+69d339fbe7fe   centos                   "/bin/bash"              9 minutes ago   Up 9 minutes                       centos
+25a9c7de0451   docker/getting-started   "/docker-entrypoint.…"   2 hours ago     Exited (0) 2 hours ago             determined_moser
+408799413c0a   hello-world              "/hello"                 8 days ago      Exited (0) 8 days ago              great_curie
+[root@localhost ~]#
+
+Name centos已经在运行（Exited状态同样）所以再次运行一个同名centos的实例报错。
+
+[root@localhost ~]# docker run -it --name centos -h centos  centos /bin/bash
+docker: Error response from daemon: Conflict. The container name "/centos" is already in use by container "69d339fbe7fed62ce9f543c65d6b12eb15c9f6ced76d5febaf5b6a9df6839ec5". You have to remove (or rename) that container to be able to reuse that name.
+See 'docker run --help'.
+[root@localhost ~]#
+
+
+[root@localhost ~]# docker ps -a
+CONTAINER ID   IMAGE                    COMMAND                  CREATED          STATUS                        PORTS     NAMES
+60b16285d76e   centos                   "/bin/bash"              23 seconds ago   Exited (127) 7 seconds ago              centos
+10645c0a819f   centos                   "/bin/bash"              11 minutes ago   Exited (127) 11 minutes ago             vibrant_nobel
+22d283a8247a   centos                   "sh"                     13 minutes ago   Exited (0) 9 minutes ago                interesting_cannon
+
+docker run -it --name centos -h centos  dangdanding/centos:V0 /bin/bash
+　
+2.5 停止运行中的容器
+
+docker stop 容器名称
+
+2.6 删除容器
+
+docker rm 容器ID
+
+如果容器处于运行状态，上面的操作会失败，可以加-f参数强制删除　　
+
+2.7 在已运行的容器中，直接执行命令
+
+docker exec 容器名称 命令
+
+例如：　　
+docker exec myubuntu apg-get update
+
+2.8 连接到到已经运行的容器的pseudo-tty
+docker attach 容器名称
+attach这个命令不太好用，进入终端后，没办法退出而不停止容器，要退出只能输入exit，但这样就将容器停止了，另外一个缺点是，如果多个容器同时attach到相同的容器，在一个窗口中操作的结果，会同步显示到所有窗口。
+
+建议用下面的命令代替：
+
+docker exec -it 容器名称 sh
+
+当然进入容器还有其它一些办法，比如网络端口22映射本机某个端口，容器里启动ssh服务，然后ssh连接进入，或者用nsenter结合进程id进入.
+
+2.9 保存对容器所做的修改
+
+在容器上做了一堆操作后，比如在ubuntu的基础上安装了一些软件、部署了一些应用之类，希望分发到其它机器，最简单的办法就是把容器重新生成一个新镜像，然后其它人直接docker pull你的新镜像就可以了。
+
+docker commit -a 作者名字 -m 提交原因 -p 容器ID 镜像名称:版本号
+
+Create a repo??
+To push an image, we first need to create a repository on Docker Hub.
+
+Sign up and share images using Docker Hub.
+
+Sign in to Docker Hub.
+
+Click the Create Repository button.
+
+比如：
+
+docker commit -a 'dangdanding' -m 'add pip' -p 300e315adb2f dangdanding/centos:V2
+-p: CONTAINER ID
+-a: hub.docker.com user account
+-m: description of this change
+options are simalar with github.
+
+[root@localhost ~]# docker commit -a 'dangdanding' -m 'add robot framework' -p ef88b7351344 dangdanding/centos:V0
+sha256:a65354ab16d43e5456259143149565524598dc7ac7240ac4a1be615794bf2c50
+[root@localhost ~]#
+
+
+
+提交完成后，可以
+
+docker images 查看
+
+
+[root@localhost ~]# docker images -a
+REPOSITORY               TAG       IMAGE ID       CREATED              SIZE
+dangdanding/centos       V0        a65354ab16d4   About a minute ago   315MB
+docker/getting-started   latest    3ba8f2ff0727   2 days ago           27.9MB
+ligato/vpp-agent         latest    24d9a5659548   10 days ago          316MB
+hello-world              latest    d1165f221234   2 weeks ago          13.3kB
+centos                   latest    300e315adb2f   3 months ago         209MB
+[root@localhost ~]#
+
+docker login -u dangdanding
+
+Use the docker tag command to give the getting-started image a new name. Be sure to swap out YOUR-USER-NAME with your Docker ID.
+
+docker tag getting-started YOUR-USER-NAME/getting-started
+
+
+[root@localhost ~]# docker  tag dangdanding/centos:V0
+
+[root@localhost ~]# docker push dangdanding/centos:V0
+Using default tag: latest
+The push refers to repository [docker.io/dangdanding/centos]
+tag does not exist: dangdanding/centos:latest
+
+[root@localhost ~]# docker push dangdanding/centos:V0
+The push refers to repository [docker.io/dangdanding/centos]
+c185afa0b01c: Preparing
+2653d992f4ef: Preparing
