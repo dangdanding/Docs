@@ -1,30 +1,30 @@
-Robot Framework°²×°½Ì³Ì£¬ĞèÒª°²×°ÒÔÏÂ£º
+Robot Frameworkå®‰è£…æ•™ç¨‹ï¼Œéœ€è¦å®‰è£…ä»¥ä¸‹ï¼š
 
 
-1£¬Python2.7ÒÔÉÏ°æ±¾¡ªÕâÀïÓÃµÄÊÇ Python3.8
-2£¬pip ºÍ setuptools £¨Python µÄÌ×¼ş¹ÜÀí³ÌÊ½£¬×îĞÂ°æµÄPython 2.7.13ÒÑ°üº¬£©
+1ï¼ŒPython2.7ä»¥ä¸Šç‰ˆæœ¬â€”è¿™é‡Œç”¨çš„æ˜¯ Python3.8
+2ï¼Œpip å’Œ setuptools ï¼ˆPython çš„å¥—ä»¶ç®¡ç†ç¨‹å¼ï¼Œæœ€æ–°ç‰ˆçš„Python 2.7.13å·²åŒ…å«ï¼‰
 
-3£¬Robot Framework £¨´Ë¹¤¾ß±¾Éí£©
+3ï¼ŒRobot Framework ï¼ˆæ­¤å·¥å…·æœ¬èº«ï¼‰
 
-4£¬wxPython £¨Python ·Ç³£ÓĞÃûµÄÒ»¸öGUI ¿â£¬Ö§³ÅRideµÄÔËĞĞ¿â£©
+4ï¼ŒwxPython ï¼ˆPython éå¸¸æœ‰åçš„ä¸€ä¸ªGUI åº“ï¼Œæ”¯æ’‘Rideçš„è¿è¡Œåº“ï¼‰
 
-5£¬robotframework-ride
+5ï¼Œrobotframework-ride
 
-6£¬selenium2library £¨selenium2²âÊÔ¿â£¬»ùÓÚwebdriverÇı¶¯£©
+6ï¼Œselenium2library ï¼ˆselenium2æµ‹è¯•åº“ï¼ŒåŸºäºwebdriveré©±åŠ¨ï¼‰
 
-7£¬geckodriver, chromedriver ºÍ IEDriverServer £¨ä¯ÀÀÆ÷Çı¶¯£¬¾İËµ45ÒÔÉÏµÄ°æ±¾FirefoxÇı¶¯Ò²²»ÔÙÊÇÄ¬ÈÏ°üº¬£©
+7ï¼Œgeckodriver, chromedriver å’Œ IEDriverServer ï¼ˆæµè§ˆå™¨é©±åŠ¨ï¼Œæ®è¯´45ä»¥ä¸Šçš„ç‰ˆæœ¬Firefoxé©±åŠ¨ä¹Ÿä¸å†æ˜¯é»˜è®¤åŒ…å«ï¼‰
 
-8£¬AutoItLibrary £¨autoit¿â°ü£¬ÓÃÓÚ½øĞĞWindows GUIµÄ×Ô¶¯»¯²Ù×÷£©
+8ï¼ŒAutoItLibrary ï¼ˆautoitåº“åŒ…ï¼Œç”¨äºè¿›è¡ŒWindows GUIçš„è‡ªåŠ¨åŒ–æ“ä½œï¼‰
 
-9£¬pywin32 £¨AutoItµÄÔËĞĞ»·¾³£©
+9ï¼Œpywin32 ï¼ˆAutoItçš„è¿è¡Œç¯å¢ƒï¼‰
 
-10£¬autoit £¨autoit¿Í»§¶Ë³ÌĞò£¬Êµ¼ÊÔËÓÃÖĞ£¬±ØĞë×°ÁËautoit²ÅÄÜÓÃAutoItLibrary £©
-11, robotframework-sshlibrary°²×°ÃüÁî£ºpip install robotframework-sshlibrary
+10ï¼Œautoit ï¼ˆautoitå®¢æˆ·ç«¯ç¨‹åºï¼Œå®é™…è¿ç”¨ä¸­ï¼Œå¿…é¡»è£…äº†autoitæ‰èƒ½ç”¨AutoItLibrary ï¼‰
+11, robotframework-sshlibraryå®‰è£…å‘½ä»¤ï¼špip install robotframework-sshlibrary
 
-pipÎŞ·¨Á¬½Ó»òÁ¬½Ó³¬Ê±½â¾ö·½°¸
-ÉèÖÃ³¬Ê±Ê±¼ä£ºpip --default-timeout=600 install  XXX
-»òÕßÖÆ¶¨¹úÄÚ¾µÏñÕ¾
-ÉèÖÃ³¬Ê±Ê±¼ä£ºpip --default-timeout=600 install  XXX -i http://pypi.douban.com/simple --trusted-host 
+pipæ— æ³•è¿æ¥æˆ–è¿æ¥è¶…æ—¶è§£å†³æ–¹æ¡ˆ
+è®¾ç½®è¶…æ—¶æ—¶é—´ï¼špip --default-timeout=600 install  XXX
+æˆ–è€…åˆ¶å®šå›½å†…é•œåƒç«™
+è®¾ç½®è¶…æ—¶æ—¶é—´ï¼špip --default-timeout=600 install  XXX -i http://pypi.douban.com/simple --trusted-host 
 mirrors:
 http://mirrors.aliyun.com/pypi/simple/
 https://mirrors.bfsu.edu.cn/pypi/web/simple/
@@ -34,7 +34,20 @@ https://pypi.mirrors.ustc.edu.cn/simple/
 example:
 [root@centos script]# cat test.robot
 *** Settings ***
+Documentation     A test suite with a single test for valid login.
+...
+...               This test has a workflow that is created using keywords in
+...               the imported resource file.
+
+#Resource          resource.robot
 Library     OperatingSystem
+
+#Suite Setup       Open Browser To Login Page
+#Suite Teardown    Close Browser
+#Test Setup        Go To Login Page
+#Test Teardown     Close Browser
+#Test Template     Login With Invalid Credentials Should Fail
+
 #Settings
 
 *** Variables ***
