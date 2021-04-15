@@ -1,0 +1,29 @@
+symptom:
+每次修改Policy配置以后提交时，流量traffic会出现短暂不通的现象，已经建立session的流量不受影响，只会影响新发起的流量。配置syslog记录policy行为，发现流量是被default policy deny了，但实际上是对应的Policy是存在的。什么原因导致了应该正常被permit policy匹配的流量匹配了default deny policy呢？
+
+analysis:
+policy configuration modfication is committed every time will trigger PFE policy sync between RE and PFE, policy jtree will be updated to reflect new changes, there is a change when coorespoding policy is being locked and updated and this time traffic first path lookup is happening. In this situation policy first path lookup failed to match expected policy but default policy is matched, default policy should be deny in general, so traffic is denied by default policy.
+
+how to reproduce:
+1.问题发生在policy configuration commit操作的时候，首先怀疑是commit操作时对cpu资源的竞争导致了此问题的发生，复现的方法就是加重和放大cpu竞争
+2.插入满载的spc卡
+3.配置更多的policy(30k)
+4.加大测试流量
+5.移动最末位Policy到最开始的位置。policy是有顺序的，查找时是按照顺序查找的，最末的policy移动操作导致policy index值发生变化，这样移动一条policy会导致其他所有的index值需要更新，移动多条会导致多次的循环更新所有Policy的index值，用户流量hit正在被更新的policy的机会增大，此时查找Policy失败，缺省的Deny policy被命中。
+
+fix:
+1.增加计数器记录policy第一次查找失败的次数，验证first path policy lookup失败的推测
+2.增加一个flag，记录policy update正在进行的状态
+3.增加buffer，当policy update正在进行时所有policy查找失败的first path packet都缓冲到buffer队列
+4.增加一个计时器当计时器超时将buffer中的报文发往flow做first path policy lookup,未找到对应的policy则重新放到队列里面
+5.增加计数器记录buffer里面报文重复查找Policy的次数，达到配置的查找次数仍然没有找到对应policy，则匹配default policy
+6.增加一个计数器记录最终匹配到default policy的packet数目
+
+验证：
+1.第一次查找失败packet数目计数器在每次commit操作时大量增加
+2.如果不应用fix，此时最终匹配default policy的packet数目大量增加
+3.应用fix以后最终匹配default policy的packet数目增加显著减少了80%(20%左右最终匹配了default policy)
+
+评价：
+不是最优方案但是可以提升了80%以上性能，完整解决方案是应用2个Jtree，policy更新同步完成后一次性整体切换。
+

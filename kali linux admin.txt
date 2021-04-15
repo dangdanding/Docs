@@ -1,0 +1,144 @@
+sudo dpkg -i(install) <package.deb>
+
+sudo apt install -y metasploit-framework
+
+allow for a user to be added to a trusted group that will not need to supply a password when using sudo
+$sudo apt install -y kali-grant-root && sudo dpkg-reconfigure kali-grant-root
+$sudo apt install -y kali-grant-root
+$sudo dpkg-reconfigure kali-grant-root
+
+默认情况下，linux不允许root用户以telnet方式登录linux主机，若要允许root用户登录，可采取以下3种方法之一：
+
+$sudo apt install -y metasploit-framework
+
+
+1、修改login文件
+
+RedHat中对于远程登录的限制体现在/etc/pam.d/login 文件中，如果把限制的内容注销掉，那么限制将不起作用。
+
+#%PAM-1.0
+auth [user_unknown=ignore success=ok ignore=ignore default=bad] pam_securetty.so
+auth  include  system-auth
+#account  required  pam_nologin.so
+account  include  system-auth
+password  include  system-auth
+# pam_selinux.so close should be the first session rule
+session  required  pam_selinux.so close
+session  include  system-auth
+session  required  pam_loginuid.so
+session  optional  pam_console.so
+# pam_selinux.so open should only be followed by sessions to be executed in the user context
+session  required  pam_selinux.so open
+session  optional  pam_keyinit.so force revoke
+~
+
+2、移除securetty文件
+
+验证规则设置在/etc/security文件中，该文件定义root用户只能在tty1-tty6的终端上记录，删除该文件或者将其改名即可避开验证规则实现root用户远程登录。
+
+[root@nodel ~]# mv /etc/securetty /etc/securetty.bak
+
+3、修改securetty文件
+
+[root@nodel ~]# vim /etc/securetty 
+console
+vc/1
+....
+
+....
+
+vc/10
+tty1
+....
+
+tty11
+
+pts/1
+pts/2
+....
+....
+....
+pts/11
+
+kali linux初始化安装设置root口令
+sudo passwd root
+
+kali linux开启SSH服务 允许root登陆
+1. 查看ssh服务状态
+# /etc/init.d/ssh status
+2.修改配置文件
+# vim /etc/ssh/sshd_config
+#PermitRootLogin prohibit-password
+PermitRootLogin yes
+#PasswordAuthentication yes
+PasswordAuthentication yes
+
+3. 启动ssh服务
+# /etc/init.d/ssh start
+
+查看服务状态 
+# /etc/init.d/ssh status
+
+配置网络接口
+/etc/network、interfaces
+
+dhcp配置
+# The primary network interface
+allow-hotplug eth0
+iface eth0 inet dhcp
+
+固定IP配置
+auto eth0
+iface eth0 inet static //配置eth0使用默认的静态地址
+address 192.168.77.133 //设置eth0的IP地址
+netmask 255.255.255.0 //配置eth0的子网掩码
+gateway 192.168.77.254 //配置当前主机的默认网关
+man interfaces
+
+DNS配置
+/etc/resolv.conf
+
+重启动网络
+/etc/init.d/networking restart
+或者service 命令
+service networking start
+
+
+Kali Linux中启动Metasploit Framework正确方法
+1、启动PostgreSQL服务
+#service postgresql start
+命令“ss -ant”检查输出并确保5432端口正在监听
+2、初始化Metasploit PostgreSQL数据库
+# msfdb init
+3、启动msfconsole并验证是否连接数据库成功
+# msfconsole
+msf > db_status
+
+显示Metasploit框架中所有可以使用的渗透攻击模块。
+msf>show  exploits
+
+显示所有的辅助模块以及他们的用途
+msf>show  auxiliary
+
+参数Option是保证Metasploit框架中各个模块正确运行所需的各种设置
+msf>show  options
+
+back命令可以使你退出当前的模块，回到“msf>”命令格式下
+msf>(exploite module) back
+
+search命令可以查询某个特定的渗透攻击、辅助或攻击载荷模块。例如，查询与mssql相关的内容
+msf>search mssql
+
+单前模块兼容的攻击载荷显示出来
+msf>show payloads
+
+列出有效载荷攻击模块可以实行有效攻击的系统类型
+msf>show targets
+
+msf(有效攻击载荷模块)>info
+
+Metasploit模块中的所有参数只有两个状态：已设置（set）和未设置（unset）.有些参数会被标记为必填项（required）,这样的参数必须经过手工设置并处于启动状态。可以在终端输入“show option”来查看那些参数时必须要填写的；使用Set命令可以对某个参数进行设置（同时启用该参数）；使用unset 命令可以禁止相关参数。下面举例说明：
+set RHOST 192.168.1.1
+
+
+

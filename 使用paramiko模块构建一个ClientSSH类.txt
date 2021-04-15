@@ -1,0 +1,182 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Wed May 14 10:53:38 2019
+
+@author: Phoenix
+
+Modified : 2019-10-24
+"""
+import paramiko
+from time import sleep
+
+
+class ClientSSH(object):
+
+    def __init__(self, ip, port, username, password, timeout=30):
+
+        """
+        通过IP, 端口，用户名，密码，超时时间，初始化一个远程主机
+        :param ip:
+        :param port:
+        :param username:
+        :param password:
+        :param timeout:
+        """
+
+        self._ip = ip
+        self._port = port
+        self._username = username
+        self._password = password
+        self._timeout = timeout
+        # transport, channel, ssh, sftp
+        self._transport = None
+        self._channel = None
+        self._ssh = None
+        self._sftp = None
+        self._prompt = None
+        # 连接失败的重试次数（总计3次尝试）
+        self._try_times = 2
+
+
+    # 调用connect方法连接远程主机
+    def connect(self):
+        _result = ''
+        while True:
+            # 尝试连接
+            try:
+                self._transport = paramiko.Transport((self._ip, self._port))
+                self._transport.connect(username=self._username, password=self._password)
+                # 如果没有抛出异常说明连接成功，直接返回
+                # print('%s 创建成功' % self._ip)
+                _result += '%s 创建成功\n' % self._ip
+                break
+            # 这里对可能的异常如网络不通、链接超时、socket.error, socket.timeout直接输出
+            except Exception as _e:
+                if self._try_times != 0:
+                    _result += '第%i次连接\'%s\'失败，原因：%s\n' % (3 - self._try_times, self._ip, _e)
+                    _result += '进行重试\n'
+                    self._try_times -= 1
+                else:
+                    _result += '第%i次连接\'%s\'失败，原因：%s\n' % (3 - self._try_times, self._ip, _e)
+                    _result += '连接远程主机\'%s\'失败，结束重试\n' % self._ip
+                    break
+        return _result
+
+
+    # 开启channel，获取提示符
+    def open_channel(self):
+        _result = ''
+        try:
+            self._channel = self._transport.open_session()
+            self._channel.settimeout(self._timeout)
+            self._channel.get_pty()
+            self._channel.invoke_shell()
+            # 如果没有抛出异常说明连接成功
+            _result += '%s channel建立成功' % self._ip
+            # 获取提示符
+            try:
+                sleep(1)  # 等待1秒，接收SSH banner信息
+                _Banner = self._channel.recv(65535)  # 接收ssh banner信息
+                # 发送“Enter”获取提示符
+                n = 0
+                while n < 3:
+                    self._channel.send("\r")
+                    # 这里必须暂停0.5~1秒接收输入回车后的返回结果
+                    sleep(0.5)
+                    _Prompt_vendor = self._channel.recv(64)
+                    # 获取提示符的两种方式：1. 按\r\n进行字符串分割，后边的就是完整的提示符
+                    self._prompt = _Prompt_vendor.decode('utf-8').split('\r')[-1]
+                    # 2. 提示符取输出的后x位，即_Prompt_vendor[-x:]
+                    # self._prompt = _Prompt_vendor[-2:].decode('utf-8')
+                    if self._prompt.endswith('>'):
+                        _result += '\t提示符获取成功 (%s)\n' % self._prompt
+                        break
+                    n += 1
+                else:
+                    _result += '\t提示符获取异常 (%s)\n' % self._prompt
+            except Exception as _e:
+                _result += '\t提示符获取失败\t原因：%s\n' % _e
+        except Exception as _e:
+            _result += 'Channel建立失败\t原因：%s\n' % _e
+        return _result
+
+    # 开启ssh
+    def open_ssh(self):
+        # 连接ssh
+        try:
+            self._ssh = paramiko.SSHClient()
+            self._ssh._transport = self._transport
+            return '%s ssh连接成功\n' % self._ip
+        except Exception as _e:
+            return '%s ssh连接失败\t原因：%s\n' % (self._ip, _e)
+
+
+    # ssh发送无需交互的单条命令
+    def ssh_send(self, _cmd):
+        try:
+            _stdin, _stdout, _stderr = self._ssh.exec_command(_cmd)
+            # 返回decode的指令stdout和stderr信息
+            return _stdout.read().decode(), _stderr.read().decode()
+        except Exception as _e:
+            return 'ssh指令执行失败\t原因：%s\n' % _e
+
+    # 开启sftp
+    def open_sftp(self):
+        # 连接sftp
+        try:
+            self._sftp = paramiko.SFTPClient.from_transport(self._transport)
+            return '%s sftp连接成功\n' % self._ip
+        except Exception as _e:
+            return '%s sftp连接失败\t原因：%s\n' % (self._ip, _e)
+
+
+    # sftp get单个文件
+    def sftp_get(self, remotefile, localfile):
+        try:
+            self._sftp.get(remotefile, localfile)
+            return '下载成功：%s\n' % remotefile
+        except Exception as e:
+            return '下载失败：%s\t原因：%s\n' % (remotefile, e)
+
+
+    # sftp put单个文件
+    def sftp_put(self, localfile, remotefile):
+        try:
+            self._sftp.put(localfile, remotefile)
+            return '上传成功：%s' % localfile
+        except Exception as e:
+            return '上传失败：%s\t原因：%s' % (localfile, e)
+
+
+    # 通过channel发送无需交互的指令，返回执行结果
+    def channel_send(self, _cmd=''):
+        _stream = ''
+        try:
+            _cmd += '\r'
+            # 通过提示符来判断命令是否执行完成
+            # 发送要执行的命令
+            self._channel.send(_cmd)
+            # 回显很长的命令可能执行较久，通过循环分批次取回回显
+            while True:
+                sleep(0.5)
+                _stream += self._channel.recv(1024).decode('utf-8')
+                if _stream.endswith(self._prompt):
+                    break
+            return _stream
+        except Exception as _e:
+            return 'channel执行指令错误\t原因：%s\n' % _e
+
+
+    def close(self):
+        # 断开连接
+        if self._ssh:
+            self._ssh.close()
+        if self._channel:
+            self._channel.close()
+        if self._transport:
+            self._transport.close()
+        return '%s 连接已关闭\n' % self._ip
+
+
+    def __del__(self):
+        return

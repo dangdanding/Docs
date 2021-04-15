@@ -1,0 +1,3240 @@
+﻿paramiko、fabric与pexpect
+
+paramiko
+
+paramiko模块是基于Python实现的SSH远程安全连接，用于SSH远程执行命令、文件传输等功能。
+
+
+默认Python没有，需要手动安装：pip install paramiko
+
+
+如安装失败，可以尝试yum安装：yum install python-paramiko
+
+#!/usr/bin/env python
+import paramiko
+import threading
+ 
+def ssh2(ip,username,passwd,cmd):
+    try:
+        ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        ssh.connect(ip,22,username,passwd,timeout=5)
+        for m in cmd:
+            stdin, stdout, stderr = ssh.exec_command(m)
+            out = stdout.readlines()
+            for o in out:
+                print o,
+        print '%s\tOK\n'%(ip)
+        ssh.close()
+    except :
+        print '%s\tError\n'%(ip)
+ 
+ 
+if __name__=='__main__':
+    cmd = ['date']
+    username = "root"  
+    passwd = "******"    
+    threads = []   
+    print "Begin......"
+    for i in range(1,254):
+        ip = '10.0.0.'+str(i)
+        a=threading.Thread(target=ssh2,args=(ip,username,passwd,cmd))
+        a.start()
+
+
+
+
+
+
+
+基于账号密码的形式，执行命令或上传下载文件
+
+import paramiko
+ 
+# 基于账号密码执行命令
+# 创建SSH对象
+ssh = paramiko.SSHClient()
+# 允许连接不在know_hosts文件中的机器
+ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+# 连接服务器
+ssh.connect(hostname="192.168.80.20", port=22, username="root", password="test@2015")
+# 执行命令
+stdin, stdout, stderr = ssh.exec_command("free -m")
+# 获取命令结果
+res, err = stdout.read(), stderr.read()
+result = res if res else err
+print(result.decode())
+# 关闭连接
+ssh.close()
+ 
+# 基于账号密码的上传下载
+transport = paramiko.Transport(("192.168.80.20", 22))
+transport.connect(username="root", password="test@2015")
+sftp = paramiko.SFTPClient.from_transport(transport)
+# 将location.py上传至服务器的/tmp/test.py
+sftp.put("高级FTP.png", "/root/高级FTP.png")
+# 将remove_path下载到本地local_path
+sftp.get("remove_path", "local_path")
+transport.close()
+ 
+# SSHClient 封装 Transport
+transport = paramiko.Transport(('hostname', 22))
+transport.connect(username='wupeiqi', password='123')
+ssh = paramiko.SSHClient()
+ssh._transport = transport
+stdin, stdout, stderr = ssh.exec_command('df')
+print(stdout.read().decode())
+transport.close()
+
+
+
+
+
+
+基于密钥的形式，执行命令或上传下载文件
+
+
+
+
+import paramiko
+ 
+# 基于密钥执行命令
+private_key = paramiko.RSAKey.from_private_key_file("id_rsa")
+ssh = paramiko.SSHClient()
+ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+ssh.connect(hostname="192.168.80.24", port=22, username="root", pkey=private_key)
+stdin, stdout, stderr = ssh.exec_command("ifconfig")
+res, err = stdout.read(), stderr.read()
+result = res if res else err
+print(result.decode())
+ssh.close()
+ 
+# 基于密钥的上传下载
+private_key = paramiko.RSAKey.from_private_key_file("id_rsa")
+transport = paramiko.Transport(("192.168.80.24", 22))
+transport.connect(username="root", pkey=private_key)
+sftp = paramiko.SFTPClient.from_transport(transport)
+sftp.get("test.txt", "1")
+transport.close()
+ 
+# SSHClient 封装 Transport
+private_key = paramiko.RSAKey.from_private_key_file('/home/auto/.ssh/id_rsa')
+transport = paramiko.Transport(('hostname', 22))
+transport.connect(username='wupeiqi', pkey=private_key)
+ssh = paramiko.SSHClient()
+ssh._transport = transport
+stdin, stdout, stderr = ssh.exec_command('df')
+transport.close()
+​​
+​
+​
+
+
+
+
+
+SSH密码认证远程执行命令
+
+
+
+#!/usr/bin/python
+
+# -*- coding: utf-8 -*-
+
+import paramiko
+
+import sys
+
+hostname = '192.168.1.215'
+
+port = 22
+
+username = 'root'
+
+password = '123456'
+
+client = paramiko.SSHClient()  # 绑定实例
+
+client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
+client.connect(hostname, port, username, password, timeout=5)
+
+stdin, stdout, stderr = client.exec_command('df -h')   # 执行bash命令
+
+result = stdout.read()
+
+error = stderr.read()
+
+# 判断stderr输出是否为空，为空则打印执行结果，不为空打印报错信息
+
+if not error:
+
+   print result
+
+else:
+
+   print error
+
+client.close()
+
+
+私钥认证远程执行命令
+
+
+#!/usr/bin/python
+
+# -*- coding: utf-8 -*-
+
+import paramiko
+
+import sys
+
+hostname = '192.168.1.215'
+
+port = 22
+
+username = 'root'
+
+key_file = '/root/.ssh/id_rsa'
+
+cmd = " ".join(sys.argv[1:])
+
+def ssh_conn(command):
+
+    client = paramiko.SSHClient()
+
+    key = paramiko.RSAKey.from_private_key_file(key_file)
+
+    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
+    client.connect(hostname, port, username, pkey=key)
+
+    stdin, stdout, stderr = client.exec_command(command)  # 标准输入，标准输出，错误输出
+
+    result = stdout.read()
+
+    error = stderr.read()
+
+    if not error:
+
+        print result
+
+    else:
+
+        print error
+
+    client.close()
+
+if __name__ == "__main__":
+
+    ssh_conn(cmd)
+
+
+上传文件到远程服务器
+
+
+#!/usr/bin/python
+
+# -*- coding: utf-8 -*-
+
+import os, sys
+
+import paramiko
+
+hostname = '192.168.1.215'
+
+port = 22
+
+username = 'root'
+
+password = '123456'
+
+local_path = '/root/test.txt'
+
+remote_path = '/opt/test.txt'
+
+if not os.path.isfile(local_path):
+
+    print local_path + " file not exist!"
+
+    sys.exit(1)
+
+try:
+
+    s = paramiko.Transport((hostname, port))
+
+    s.connect(username = username, password=password)
+
+except Exception as e:
+
+    print e
+
+    sys.exit(1)
+
+sftp = paramiko.SFTPClient.from_transport(s)
+
+
+# 使用put()方法把本地文件上传到远程服务器
+
+
+sftp.put(local_path, remote_path)  
+
+     
+
+# 简单测试是否上传成功
+
+try:
+
+    # 如果远程主机有这个文件则返回一个对象，否则抛出异常               
+
+    sftp.file(remote_path) 
+
+    print "上传成功."
+
+except IOError:
+
+    print "上传失败!"
+
+finally:
+
+    s.close()
+
+
+从远程服务器下载文件
+
+
+#!/usr/bin/python
+
+# -*- coding: utf-8 -*-
+
+import os, sys
+
+import paramiko
+
+hostname = '192.168.1.215'
+
+port = 22
+
+username = 'root'
+
+password = '123456'
+
+local_path = '/root/test.txt'
+
+remote_path = '/opt/test.txt'
+
+try:
+
+    s = paramiko.Transport((hostname, port))
+
+    s.connect(username=username, password=password)
+
+    sftp = paramiko.SFTPClient.from_transport(s)
+
+except Exception as e:
+
+    print e
+
+    sys.exit(1)
+
+try:
+
+    # 判断远程服务器是否有这个文件
+
+    sftp.file(remote_path)
+
+    # 使用get()方法从远程服务器拉去文件
+
+    sftp.get(remote_path, local_path)       
+
+except IOError as e:
+
+    print remote_path + "remote file not exist!"
+
+    sys.exit(1)
+
+finally:
+
+    s.close()
+
+# 测试是否下载成功
+
+if os.path.isfile(local_path):
+
+    print "下载成功."
+
+else:
+
+    print "下载失败!"
+
+
+
+上传目录到远程服务器
+
+paramiko模块并没有实现直接上传目录的类，已经知道了如何上传文件，再写一个上传目录的代码就简单了，利用os库的os.walk()方法遍历目录，再一个个上传：
+
+#!/usr/bin/python
+
+# -*- coding: utf-8 -*-
+
+import os, sys
+
+import paramiko
+
+hostname = '192.168.1.215'
+
+port = 22
+
+username = 'root'
+
+password = '123456'
+
+local_path = '/root/abc'
+
+remote_path = '/opt/abc'
+
+# 去除路径后面正斜杠
+
+if local_path[-1] == '/':
+
+    local_path = local_path[0:-1]
+
+if remote_path[-1] == '/':
+
+    remote_path = remote_path[0:-1]
+
+file_list = []
+
+if os.path.isdir(local_path):
+
+    for root, dirs, files in os.walk(local_path):
+
+        for file in files:
+
+            # 获取文件绝对路径
+
+            file_path = os.path.join(root, file) 
+
+            file_list.append(file_path)
+
+else:
+
+    print path + "Directory not exist!"
+
+    sys.exit(1)
+
+try:
+
+    s = paramiko.Transport((hostname, port))
+
+    s.connect(username=username, password=password)
+
+    sftp = paramiko.SFTPClient.from_transport(s)
+
+except Exception as e:
+
+    print e
+
+for local_file in file_list:
+
+    # 替换目标目录
+
+    remote_file = local_file.replace(local_path, remote_path)
+
+    remote_dir = os.path.dirname(remote_file)
+
+    # 如果远程服务器没目标目录则创建
+
+    try:
+
+        sftp.stat(remote_dir)
+
+    except IOError:
+
+        sftp.mkdir(remote_dir)
+
+    print "%s -> %s" % (local_file, remote_file)
+
+    sftp.put(local_file, remote_file)
+
+s.close()
+
+
+传输文件
+
+
+#!/usr/bin/python
+
+#-*- coding:UTF-8 -*-
+
+
+try:
+
+    import os,sys
+
+    import re
+
+    import datetime
+
+    import shutil
+
+    import commands
+
+
+    from optparse import OptionParser
+
+except ImportError,e:
+
+    print "Error:",e
+
+    sys.exit()
+
+
+def Get_And_ScpLogfile(host,list,tmpdir,yestoday):
+
+    logdir = '/log/'
+
+    desdir = '/home/haoren/logdir/'
+
+    global dirs;dirs = []
+
+    for ip in list:
+
+        ident = ip.split('.')[3]
+
+        ldir = '%s%s_%s' % (tmpdir,yestoday,ident)
+
+        dirs.append(ldir) 
+
+        if not os.path.exists(ldir):
+
+                os.makedirs(ldir)
+
+
+        s,o = commands.getstatusoutput('ssh %s /bin/ls -ld %s%s ' % (ip,logdir,yestoday))
+
+        print "********************************************%s**************************************************" % ip
+
+        print "BEGIN:"
+
+        if s == 0:
+
+            os.system('/usr/bin/scp -r %s:%s%s/* %s' % (ip,logdir,yestoday,ldir)) 
+
+        else:
+
+            os.system('/usr/bin/scp -r %s:%s*%s* %s' % (ip,logdir,yestoday,ldir)) 
+
+
+
+    for ip in host:
+
+         print "**************************************SCP_To_%s**************************************************" % ip
+
+         print "BEGIN:"
+
+         os.system('/usr/bin/scp -r %s%s* %s:%s' % (tmpdir,yestoday,ip,desdir))     
+
+
+def CleanLogFile():
+
+    for d in dirs:
+
+        shutil.rmtree(d,True)
+
+
+def main():
+
+    ####option####
+
+    parser = OptionParser()
+
+    parser.add_option("-t","--time",action="store",dest="filedate",help="appoint the logfile time,use like this '-t 130825'")
+
+    (options,args) = parser.parse_args()
+
+
+    ####option####
+
+    
+
+    if options.filedate:
+
+        filedate = options.filedate
+
+    else:
+
+        filedate = (datetime.datetime.now() - datetime.timedelta(days=1)).strftime('%y%m%d')
+
+
+    iplist = []
+
+    host = []
+
+    tmpdir = '/home/haoren/tempdir/'
+
+    f = open('/home/haoren/tools/log_config.ini','r')
+
+    for line in f:
+
+        line = line.strip()
+
+        if re.search(r'^[0-9]{1,2}=.*',line):
+
+            iplist.append(line.split('=')[1])
+
+        elif re.search(r'^host=.*',line):
+
+            #host = line.split('=')[1]
+
+            host.append(line.split('=')[1])
+
+        elif re.search(r'^host2=.*',line):
+
+        #    host2 = line.split('=')[1]
+
+            host.append(line.split('=')[1])
+
+    f.close()
+
+    Get_And_ScpLogfile(host,iplist,tmpdir,filedate) 
+
+    CleanLogFile()
+
+
+if __name__ == "__main__":
+
+    main()
+
+
+shutil 用来处理 文件 文件夹 压缩包 的模块
+
+
+import shutil
+
+  
+
+# 拷贝文件内容
+
+shutil.copyfileobj(open('old.xml', 'r'), open('new.xml', 'w'))
+
+  
+
+# 拷贝文件
+
+shutil.copyfile('f1.log', 'f2.log')
+
+  
+
+# 拷贝权限
+
+shutil.copymode('f1.log', 'f2.log')
+
+  
+
+# 拷贝文件状态信息
+
+shutil.copystat('f1.log', 'f2.log')
+
+  
+
+# 拷贝文件和权限
+
+shutil.copy('f1.log', 'f2.log')
+
+  
+
+# 递归地拷贝文件夹
+
+# shutil.copytree('folder1', 'folder2',
+
+ignore=shutil.ignore_patterns('*.pyc', '*.txt'))
+
+  
+
+# 递归地删除文件
+
+# shutil.rmtree('folder2')
+
+  
+
+# 递归地移动重命名文件
+
+# shutil.move('folder2', 'folder3')
+
+  
+
+# 打包文件
+
+ret = shutil.make_archive(r'C:\GitHub\Python\day7\shutil\www', 'gztar',
+
+root_dir=r'C:\GitHub\Python\day7\shutil\folder1') 
+
+
+
+zipfile tarfile
+
+
+import zipfile
+
+  
+
+# 压缩
+
+z = zipfile.ZipFile('z.zip', 'w')
+
+z.write('xo.xml')
+
+z.write('xxxoo.xml')
+
+z.close()
+
+  
+
+# 解压
+
+z = zipfile.ZipFile('z.zip', 'r')
+
+for item in z.namelist():
+
+    print(item)
+
+# z.extractall()
+
+z.extract('xo.xml')
+
+  
+
+import tarfile
+
+  
+
+# 压缩
+
+tar = tarfile.open('z.tar', 'w')
+
+tar.add('xo.xml', arcname='bbs2.log')
+
+tar.add('xxxoo.xml', arcname='cmdb.log')
+
+tar.close()
+
+  
+
+# 解压
+
+tar = tarfile.open('z.tar', 'r')
+
+# for item in tar.getmembers():
+
+#     print(item, type(item))
+
+obj = tar.getmember('cmdb.log')  # 和zipfile不同的是 再解压特定文件前要先获取文件特殊对象值
+
+tar.extract(obj)
+
+tar.close()
+
+
+
+
+和处理shell相关的命令
+
+
+import subprocess
+
+  
+
+# 返回命令执行结果
+
+# result = subprocess.call('ls -l', shell=True)
+
+# result = subprocess.call(['ls', '-l'], shell=False)
+
+# print(result)
+
+  
+
+# subprocess.check_call(["ls", "-l"])
+
+# subprocess.check_call("exit 1", shell=True)
+
+  
+
+# 好像没Python废弃了
+
+subprocess.check_output(["echo", "Hello World!"], shell=False)
+
+subprocess.check_output("exit 1", shell=True)
+
+  
+
+# 2、执行复杂的系统相关命令
+
+  
+
+# 1）切换目录再执行命令
+
+obj = subprocess.Popen("mkdir t3", shell=True, cwd='/home/dev',)
+
+  
+
+# 2）有多行且复杂的命令使用三个接口
+
+# obj = subprocess.Popen(["python"], stdin=subprocess.PIPE, 
+
+stdout=subprocess.PIPE， stderr=subprocess.PIPE, universal_newlines=True)
+
+# obj.stdin.write("print(1)\n")  # 传命令接口
+
+# obj.stdin.write("print(2)")
+
+# obj.stdin.close()
+
+# 
+
+# cmd_out = obj.stdout.read()  # 读接口
+
+# obj.stdout.close()
+
+# cmd_error = obj.stderr.read()  # 读错误接口
+
+# obj.stderr.close()
+
+# 
+
+# print(cmd_out)
+
+# print(cmd_error)
+
+  
+
+# 3）一次读输出
+
+# obj = subprocess.Popen(["python"], stdin=subprocess.PIPE, 
+
+stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+
+# obj.stdin.write("print(1)\n")
+
+# obj.stdin.write("print(2)")
+
+#
+
+# out_error_list = obj.communicate()
+
+# print(out_error_list)
+
+  
+
+# 4）简单写法
+
+# obj = subprocess.Popen(["python"], stdin=subprocess.PIPE,
+
+stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+
+# out_error_list = obj.communicate('print("hello")')
+
+# print(out_error_list) 
+
+
+
+
+
+xml 是实现不同语言和程序之间进行数据交换的协议
+
+
+
+from xml.etree import ElementTree as ET
+
+  
+
+# xml有两个常见格式
+
+# 1）直接读取字符串格式的xml
+
+str_xml = open('xo.xml', 'r').read()
+
+root = ET.XML(str_xml)  # 这里没有建立 xml tree 所以不能直接将内存中的xml写回文件
+
+  
+
+# 2）读取xml格式文件
+
+# tree = ET.parse('xo.xml')  # 首先建立了一个 xml tree 对象
+
+# root = tree.getroot()
+
+# print(root)  # 获取根节点
+
+# print(root.tag)  # 取根节点名
+
+# print(root.attrib)  # 获取节点属性
+
+  
+
+# 3) 遍历多层xml
+
+for child in root:
+
+    print(child.tag, child.attrib)
+
+    for child_second in child:
+
+        print(child_second.tag, child_second.text)  # child_second.text 节点内容
+
+  
+
+# 4) 遍历指定的节点
+
+for node in root.iter('year'):
+
+    print(node.tag, node.text)
+
+  
+
+# 5) 修改节点内容
+
+for node in root.iter('year'):
+
+    new_year = int(node.text) + 1
+
+    node.text = str(new_year)
+
+  
+
+    node.set('name', 'london')
+
+    node.set('age', '18')
+
+  
+
+    del node.attrib['age']
+
+  
+
+tree = ET.ElementTree(root)
+
+tree.write('new_xo.xml', encoding='utf-8')
+
+   
+
+# 6、删除节点
+
+str_xml = open('xo.xml', 'r').read()
+
+root = ET.XML(str_xml)
+
+for country in root.findall('country'):
+
+    rank = int(country.find('rank').text)
+
+    if rank > 50:
+
+        root.remove(country)
+
+  
+
+tree = ET.ElementTree(root)
+
+tree.write('new_xoo.xml', encoding='utf-8')
+
+  
+
+# 7、创建 xml 文档
+
+  
+
+from xml.dom import minidom
+
+  
+
+  
+
+def prettify(elem):
+
+    """将节点转换成字符串，并添加缩进。
+
+    """
+
+    rough_string = ET.tostring(elem, 'utf-8')
+
+    reparsed = minidom.parseString(rough_string)
+
+    return reparsed.toprettyxml(indent="\t")
+
+  
+
+# 创建根节点
+
+root = ET.Element("famliy")
+
+  
+
+# 创建大儿子
+
+# son1 = ET.Element('son', {'name': '儿1'})
+
+son1 = root.makeelement('son', {'name': '儿1'})
+
+# 创建小儿子
+
+# son2 = ET.Element('son', {"name": '儿2'})
+
+son2 = root.makeelement('son', {"name": '儿2'})
+
+  
+
+# 在大儿子中创建两个孙子
+
+# grandson1 = ET.Element('grandson', {'name': '儿11'})
+
+grandson1 = son1.makeelement('grandson', {'name': '儿11'})
+
+# grandson2 = ET.Element('grandson', {'name': '儿12'})
+
+grandson2 = son1.makeelement('grandson', {'name': '儿12'})
+
+  
+
+son1.append(grandson1)
+
+son1.append(grandson2)
+
+  
+
+  
+
+# 把儿子添加到根节点中
+
+root.append(son1)
+
+root.append(son1)
+
+  
+
+raw_str = prettify(root)  # 自动添加缩进
+
+  
+
+f = open("xxxoo.xml", 'w', encoding='utf-8')
+
+f.write(raw_str)
+
+f.close()
+
+
+
+
+configparser 用于处理特定格式的文件 实质上是通过open来操作文件
+
+源文件特定格式
+
+
+[section1]
+
+k1 = 123
+
+k2 = v2
+
+  
+
+[section2]
+
+k1 = 456
+
+k2 = v2
+
+k3 = v3
+
+
+常见操作
+
+import configparser
+
+  
+
+# 1、读取文件 读取节点
+
+config = configparser.ConfigParser()
+
+config.read('conf_file', encoding='utf-8')
+
+ret = config.sections()  # 获取所有节点 返回一个列表
+
+ret1 = config.items('section1')  # 读取节点下的键值对
+
+ret2 = config.options('section1')  # 读取某个节点下的键
+
+  
+
+print(ret)
+
+print(ret1)
+
+print(ret2)
+
+  
+
+# 2、读取节点键值
+
+v = config.get('section1', 'k1')  # 获取指定key下的值 默认 str 类型
+
+# v = config.getint('section1', 'k1')
+
+# v = config.getfloat('section1', 'k1')
+
+# v = config.getboolean('section1', 'k1')
+
+print(v, type(v))
+
+  
+
+# 3、检查 添加 删除节点
+
+has_sec = config.has_section('section1')
+
+print(has_sec)
+
+  
+
+# config.add_section('section5')
+
+# config.write(open('conf_file', 'w'))
+
+  
+
+# config.remove_section('section3')
+
+# config.write(open('conf_file', 'w'))
+
+  
+
+# 4、检查 删除 设置 指定组内的键值对
+
+has_opt = config.has_option('section1', 'k1')
+
+print(has_opt)
+
+  
+
+# config.remove_option('section2', 'k3')
+
+# config.write(open('conf_file', 'w'))
+
+  
+
+config.set('section5', 'k1', '123')
+
+config.write(open('conf_file', 'w'))
+
+
+
+
+re 模块
+
+.  匹配除换行符以外的任意字符
+
+\w 匹配字母或数字或下划线或汉字
+
+\s 匹配任意的空白符 
+
+\d 匹配数字
+
+\b 匹配单词的开始或结束 
+
+^  匹配字符串的开始
+
+$  匹配字符串的结束 
+
+*  重复零次或更多次
+
++  重复一次或更多次 
+
+?  重复零次或一次
+
+{n}   重复n次 
+
+{n,}  重复n次或更多次
+
+{n,m} 重复n到m次 
+
+
+
+# import re
+
+   
+
+# match
+
+# print(re.match('com', 'comwww.runcombb').group())  # match 匹配起始位置
+
+# print(re.search('com', 'www.runcombb').group())  # search 匹配第一次位置
+
+  
+
+# sub subn 匹配 替换
+
+# print(re.sub("g.t", "have", 'I get A, get B', 1))  # 1表示只替换1次
+
+# print(re.subn("g.t", "have", 'I get A, get B'))  # 提示替换了几次
+
+  
+
+# split
+
+# print(re.split('\d+', 'one1two2three3four4'))  # 有空格
+
+# 输出
+
+# ['one', 'two', 'three', 'four', '']
+
+  
+
+# compile 封装一个固定匹配规则供多次调用
+
+# s = "JGood is a boy,so cool..."
+
+# r = re.compile(r'\w*oo\w*')   # 查找所有包含oo的单词
+
+# print(r.findall(s))
+
+# 输出：
+
+# ['JGood', 'cool']
+
+  
+
+# 反斜杠
+
+# 在Python中 要进行两次转义才能匹配一个带反斜杠的字符 所以需要4个 \\\\
+
+# print(re.search("\\\\com", "\comcn").group())
+
+  
+
+# 单词
+
+# print(re.findall(r'I\b', 'I&am Ikobe')) # 有很多字符可以用来分隔单词 这里使用&
+
+  
+
+# 分组
+
+# 去已经匹配到的数据中再提取数据
+
+# origin = 'has sdfsdfsdfwer432'
+
+# r = re.match("h\w+", origin)  # 输出：has () {}
+
+# r = re.match("h(\w+)", origin)  # 输出：has ('as',) {}
+
+# r = re.match("h(?P<name>\w+)", origin)  # 输出：has ('as',) {'name': 'as'}
+
+# print(r.group())
+
+# print(r.groups())
+
+# print(r.groupdict())
+
+  
+
+# findall 分组
+
+# origin = "hasaabc halaaabc"
+
+# r = re.findall("h(\w+)a(ab)c", origin)  # 首先整体匹配 再将分组放入结果
+
+# print(r)
+
+# 输出：
+
+# [('as', 'ab'), ('ala', 'ab')]
+
+  
+
+# spilt 分组
+
+# origin = "hello alex abc alex age"
+
+# r = re.split("a(le)x", origin, 1)  # 忽略了alex 直接匹配le
+
+# print(r)
+
+# 输出：
+
+# ['hello ', 'le', ' abc alex age']
+
+常用正则表达式
+
+
+# IP：
+
+# ^(25[0-5]|2[0-4]\d|[0-1]?\d?\d)(\.(25[0-5]|2[0-4]\d|[0-1]?\d?\d)){3}$
+
+  
+
+# 手机号：
+
+# ^1[3|4|5|8][0-9]\d{8}$
+
+  
+
+# 邮箱：
+
+# [a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+
+
+
+
+hashlib
+
+
+# import hashlib
+
+  
+
+# obj = hashlib.md5(bytes('sdfsdfsadf', encoding='utf-8'))  # 加bytes任意字符防止被撞库破译
+
+# obj.update(bytes('123', encoding='utf-8'))
+
+# r = obj.hexdigest()
+
+# print(r)
+
+  
+
+# python内置还有一个 hmac 模块，它内部对我们创建 key 和 内容 进行进一步的处理然后再加密
+
+# import hmac 
+
+  
+
+# h = hmac.new(bytes('898oaFs09f',encoding="utf-8"))
+
+# h.update(bytes('admin',encoding="utf-8"))
+
+# print(h.hexdigest())
+
+
+os 系统级别的操作
+
+os.getcwd()                 获取当前工作目录，即当前python脚本工作的目录路径
+
+os.chdir("dirname")         改变当前脚本工作目录；相当于shell下cd
+
+os.curdir                   返回当前目录: ('.')
+
+os.pardir                   获取当前目录的父目录字符串名：('..')
+
+os.makedirs('dir1/dir2')    可生成多层递归目录
+
+os.removedirs('dirname1')   若目录为空，则删除，并递归到上一级目录，如若也为空，则删除，依此类推
+
+os.mkdir('dirname')         生成单级目录；相当于shell中mkdir dirname
+
+os.rmdir('dirname')         删除单级空目录，若目录不为空则无法删除，报错；相当于shell中rmdir dirname
+
+os.listdir('dirname')       列出指定目录下的所有文件和子目录，包括隐藏文件，并以列表方式打印
+
+os.remove()                 删除一个文件
+
+os.rename("oldname","new")  重命名文件/目录
+
+os.stat('path/filename')    获取文件/目录信息
+
+os.sep                      操作系统特定的路径分隔符，win下为"\\",Linux下为"/"
+
+os.linesep                  当前平台使用的行终止符，win下为"\t\n",Linux下为"\n"
+
+os.pathsep                  用于分割文件路径的字符串
+
+os.name                     字符串指示当前使用平台。win->'nt'; Linux->'posix'
+
+os.system("bash command")   运行shell命令，直接显示
+
+os.environ                  获取系统环境变量
+
+os.path.abspath(path)       返回path规范化的绝对路径
+
+os.path.split(path)         将path分割成目录和文件名二元组返回
+
+os.path.dirname(path)       返回path的目录。其实就是os.path.split(path)的第一个元素
+
+os.path.basename(path)      返回path最后的文件名。如何path以／或\结尾，那么就会返回空值。即os.path.split(path)的第二个元素
+
+os.path.exists(path)        如果path存在，返回True；如果path不存在，返回False
+
+os.path.isabs(path)         如果path是绝对路径，返回True
+
+os.path.isfile(path)        如果path是一个存在的文件，返回True。否则返回False
+
+os.path.isdir(path)         如果path是一个存在的目录，则返回True。否则返回False
+
+os.path.join(path1[, path2[, ...]])  将多个路径组合后返回，第一个绝对路径之前的参数将被忽略
+
+os.path.getatime(path)      返回path所指向的文件或者目录的最后存取时间
+
+os.path.getmtime(path)      返回path所指向的文件或者目录的最后修改时间
+
+
+
+sys
+
+用于对Python解释器相关操作：
+
+sys.argv           命令行参数List，第一个元素是程序本身路径
+
+sys.exit(n)        退出程序，正常退出时exit(0)
+
+sys.version        获取Python解释程序的版本信息
+
+sys.maxint         最大的Int值
+
+sys.path           返回模块的搜索路径，初始化时使用PYTHONPATH环境变量的值
+
+sys.platform       返回操作系统平台名称
+
+sys.stdin          输入相关
+
+sys.stdout         输出相关
+
+sys.stderror       错误相关
+
+关于sys运用：进度条
+
+
+def view_bar(num, total):
+
+    rate = num / total
+
+    rate_num = int(rate * 100)
+
+    r1 = '\r%s>%d%%' % ("="*num, rate_num,)  # 加 r 的话让每次输出回到初始最前面位置
+
+    sys.stdout.write(r1)  # 和print的区别就是不加换行符
+
+    sys.stdout.flush()  # 清空屏幕输出
+
+  
+
+for i in range(0, 101):
+
+    time.sleep(0.1)
+
+    view_bar(i, 100) 
+
+
+python的内置模块中对于命令行的解析模块共两个getopt 和 optparse 。不过getopt过于简单，往往不能满足需求。此时可以使用optparse模块。这个模块相对于getopt更新，功能更强大。
+
+那么如何使用optparse模块呢? optparse 模块的官方文档给出了很详细的说明。
+
+
+第一步、导入模块，并在主函数中创建实例
+
+
+from optparse import OptionParser
+
+[...]
+
+parser = OptionParser()
+
+
+第二步、使用add_option定义需要的option
+
+
+parser.add_option(opt_str, ...,
+
+                  attr=value, ...)
+
+
+add_option 方法中有很多可选的参数，及一些影响optparse函数行为的属性。这些东西都很值得去细细推敲。
+
+
+最后一步、当定义完所有option 后，通过parse_args 去解析所有的option。并返回解析结果
+
+
+(options, args) = parser.parse_args()
+
+
+parse_args 默认解析的是sys.argv[1:] 的所有参数。不过若你喜欢，也可以自己传递参数到parse_args。例如如下的形式：
+
+args = ["-f", "foo.txt"]
+
+(options, args) = parser.parse_args(args)
+
+
+parse_args 有两个返回值，options 和 args 。其中options是一个对象，通过这个对象可以获取到所有定义的option相应信息。而args是一个list，里面存储了所有没有被定义的参数信息。
+
+
+以上三个步骤，就是使用optparse模块的完整体现。不过在第二步中add_option中存在很多影响pars_args行为的属性，将在下面逐步记录解释。
+
+
+
+action 属性：
+
+它将告诉optparse 遇到相应的命令行时应该怎么去做。默认若不指定action属性，它将被赋予默认值store。那么store是什么意义呢？以官方的实例说明
+
+当添加如下的option：
+
+
+parser.add_option("-f", "--file",
+
+                  action="store", type="string", dest="filename")
+
+且传递如下的参数：
+
+
+args = ["-f", "foo.txt"]
+
+(options, args) = parser.parse_args(args)
+
+当optparse 发现参数-f 时，它会将-f后面的一个参数也消费掉(将-f 和 foo.txt绑定到一起了)。并将foo.txt存储到options.filename中。当经过parse_args解析后，调用options.filename时将得到foo.txt这个值。
+
+
+以上是action的默认值store。另外还有布尔类型的action。这样类型的东西主要是在命令行参数不需要值的时候使用。例如 -v 查看版本号， -v 后面就需要再写参数了。
+
+Example：
+
+
+parser.add_option("-v", action="store_true", dest="verbose")
+
+parser.add_option("-q", action="store_false", dest="quit")
+
+以上两个例子，当经过parse_args后调用options.verbose将为true。而调用options.quit将为false
+
+
+当然，action还有其他一些值。如：store_const、append、count 和 callback 。研究后再呈上文章吧。
+
+default属性：
+
+给相应的参数设置默认值，也是一个很有必要知道的属性
+
+Example:
+
+
+parser.add_option("-v", action="store_true", dest="verbose", default=False)
+
+parser.add_option("-q", action="store_false", dest="verbose", default=True)
+
+另外一种比较清晰的方法设置默认值：
+
+
+parser.set_defaults(verbose=True)
+
+parser.add_option(...)
+
+(options, args) = parser.parse_args()
+
+
+
+
+optparse，是一个能够让程式设计人员轻松设计出简单明了、易于使用、符合标准的Unix命令列程式的Python模块。生成使用和帮助信息。
+
+使用此模块前，首先需要导入模块中的类OptionParser，然后创建它的一个实例（对象）：
+
+ 
+
+ 
+
+from optparse import OptionParser
+
+ 
+
+parser = OptionParser()  #这里也可以定义类的参数
+
+例子1：
+
+
+from optparse import OptionParser
+
+  
+
+def opt():
+
+    parser=OptionParser("Usage: %prog -a command")
+
+    parser.add_option('-a',
+
+                      dest='addr',
+
+                      action='store',
+
+                      help='ip or iprange EX: 192.168.1,192.168.1.3 or192.168.1.1-192.168.1.100')
+
+    options,args=parser.parse_args()
+
+    return options, args
+
+options,args=parser.parse_args()是一个方法返回的是一个元组里面包括选项和参数及options和args
+
+例子2
+
+
+#!/usr/bin/python
+
+from optparse import OptionParser 
+
+import sys
+
+import os
+
+parser = OptionParser() 
+
+parser.add_option("-c","--char",   
+
+                  dest="chars",
+
+                  action="store_true",
+
+                  default=False,
+
+  
+
+                  help="only count chars")
+
+  
+
+parser.add_option("-w", "--word",
+
+                  dest="words",
+
+                  action="store_true",
+
+                  default=False,
+
+                  help="only count words")
+
+  
+
+parser.add_option("-l", "--line",
+
+                  dest="lines",
+
+                  action="store_true",
+
+                  default=False,
+
+                  help="only count lines")
+
+  
+
+options, args=parser.parse_args()
+
+print options,args
+
+
+执行这个脚本 python  aa.py
+
+{'chars': False, 'lines': False, 'words': False} []
+
+
+[root@133 day1]# python hu.py -w hu.py
+
+{'chars': False, 'lines': False, 'words': True}['hu.py']
+
+
+这个hu.py就代表args  参数。大括号里面的代表options选项
+
+注意：不要用模块的名字做脚本的名字，否则运行时会报错
+
+
+
+#!/usr/bin/env python
+
+#coding:utf-8
+
+#对标准输入进行统计
+
+import sys, os
+
+from optparse import OptionParser
+
+ 
+
+def opt():
+
+    usage = "usage: %prog [options] arg1 arg2"
+
+    parser = OptionParser()
+
+    parser.add_option("-c", "--char",
+
+                    dest="chars",
+
+                    action="store_true",
+
+                    default=False,
+
+                    help="only count chars")
+
+    parser.add_option("-w", "--word",
+
+                    dest="words",
+
+                    action="store_true",
+
+                    default=False,
+
+                    help="only count words")
+
+    parser.add_option("-l", "--line",
+
+                    dest="lines",
+
+                    action="store_true",
+
+                    default=False,
+
+                    help="only count lines")
+
+    parser.add_option("-n", "--nototal",
+
+                    dest="nototal",
+
+                    action="store_true",
+
+                    default=False,
+
+                    help="nototal")
+
+    options, args = parser.parse_args()
+
+ 
+
+    return options, args     
+
+ 
+
+opt()
+
+print sys.argv[:]    //打印出脚本运行时的参数，注意和parse_args返回的参数做对比
+
+options, args = opt()
+
+print options, args    //打印出parse_args返回的args的值。
+
+
+
+
+
+#!/usr/bin/env python
+
+# coding=utf-8
+
+ 
+
+import sys, os
+
+from optparse import OptionParser
+
+ 
+
+def opt():
+
+    parser = OptionParser()
+
+    parser.add_option("-c", "--char",
+
+                      dest="chars",
+
+                      action="store_true",
+
+                      default=False,
+
+                      help="only count chars")
+
+    parser.add_option("-w", "--ward",
+
+                      dest="words",
+
+                      action="store_true",
+
+                      default=False,
+
+                      help="only count words")
+
+    parser.add_option("-l", "--line",
+
+                      dest="lines",
+
+                      action="store_true",
+
+                      default=False,
+
+                      help="only count lines")
+
+    parser.add_option("-n", "--no-total",
+
+                      dest="nototal",
+
+                      action="store_true",
+
+                      default=False,
+
+                      help="show total or not")
+
+    options, args = parser.parse_args()
+
+    return options, args
+
+ 
+
+def get_count(data):
+
+    chars =  len(data)
+
+    words = len(data.split())
+
+    lines = data.count('\n')
+
+    return lines, words, chars
+
+ 
+
+def print_wc(options, lines, words, chars, fn):
+
+    if options.lines:
+
+        print lines,
+
+    if options.words:
+
+        print words,
+
+    if options.chars:
+
+        print chars,
+
+    print(fn)
+
+ 
+
+def main():
+
+    options, args = opt()
+
+    if not (options.words or options.chars or options.lines):
+
+        options.words, options.chars, options.lines = True, True, True
+
+ 
+
+    if args:
+
+        total_lines, total_words, total_chars = 0, 0, 0
+
+        for fn in args:
+
+            if os.path.isfile(fn):
+
+                with open(fn) as fd:
+
+                    data = fd.read()
+
+                lines, words, chars = get_count(data)
+
+                print_wc(options, lines, words, chars, fn)
+
+                total_lines += lines
+
+                total_words += words
+
+                total_chars += chars
+
+            elif os.path.isdir(fn):
+
+                print("%s: is a directory" % fn, file=sys.stderr)
+
+            else:
+
+                sys.stderr.write("%s: No such file or direcotry\n" % fn)
+
+        if len(args) > 1 and not options.nototal:
+
+            print_wc(options, total_lines, total_words, total_chars, 'total')
+
+    else:
+
+        data = sys.stdin.read()
+
+        fn = ''
+
+        lines, words, chars = get_count(data)
+
+        print_wc(options, lines, words, chars, fn)
+
+ 
+
+if __name__ == '__main__':
+
+    main()
+
+
+
+#!/usr/bin/env python
+import sys, os
+
+from optparse import OptionParser
+
+ 
+
+parser = OptionParser()
+
+parser.add_option("-c", "--char",
+
+                  dest="chars",
+
+                  action="store_true",
+
+                  default=False,
+
+                  help="only count chars")
+
+ 
+
+parser.add_option("-w", "--word",
+
+                  dest="words",
+
+                  action="store_true",
+
+                  default=False,
+
+                  help="only count words")
+
+ 
+
+parser.add_option("-l", "--line",
+
+                  dest="lines",
+
+                  action="store_true",
+
+                  default=False,
+
+                  help="only count lines")
+
+ 
+
+ 
+
+options, args = parser.parse_args()
+
+print options, args
+
+ 
+
+data = sys.stdin.read()
+
+chars = len(data)
+
+words = len(data.split())
+
+lines = data.count('\n')
+
+ 
+
+if options.chars:
+
+    print chars,
+
+if options.words:
+
+    print words,
+
+if options.lines:
+
+    print lines
+
+
+
+parse_args()这个方法返回两个值，options和args，分别是对象和列表，options里包括所有使用parser.add_option()这个方法定义的选项，比如‘-w'。
+
+options.words就是存储'-w'这个选项的，它的值是True或者False，比如脚本后面带-w选项时，那么options.words的值就是True。
+
+下面这个在ipython下的输出，由于没有使用add_option()定义任何选项，所以options的输出里没有选项的值。
+
+这个是python自带的模块，想具体了解它的内部是如何实现的，源码文件在这个位置，/usr/lib64/python2.6/optparse.py。
+
+
+脚本中这样定义的：dest = "characters",
+
+后面应该这样判断：if options.characters，而不是if options.chars
+
+
+
+dest和action有什么用？看Help似乎没怎么提到？
+
+在代码里引用选项时需要dest后面定义的那个名字，比如引用-c选项，就使用options.characters，每个选项都需要dest去定义一个名字，这个值就是选项的名字，目的就是在程序中去引用这个选项，比如：if not (options.characters or options.words or options.lines):括号里就是在引用这些选项。
+
+有的命令后面的选项就是一个字母，有的不仅有字母，而且后面还有值，比较一下下面这两个命令：
+
+wc -l /etc/passwd
+
+tail -n 20 /etc/passwd
+
+-l与-n都是选项，但是行为不一样，-l后面没有值，-n后面有值，那么选项后面带不带值是action决定的，如果action="store_true",那么说明选项后面没有值，如果action='store',说明选项后面需要带值。
+
+脚本后面跟-h时，可以看到help定义的内容。
+
+
+
+那default又是有什么作用，为False和True分别表示什么？
+
+拿-c选项举例子，
+
+default如果为True，表示脚本后面如果不加-c选项，默认也是有-c的行为的。
+
+default为False时，表示脚本后面不加-c选项，就没有-c的行为，比如wc -l /etc/hosts，没有-c选项，就说明不对字符统计，只对行数统计
+
+
+
+
+sftp是安全文件传输协议，提供一种安全的加密方法，sftp是SSH的一部分，SFTPClient类实现了sftp客户端，通过已建立的SSH通道传输文件，与其他的操作，如下：
+
+
+
+sftp.getcwd() 返回当前工作目录
+
+sftp.chdir(path) 改变工作目录
+
+sftp.chmod(path, mode) 修改权限
+
+sftp.chown(path, uid, gid) 设置属主属组
+
+sftp.close() 关闭sftp
+
+sftp.file(filename, mode='r', bufsize=-1) 读取文件
+
+sftp.from_transport(s) 创建SFTP客户端通道
+
+sftp.listdir(path='.') 列出目录，返回一个列表
+
+sftp.listdir_attr(path='.') 列出目录，返回一个SFTPAttributes列表
+
+sftp.mkdir(path, mode=511) 创建目录
+
+sftp.normalize(path) 返回规范化path
+
+sftp.open(filename, mode='r', bufsize=-1) 在远程服务器打开文件
+
+sftp.put(localpath, remotepath, callback=None)  localpath文件上传到远程服务器remotepath
+
+sftp.get(remotepath, localpath, callback=None)  从远程服务器remotepath拉文件到本地localpath
+
+sftp.readlink(path) 返回一个符号链接目标
+
+sftp.remove(path) 删除文件
+
+sftp.rename(oldpath, newpath) 重命名文件或目录
+
+sftp.rmdir(path) 删除目录
+
+sftp.stat(path) 返回远程服务器文件信息（返回一个对象的属性）
+
+sftp.truncate(path, size) 截取文件大小
+
+sftp.symlink(source, dest) 创建一个软链接（快捷方式）
+
+sftp.unlink(path) 删除软链接
+
+
+
+
+fabric
+
+fabric模块是在paramiko基础上又做了一层封装，操作起来更方便。主要用于多台主机批量执行任务。
+
+默认Python没有，需要手动安装：pip install fabric
+
+如安装失败，可以尝试yum安装：yum install fabric
+
+
+
+Fabric常用API：
+
+API类
+
+描述
+
+示例
+
+local 执行本地命令  local('uname -s')
+
+lcd 切换本地目录  lcd('/opt')
+
+run 执行远程命令  run('uname -s')
+
+cd 切换远程目录  cd('/opt')
+
+sudo sudo方式执行远程命令sudo('/etc/init.d/httpd start')
+
+put 上传本地文件或目录到远程主机put(remote_path, local_path)
+
+get 从远程主机下载文件或目录到本地put(local_path, remote_path)
+
+open_shell 打开一个shell，类似于SSH连接到了远程主机open_shell("ifconfig eth0")
+
+prompt 获得用户输入信息prompt('Please input user password: ')
+
+confirm 获得提示信息确认confirm('Continue[Y/N]?')
+
+reboot 重启远程主机  reboot()
+
+@task 函数装饰器，引用说明函数可调用，否则不可见
+
+@runs_once 函数装饰器，函数只会执行一次
+
+当我们写好fabric脚本后，需要用fab命令调用执行任务。
+
+命令格式：fab [options] <command>[:arg1,arg2=val2,host=foo,hosts='h1;h2',...] ...
+
+fab命令有以下常用选项：
+
+选项
+
+描述
+
+-l 打印可用的命令（函数）
+
+--set=KEY=VALUE,... 逗号分隔，设置环境变量
+
+--shortlist 简短打印可用命令
+
+-c PATH 指定本地配置文件
+
+-D 不加载用户known_hosts文件
+
+-f PATH 指定fabfile文件
+
+-g HOST 逗号分隔要操作的主机
+
+-i PATH 指定私钥文件
+
+-k 不加载来自~/.ssh下的私钥文件
+
+-p PASSWORD 使用密码认证and/or sudo
+
+-P 默认为并行执行方法
+
+--port=PORT 指定SSH连接端口
+
+-R ROLES 根据角色操作，逗号分隔
+
+-s SHELL 指定新shell，默认是'/bin/bash -l -c'
+
+--show=LEVELS 以逗号分隔的输出
+
+--ssh-config-path=PATH SSH配置文件路径
+
+-t N 设置连接超时时间，单位秒
+
+-T N 设置远程命令超时时间，单位秒
+
+-u USER 连接远程主机用户名
+
+-x HOSTS 以逗号分隔排除主机
+
+-z INT 并发进程数 
+
+
+
+
+本地执行命令
+
+
+from fabric.api import local
+
+def command():
+
+    local('ls')
+
+# fab command
+
+[localhost] local: ls
+
+fabfile.py  fabfile.pyc  tab.py  tab.pyc
+
+Done.
+
+
+
+使用fab命令调用，默认寻找当前目录的fabfile.py文件。
+
+from fabric.api import run
+
+def command():
+
+    run('ls')
+
+# fab -H 192.168.1.120 -u user command
+
+[192.168.1.120] Executing task 'command'
+
+[192.168.1.120] run: ls
+
+[192.168.1.120] Login password for 'user':
+
+[192.168.1.120] out: access.log  a.py
+
+[192.168.1.120] out:
+
+Done.
+
+ 
+
+Disconnecting from 192.168.1.120... done.
+
+
+
+如果在多台主机执行，只需要-H后面的IP以逗号分隔即可。
+
+
+
+给脚本函数传入位置参数
+
+
+from fabric.api import run
+
+
+def hello(name="world"):
+
+    print("Hello %s!" % name)
+
+# fab -H localhost hello
+
+[localhost] Executing task 'hello'
+
+Hello world!
+
+Done.
+
+# fab -H localhost hello:name=Python
+
+[localhost] Executing task 'hello'
+
+Hello Python!
+
+Done.
+
+
+主机列表组
+
+
+from fabric.api import run, env
+
+
+env.hosts = ['root@192.168.1.120:22', 'root@192.168.1.130:22']
+
+env.password = '123.com'
+
+env.exclude_hosts = ['root@192.168.1.120:22']   # 排除主机
+
+def command():
+
+   run('ls')
+
+
+
+env作用是定义fabfile全局设定，类似于变量。还有一些常用的属性：
+
+env属性
+
+描述
+
+示例
+
+env.hosts 定义目标主机env.hosts = ['192.168.1.120:22']
+
+env.exclude_hosts 排除指定主机env.exclude_hosts = '[192.168.1.1]'
+
+env.user 定义用户名env.user='root'
+
+env.port 定义端口  env.port='22'
+
+env.password 定义密码env.password='123'
+
+env.passwords 定义多个密码，不同主机对应不同密码env.passwords = {'root@192.168.1.120:22': '123'}
+
+env.gateway 定义网关env.gateway='192.168.1.2'
+
+env.roledefs 定义角色分组env.roledef = {'web':['192.168.1.11'], 'db':['192.168.1.12']}
+
+env.deploy_release_dir 自定义全局变量，格式：env.+ '变量名'env.var
+
+
+
+
+# vi install.py
+
+
+from fabric.api import run, env
+
+
+env.roledefs = {
+    'web': ['192.168.1.10', '192.168.1.20'],
+
+    'db': ['192.168.1.30', '192.168.1.40']
+
+}
+
+env.password = '123'
+
+@roles('web')
+
+def task1():
+
+   run('yum install httpd -y')
+
+@roles('db')
+
+def task2():
+
+   run('yum install mysql-server -y')
+
+def deploy():
+
+   execute(task1)
+
+   execute(task2)
+
+# fab -f install.py deploy
+
+
+
+上传目录到远程主机
+
+
+
+from fabric.api import *
+
+env.hosts = ['192.168.1.120']
+
+env.user = 'user'
+
+env.password = '123.com'
+
+def task():
+
+   put('/root/abc', '/home/user')
+
+   run('ls -l /home/user')
+
+# fab task
+
+
+
+ 从远程主机下载目录
+
+
+from fabric.api import *
+
+
+env.hosts = ['192.168.1.120']
+
+env.user = 'user'
+
+env.password = '123.com'
+
+def task():
+
+   get('/home/user/b', '/opt')
+
+   local('ls -l /opt')
+
+# fab task
+
+
+打印颜色，有助于关键地方醒目
+
+
+from fabric.colors import *
+
+
+def show():
+
+   print green('Successful.')
+
+   print red('Failure!')
+
+   print yellow('Warning.')
+
+# fab show
+
+
+
+pexpect
+
+pexpect是一个用来启动子程序，并使用正则表达式对程序输出做出特定响应，以此实现与其自动交互的Python模块。暂不支持Windows下的Python环境执行。
+
+这里主要讲解run()函数和spawn()类，能完成自动交互，下面简单了解下它们使用。
+
+
+安装Python
+
+
+download pexpect-2.3.tar.gz
+
+tar zxvf pexpect-2.3.tar.g
+
+cd pexpect-2.3
+
+python setup.py install  (do this as root)
+
+
+下载pexpect模块：https://pypi.python.org/pypi/pexpect/#downloads
+
+解压后在目录下运行：python ./setup.py install　（必须是root权限）
+
+如果没有使用root权限，你只需要把lib的路径放入sys.path，这样便可以使用pexpect
+
+
+import sys
+
+sys.path.append('pexpect-4.2.1/build/lib')
+
+
+确认是否安装成功
+
+import pexpect
+
+dir(pexpect)
+
+
+['EOF', 'ExceptionPexpect', 'Expecter', 'PY3', 'TIMEOUT', '__all__', '__builtins__', '__doc__', '__file__', '__name__', '__package__', '__path__', '__revision__', '__version__', 'exceptions', 'expect', 'is_executable_file', 'searcher_re', 'searcher_string', 'split_command_line', 'sys', 'utils', 'which']
+
+
+
+
+18.3.1 run()
+
+run()函数用来运行bash命令，类似于os模块中的system()函数。
+
+
+
+参数：run(command, timeout=-1, withexitstatus=False, events=None, extra_args=None, logfile=None, cwd=None, env=None)
+
+
+run(command,timeout=-1,withexitstatus=False,events=None,extra_args=None,logfile=None, cwd=None, env=None)
+
+
+函数 run 可以用来运行命令，其作用与 Python os 模块中 system() 函数相似。
+
+run() 是通过 Pexpect 类实现的。
+
+
+如果命令的路径没有完全给出，则 run 会使用 which 命令尝试搜索命令的路径 。
+
+
+
+例1：执行ls命令
+
+>>> import pexpect
+
+>>> pexpect.run("ls") 
+
+
+例2：获得命令状态返回值
+
+>>> command_output, exitstatus = pexpect.run("ls", withexitstatus=1)
+
+
+command_outout是执行结果，exitstatus是退出状态值。
+
+
+使用 run()执行 svn 命令
+
+
+from pexpect import *
+
+
+run ("svn ci -m 'automatic commit' my_file.py")
+
+
+与 os.system() 不同的是，使用 run() 可以方便地同时获得命令的输出结果与命令的退出状态 。
+
+
+run() 的返回值
+
+
+from pexpect import *
+
+
+(command_output, exitstatus) = run ('ls -l /bin', withexitstatus=1)
+
+
+command_out 中保存的就是 /bin 目录下的内容
+
+
+
+spawn()是pexpect模块主要的类，实现启动子程序，使用pty.fork()生成子进程，并调用exec()系列函数执行命令。
+
+
+参数：spawn(command, args=[], timeout=30, maxread=2000, searchwindowsize=None, logfile=None, cwd=None, env=None)
+
+
+spawn()类几个常用函数：
+
+
+expect(pattern, timeout=-1, searchwindowsize=None) #匹配正则表达式，pattern可以是正则表达式。
+
+
+send(s)给子进程发送一个字符串
+
+
+sendline(s='') 就像send()，但添加了一个换行符（os.lineseq）
+
+
+sendcontrol(char) 发送一个控制符，比如ctrl-c、ctrl-d
+
+
+
+spawn() 使用示例
+
+
+child = pexpect.spawn ('/usr/bin/ftp') #执行ftp客户端命令
+
+
+child = pexpect.spawn ('/usr/bin/ssh user@example.com') #使用ssh登录目标机器
+
+
+child = pexpect.spawn ('ls -latr /tmp') #显示 /tmp目录内容
+
+
+当子程序需要参数时，还可以使用一个参数的列表：
+
+
+child = pexpect.spawn ('/usr/bin/ftp', [])
+
+child = pexpect.spawn ('/usr/bin/ssh', ['user@example.com'])
+
+child = pexpect.spawn ('ls', ['-latr', '/tmp'])
+
+
+在构造函数中，maxread 属性指定了 Pexpect 对象试图从 tty 一次读取的最大字节数，它的默认值是2000字节 。
+
+由于需要实现不断匹配子程序输出， searchwindowsize 指定了从输入缓冲区中进行模式匹配的位置，默认从开始匹配。
+
+logfile 参数指定了 Pexpect 产生的日志的记录位置。
+
+记录日志
+
+child = pexpect.spawn('some_command')
+
+fout = file('mylog.txt','w')
+
+child.logfile = fout
+
+
+还可以将日志指向标准输出：
+
+child = pexpect.spawn('some_command')
+
+child.logfile = sys.stdout
+
+如果不需要记录向子程序输入的日志，只记录子程序的输出，可以使用：
+
+child = pexpect.spawn('some_command')
+
+
+child.logfile_send = sys.stdout
+
+
+
+ftp交互
+
+用ftp命令登录是这样的，需要手动输入用户名和密码，才能登录进去。
+
+
+# ftp 192.168.1.10
+
+Connected to 192.168.1.10 (192.168.1.10).
+
+220-FileZilla Server version 0.9.46 beta
+
+220-written by Tim Kosse (tim.kosse@filezilla-project.org)
+
+220 Please visit http://sourceforge.net/projects/filezilla/
+
+Name (192.168.1.10:root): yunwei
+
+331 Password required for yunwei
+
+Password:
+
+230 Logged on
+
+Remote system type is UNIX.
+
+ftp>
+
+
+下面我们用pexpect帮我们完成输入用户名和密码：
+
+
+import pexpect
+
+
+child = pexpect.spawn('ftp 192.168.1.10')
+
+child.expect('Name .*: ')
+
+child.sendline('yunwei')
+
+child.expect('Password:')
+
+child.sendline('yunweipass')
+
+child.expect('ftp> ')
+
+child.sendline('ls')
+
+child.sendline('bye')
+
+child.expect(pexpect.EOF)   # pexpect.EOF程序打印提示信息
+
+print child.before   # 保存命令执行结果
+
+
+
+
+Python 远程批量修改密码脚本
+
+
+#tar -zxvf pexpect-3.0.tar.gz
+
+#cd pexpect-3.0
+
+#python setup.py install
+
+#!/usr/bin/env python
+
+#coding:utf8
+
+import pexpect                            
+
+import sys 
+
+iplist = ['192.168.140.142','192.168.140.145'] ##定义主机列表
+
+oldpasswd = '234567' ##旧密码
+
+newpasswd = '1234567' ##新密码
+
+while iplist:
+
+    ip = iplist[-1] ##获取一个IP
+
+    iplist.pop() ##列表去掉一个值
+
+    child = pexpect.spawn('ssh root@'+ip) ##定义触发
+
+    fout = file('passlog.txt','a') ##定义日志文件，
+
+    child.logfile = fout
+
+    try:
+
+        while True:
+
+            index = child.expect(['(yes/no)','(?i)password:'])
+
+            if index == 0:
+
+                child.sendline('yes')
+
+            elif index == 1:
+
+                child.sendline(oldpasswd)
+
+                child.expect('#')
+
+                child.sendline('echo  '+newpasswd+' | passwd --stdin root')
+
+                child.expect('#')
+
+                child.sendline('exit')
+
+    except pexpect.TIMEOUT:
+
+        print >>sys.stderr, ip+' timeout'
+
+    except pexpect.EOF:
+
+        print >>sys.stderr, ip+' <the end>'
+
+（1）spawn类
+
+ class pexpect.spawn(command,args=[],timeout=30,maxread=2000,searchwidowsize=None
+
+,logfile=None,cwd=None,env=None,ignore_sighup=True)
+
+（2）run函数
+
+pexpect.run(command,timeout=-1,withexitstatus=False,events=None,extra_args=None,
+
+logfile=None,cwd=None,env=None).
+
+（3）pxssh类
+
+class pexpect.pxssh.pxssh(timeout=30,maxread=2000,searchwidowsize=None,logfile=None,
+
+cwd=None,env=None)
+
+pxssh常用的三个方法：
+
+    login()建立连接；
+
+    logout()断开连接；
+
+    prompt()等待系统提示符，用于等待命令执行结束
+
+
+
+python之pexpect用法及scp新用途
+
+
+import pexpect
+
+def scp_cmd():
+
+    passwd='*******'
+
+    passwd1='*******'
+
+    ssh = pexpect.spawn('scp -rp root@192.168.1.107:/backup root@192.168.1.102:/data')
+
+    r = ''
+
+    try:
+
+        i = ssh.expect(['password: ', 'continue connecting (yes/no)?'])
+
+        if i == 0 :
+
+            ssh.sendline(passwd)
+
+        elif i == 1:
+
+            ssh.sendline('yes')
+
+            ssh.expect('password:')
+
+            ssh.sendline(passwd)
+
+        b=ssh.expect(['password: ','continue connecting (yes/no)?'])
+
+        if b==0:
+
+            ssh.sendline(passwd1)
+
+        elif b==1:
+
+            ssh.sendline('yes')
+
+            ssh.expect('password:')
+
+            ssh.sendline(passwd1)
+
+    except pexpect.EOF:
+
+        ssh.close()
+
+    else:
+
+        r = ssh.read()
+
+        ssh.expect(pexpect.EOF)
+
+        ssh.close()
+
+    return r
+
+scp_cmd()
+
+
+
+
+python安装setuptools模块之后，便可使用easy_install来安装python的第三方扩展模块，默认安装路径是：
+
+/usr/lib/python2.6/site-packages/
+
+
+easy_install 模块名 #可以直接安装
+
+easy_install  pexpect
+
+[root@zhu ~]# easy_install pexpect
+
+Searching for pexpect
+
+Reading http://pypi.python.org/simple/pexpect/
+
+Reading http://pexpect.readthedocs.org/
+
+Reading http://pexpect.sourceforge.net/
+
+Reading http://sourceforge.net/project/showfiles.php?group_id=59762
+
+Best match: pexpect 3.1
+
+Downloading https://pypi.python.org/packages/source/p/pexpect/pexpect-3.1.tar.gz#md5=5a8e1573062e2e2c203c9a6d213b16e7
+
+Processing pexpect-3.1.tar.gz
+
+Running pexpect-3.1/setup.py -q bdist_egg --dist-dir /tmp/easy_install-KOPmVQ/pexpect-3.1/egg-dist-tmp-GnQBTg
+
+zip_safe flag not set; analyzing archive contents...
+
+Adding pexpect 3.1 to easy-install.pth file
+
+Installed /usr/lib/python2.6/site-packages/pexpect-3.1-py2.6.egg
+
+Processing dependencies for pexpect
+
+Finished processing dependencies for pexpect
+
+
+#由于pexpect-3.1-py2.6.egg此时仍是一个压缩文件，所以需要进行解压。
+
+cd /usr/lib/python2.6/site-packages/
+
+unzip pexpect-3.1-py2.6.egg
+
+
+
+pexpect是一个用来启动子程序并对其进行自动控制的python模块，可以用来和ssh，ftp，telnet等需要输入密码的命令行程序进行自动交互。
+
+安装过程如上。
+
+
+另一种安装方法如下：
+
+
+
+wget http://pexpect.sourceforge.net/pexpect-2.3.tar.gz
+
+ tar xzf pexpect-2.3.tar.gz
+
+ cd pexpect-2.3
+
+ python ./setup.py install
+
+
+
+pexpect 模块的使用如下：
+
+
+
+>>> pexpect.
+
+pexpect.EOF(                 pexpect.__path__             pexpect.run(
+
+pexpect.ExceptionPexpect(    pexpect.__reduce__(          pexpect.runu(
+
+pexpect.PY3                  pexpect.__reduce_ex__(       pexpect.searcher_re(
+
+pexpect.TIMEOUT(             pexpect.__repr__(            pexpect.searcher_string(
+
+pexpect.__all__              pexpect.__revision__         pexpect.select
+
+pexpect.__class__(           pexpect.__setattr__(         pexpect.signal
+
+pexpect.__delattr__(         pexpect.__sizeof__(          pexpect.spawn(
+
+pexpect.__dict__             pexpect.__str__(             pexpect.spawnu(
+
+pexpect.__doc__              pexpect.__subclasshook__(    pexpect.split_command_line(
+
+pexpect.__file__             pexpect.__version__          pexpect.struct
+
+pexpect.__format__(          pexpect._run(                pexpect.sys
+
+pexpect.__getattribute__(    pexpect.codecs               pexpect.termios
+
+pexpect.__hash__(            pexpect.errno                pexpect.time
+
+pexpect.__init__(            pexpect.fcntl                pexpect.traceback
+
+pexpect.__loader__           pexpect.os                   pexpect.tty
+
+pexpect.__name__             pexpect.pty                  pexpect.types
+
+pexpect.__new__(             pexpect.re                   pexpect.which(
+
+pexpect.__package__          pexpect.resource
+
+
+1.pexpect.run(）函数的使用
+
+
+
+run(command, timeout=-1, withexitstatus=False, events=None, extra_args=None, logfile=None, cwd=None, env=None)
+
+
+#默认情况下该指令：
+
+#1.运行给出的指令command，如果指令不是以绝对路径给出，会自动在PATH中寻找。结果输出作为字符串返回，行与行之间以\r\n分割。
+
+#2.withexitstatus设置为True时，结果返回一个元组，(command_output,
+
+    exitstatus)
+
+
+#events是一个字典，有模式和应答组成，可以自动输入内容，如果应答需要输入enter键时，此时需要为一个新行，即添加\n.
+
+>>> pexpect.run('cat /root/a.txt')
+
+'qian shan\r\nniao fei jue\r\ndu diao han jiang xue\r\n'
+
+>>> pexpect.run('cat /root/a.txt',withexitstatus=1)
+
+('qian shan\r\nniao fei jue\r\ndu diao han jiang xue\r\n', 0)
+
+>>> pexpect.run('scp /root/a.txt 192.168.56.102:/root',withexitstatus=1,events={'password': '123456\n'})
+
+("root@192.168.56.102's password: \r\n\ra.txt                                           0%    0     0.0KB/s   --:-- ETA\ra.txt                                         100%   45     0.0KB/s   00:00    \r\n", 0)
+
+
+
+
+
+2.pexpect.spawn()类的使用
+
+spawn是Pexpect模块主要的类，用以实现启动子程序，它有丰富的方法与子程序交互从而实现用户对子程序的控制。它主要使用 pty.fork() 生成子进程，并调用 exec() 系列函数执行 command 参数的内容。
+
+
+
+child = pexpect.spawn ('/usr/bin/ftp') #执行ftp客户端命令
+
+child = pexpect.spawn ('/usr/bin/ssh user@example.com') #使用ssh登录目标机器
+
+child = pexpect.spawn ('ls -latr /tmp') #显示 /tmp目录内容
+
+child = pexpect.spawn ('/usr/bin/ftp', [])
+
+child = pexpect.spawn ('/usr/bin/ssh', ['user@example.com'])
+
+child = pexpect.spawn ('ls', ['-latr', '/tmp'])
+
+child = pexpect.spawn('some_command')
+
+fout = file('mylog.txt','w')
+
+
+child.logfile = fout
+
+
+
+child = pexpect.spawn('ssh root@192.168.56.102')
+
+
+child.expect(self, pattern, timeout=-1, searchwindowsize=-1)
+
+
+为了控制子程序，等待子程序产生特定输出，做出特定的响应，可以使用 expect 方法
+
+在参数中： pattern 可以是正则表达式， pexpect.EOF ， pexpect.TIMEOUT ，或者由这些元素组成的列表。需要注意的是，当 pattern 的类型是一个列表时，且子程序输出结果中不止一个被匹配成功，则匹配返回的结果是缓冲区中最先出现的那个元素，或者是列表中最左边的元素。使用 timeout 可以指定等待结果的超时时间 ，该时间以秒为单位。当超过预订时间时， expect 匹配到pexpect.TIMEOUT。
+
+
+
+3.打印before的内容
+
+
+>>> child = pexpect.spawn('ls -l')
+
+>>> child.expect(pexpect.EOF)
+
+0
+
+>>> print child.before
+
+总用量 64
+
+drwxr-xr-x.  3 root root  4096 4月   2 10:09 aaa
+
+-rw-r--r--.  1 root root    45 4月   3 15:01 a.txt
+
+drwxr-xr-x. 16 root root  4096 3月   6 21:36 biaozhunku
+
+drwxr-xr-x.  2 root root  4096 3月  27 17:03 mypython
+
+drwxr-xr-x.  2 root root  4096 4月   3 13:21 mysource
+
+drwxr-xr-x.  2 root root  4096 4月   3 13:20 mywork
+
+drwxr-xr-x.  2 root root 36864 3月  19 11:09 pythoncook
+
+-rw-r--r--.  1 root root   276 4月   3 14:26 zhu.py
+
+#child.before 保存的就是在根目录下执行 ls 命令的结果
+
+
+send(self, s)
+
+sendline(self, s='')
+
+sendcontrol(self, char)
+
+
+这些方法用来向子程序发送命令，模拟输入命令的行为。与 send() 不同的是 sendline() 会额外输入一个回车符 ，更加适合用来模拟对子程序进行输入命令的操作。当需要模拟发送 “Ctrl+c” 的行为时，还可以使用 sendcontrol() 发送控制字符。
+
+
+
+手动输入时，是来自键盘的标准输入，而pexpect是先匹配到关键字，再向子进程发送字符串。
+
+pexpect.EOF打印提示信息，child.before保存的是命令执行结果。
+
+​
+通过上面的例子想必你已经知道pexpect主要功能了，在交互场景下很有用，这里就讲解这么多了，目的是给大家提供一个自动交互实现思路。
+
+小结：
+
+通过对Python下paramiko、fabric和pexpect模块使用，它们各有自己擅长的一面。
+
+paramiko：方便嵌套系统平台中，擅长远程执行命令，文件传输。
+
+fabric：方便与shell脚本结合，擅长批量部署，任务管理。
+
+pexpect：擅长自动交互，比如ssh、ftp、telnet。
+
+
+
+
+
+
+#!/usr/bin/env python 
+# -*- coding: utf-8 -*- 
+     
+import pexpect 
+     
+def ssh_cmd(ip, passwd, cmd): 
+    ret = -1 
+    ssh = pexpect.spawn('ssh root@%s "%s"' % (ip, cmd)) 
+    try: 
+       i = ssh.expect(['password:', 'continue connecting (yes/no)?'], timeout=5) 
+       if i == 0 : 
+          ssh.sendline(passwd) 
+       elif i == 1: 
+          ssh.sendline('yes\n') 
+          ssh.expect('password: ') 
+          ssh.sendline(passwd) 
+          ssh.sendline(cmd) 
+          r = ssh.read() 
+          print r 
+          ret = 0 
+    except pexpect.EOF: 
+       print "EOF" 
+       ssh.close() 
+       ret = -1 
+    except pexpect.TIMEOUT: 
+       print "TIMEOUT" 
+       ssh.close() 
+       ret = -2 
+    return ret 
+
+
+
+
+
+
+
+
+#-*- coding: utf-8 -*-  
+#!/usr/bin/python   
+import paramiko  
+import threading  
+def ssh2(ip,username,passwd,cmd):  
+    try:  
+        ssh = paramiko.SSHClient()  
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())  
+        ssh.connect(ip,22,username,passwd,timeout=5)  
+        for m in cmd:  
+            stdin, stdout, stderr = ssh.exec_command(m)  
+#           stdin.write("Y")   #简单交互，输入 ‘Y’   
+            out = stdout.readlines()  
+            #屏幕输出  
+            for o in out:  
+                print o,  
+        print '%s\tOK\n'%(ip)  
+        ssh.close()  
+    except :  
+        print '%s\tError\n'%(ip)  
+if __name__=='__main__':  
+    cmd = ['cal','echo hello!']#你要执行的命令列表  
+    username = ""  #用户名  
+    passwd = ""    #密码  
+    threads = []   #多线程  
+    print "Begin......" 
+    for i in range(1,254):  
+        ip = '192.168.1.'+str(i)  
+        a=threading.Thread(target=ssh2,args=(ip,username,passwd,cmd))   
+        a.start() 
+
+
+
+
+如果我们想实现一个类似xshell工具的功能，登录以后可以输入命令回车后就返回结果：
+import paramiko
+import os
+import select
+import sys
+ 
+# 建立一个socket
+trans = paramiko.Transport(('192.168.2.129', 22))
+# 启动一个客户端
+trans.start_client()
+ 
+# 如果使用rsa密钥登录的话
+'''
+default_key_file = os.path.join(os.environ['HOME'], '.ssh', 'id_rsa')
+prikey = paramiko.RSAKey.from_private_key_file(default_key_file)
+trans.auth_publickey(username='super', key=prikey)
+'''
+# 如果使用用户名和密码登录
+trans.auth_password(username='super', password='super')
+# 打开一个通道
+channel = trans.open_session()
+# 获取终端
+channel.get_pty()
+# 激活终端，这样就可以登录到终端了，就和我们用类似于xshell登录系统一样
+channel.invoke_shell()
+# 下面就可以执行你所有的操作，用select实现
+# 对输入终端sys.stdin和 通道进行监控,
+# 当用户在终端输入命令后，将命令交给channel通道，这个时候sys.stdin就发生变化，select就可以感知
+# channel的发送命令、获取结果过程其实就是一个socket的发送和接受信息的过程
+while True:
+    readlist, writelist, errlist = select.select([channel, sys.stdin,], [], [])
+    # 如果是用户输入命令了,sys.stdin发生变化
+    if sys.stdin in readlist:
+        # 获取输入的内容
+        input_cmd = sys.stdin.read(1)
+        # 将命令发送给服务器
+        channel.sendall(input_cmd)
+ 
+    # 服务器返回了结果,channel通道接受到结果,发生变化 select感知到
+    if channel in readlist:
+        # 获取结果
+        result = channel.recv(1024)
+        # 断开连接后退出
+        if len(result) == 0:
+            print("\r\n**** EOF **** \r\n")
+            break
+        # 输出到屏幕
+        sys.stdout.write(result.decode())
+        sys.stdout.flush()
+ 
+# 关闭通道
+channel.close()
+# 关闭链接
+trans.close()
+
+
+支持tab自动补全
+import paramiko
+import os
+import select
+import sys
+import tty
+import termios
+ 
+'''
+实现一个xshell登录系统的效果，登录到系统就不断输入命令同时返回结果
+支持自动补全，直接调用服务器终端
+'''
+# 建立一个socket
+trans = paramiko.Transport(('192.168.2.129', 22))
+# 启动一个客户端
+trans.start_client()
+ 
+# 如果使用rsa密钥登录的话
+'''
+default_key_file = os.path.join(os.environ['HOME'], '.ssh', 'id_rsa')
+prikey = paramiko.RSAKey.from_private_key_file(default_key_file)
+trans.auth_publickey(username='super', key=prikey)
+'''
+# 如果使用用户名和密码登录
+trans.auth_password(username='super', password='super')
+# 打开一个通道
+channel = trans.open_session()
+# 获取终端
+channel.get_pty()
+# 激活终端，这样就可以登录到终端了，就和我们用类似于xshell登录系统一样
+channel.invoke_shell()
+ 
+# 获取原操作终端属性
+oldtty = termios.tcgetattr(sys.stdin)
+try:
+    # 将现在的操作终端属性设置为服务器上的原生终端属性,可以支持tab了
+    tty.setraw(sys.stdin)
+    channel.settimeout(0)
+ 
+    while True:
+        readlist, writelist, errlist = select.select([channel, sys.stdin,], [], [])
+        # 如果是用户输入命令了,sys.stdin发生变化
+        if sys.stdin in readlist:
+            # 获取输入的内容，输入一个字符发送1个字符
+            input_cmd = sys.stdin.read(1)
+            # 将命令发送给服务器
+            channel.sendall(input_cmd)
+ 
+        # 服务器返回了结果,channel通道接受到结果,发生变化 select感知到
+        if channel in readlist:
+            # 获取结果
+            result = channel.recv(1024)
+            # 断开连接后退出
+            if len(result) == 0:
+                print("\r\n**** EOF **** \r\n")
+                break
+            # 输出到屏幕
+            sys.stdout.write(result.decode())
+            sys.stdout.flush()
+finally:
+    # 执行完后将现在的终端属性恢复为原操作终端属性
+    termios.tcsetattr(sys.stdin, termios.TCSADRAIN, oldtty)
+ 
+# 关闭通道
+channel.close()
+# 关闭链接
+trans.close()
+
+import paramiko
+
+t = paramiko.Transport(('x.x.x.x',22))   # 设置SSH连接的远程主机地址和端口
+t.connect(username='xxx',password='xxx')   # 设置登陆用户名和密码等参数
+chan=t.open_session()   # 连接成功后打开一个channel
+chan.settimeout(15)     # 设置会话超时时间
+chan.get_pty()          # 打开远程的terminal
+chan.invoke_shell()     # 激活terminal
+chan.send("display current-configuration\n")
+chan.send(" "*60)
+time.sleep(5)   # 如果程序执行的太快，没有等到返回足够的信息，chan.recv(65535)不能得到想要的结果
+# 使用一些条件循环，判断什么时候读取返回结果，实际经常报错啊！
+# str.chan.recv(65535)
+# while not str.endswith('#'):
+#     str=chan.recv(65535)    #recv_buffer=65535
+f = open("D:\\t.txt","w")
+f.write(chan.recv(65535).decode('ascii'))
+f.close()
+t.close()
+
+
+# -*- coding: utf-8 -*-
+import paramiko
+
+# 创建SSH对象
+ssh = paramiko.SSHClient()
+# 允许连接不在known_hosts文件上的主机
+ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+# 连接服务器
+ssh.connect(hostname="192.168.80.130", port=22, username="root", password="Aa123456")
+# 执行命令
+stdin, stdout, stderr = ssh.exec_command('df -h')
+# 获取结果
+result = stdout.read().decode()
+# 获取错误提示（stdout、stderr只会输出其中一个）
+err = stderr.read()
+# 关闭连接
+ssh.close()
+print(result)
+
