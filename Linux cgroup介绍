@@ -1,0 +1,440 @@
+1、导言：
+Linux系统每个进程都可以自由竞争系统资源，有时候会导致一些次要进程占用了系统某个资源（如CPU）的绝大部分，主要进程就不能很好地执行，从而影响系统效率，
+重则在linux资源耗尽时可能会引起错杀进程。因此linux引入了linux cgroups来控制进程资源，让进程更可控。
+
+2、Linux cgroups基础知识
+Cgroups是control groups的缩写，是Linux内核提供的一种可以限制、记录、隔离进程组（process groups）所使用的物理资源（如：cpu,memory,IO等等）的机制。
+最初由google的工程师提出，后来被整合进Linux内核。Cgroups也是LXC为实现虚拟化所使用的资源管理手段，可以说没有cgroups就没有LXC。
+
+1.任务（task）。在cgroups中，任务就是系统的一个进程。
+
+2.控制族群（control group）。控制族群就是一组按照某种标准划分的进程。Cgroups中的资源控制都是以控制族群为单位实现。一个进程可以加入到某个控制族群，也从一个进程组迁移到另一个控制族群。一个进程组的进程可以使用cgroups以控制族群为单位分配的资源，同时受到cgroups以控制族群为单位设定的限制。
+
+3.层级（hierarchy）。控制族群可以组织成hierarchical的形式，既一颗控制族群树。控制族群树上的子节点控制族群是父节点控制族群的孩子，继承父控制族群的特定的属性。
+
+4.子系统（subsytem）。一个子系统就是一个资源控制器，比如cpu子系统就是控制cpu时间分配的一个控制器。子系统必须附加（attach）到一个层级上才能起作用，一个子系统附加到某个层级以后，这个层级上的所有控制族群都受到这个子系统的控制。
+
+相互关系
+1.每次在系统中创建新层级时，该系统中的所有任务都是那个层级的默认 cgroup（我们称之为 root cgroup ，此cgroup在创建层级时自动创建，后面在该层级中创建的cgroup都是此cgroup的后代）的初始成员。
+
+2.一个子系统最多只能附加到一个层级。
+
+3.一个层级可以附加多个子系统
+
+4.一个任务可以是多个cgroup的成员，但是这些cgroup必须在不同的层级。
+
+5.系统中的进程（任务）创建子进程（任务）时，该子任务自动成为其父进程所在 cgroup 的成员。然后可根据需要将该子任务移动到不同的 cgroup 中，但开始时它总是继承其父任务的cgroup。
+
+Cgroups子系统介绍
+blkio -- 这个子系统为块设备设定输入/输出限制，比如物理设备（磁盘，固态硬盘，USB 等等）。
+
+cpu -- 这个子系统使用调度程序提供对 CPU 的 cgroup 任务访问。
+
+cpuacct -- 这个子系统自动生成 cgroup 中任务所使用的 CPU 报告。
+
+cpuset -- 这个子系统为 cgroup 中的任务分配独立 CPU（在多核系统）和内存节点。
+
+devices -- 这个子系统可允许或者拒绝 cgroup 中的任务访问设备。
+
+freezer -- 这个子系统挂起或者恢复 cgroup 中的任务。
+
+memory -- 这个子系统设定 cgroup 中任务使用的内存限制，并自动生成由那些任务使用的内存资源报告。
+
+net_cls -- 这个子系统使用等级识别符（classid）标记网络数据包，可允许 Linux 流量控制程序（tc）识别从具体 cgroup 中生成的数据包。
+
+ns -- 名称空间子系统。
+
+
+2.1 它主要提供了如下功能：
+Cgroups最初的目标是为资源管理提供的一个统一的框架，既整合现有的cpuset等子系统，也为未来开发新的子系统提供接口。现在的cgroups适用于多种应用场景，从单个进程的资源控制，到实现操作系统层次的虚拟化（OS Level Virtualization）。Cgroups提供了一下功能：
+
+1.限制进程组可以使用的资源数量（Resource limiting ）。比如：memory子系统可以为进程组设定一个memory使用上限，一旦进程组使用的内存达到限额再申请内存，就会出发OOM（out of memory）。
+
+2.进程组的优先级控制（Prioritization ）。比如：可以使用cpu子系统为某个进程组分配特定cpu share。
+
+3.记录进程组使用的资源数量（Accounting ）。比如：可以使用cpuacct子系统记录某个进程组使用的cpu时间
+
+4.进程组隔离（Isolation）。比如：使用ns子系统可以使不同的进程组使用不同的namespace，以达到隔离的目的，不同的进程组有各自的进程、网络、文件系统挂载空间。
+
+5.进程组控制（Control）。比如：使用freezer子系统可以将进程组挂起和恢复。
+在实践中，系统管理员一般会利用CGroup做下面这些事（有点像为某个虚拟机分配资源似的）：
+
+隔离一个进程集合（比如：nginx的所有进程），并限制他们所消费的资源，比如绑定CPU的核。
+为这组进程分配其足够使用的内存
+为这组进程分配相应的网络带宽和磁盘存储限制
+限制访问某些设备（通过设置设备的白名单）
+2.2 查看linux是否启用了linux cgroups
+$ uname -r
+
+4.18.0-24-generic
+
+$ cat /boot/config-4.18.0-24-generic | grep CGROUP
+
+CONFIG_CGROUPS=y
+
+CONFIG_BLK_CGROUP=y
+
+# CONFIG_DEBUG_BLK_CGROUP is not set
+
+CONFIG_CGROUP_WRITEBACK=y
+
+CONFIG_CGROUP_SCHED=y
+
+CONFIG_CGROUP_PIDS=y
+
+CONFIG_CGROUP_RDMA=y
+
+CONFIG_CGROUP_FREEZER=y
+
+CONFIG_CGROUP_HUGETLB=y
+
+CONFIG_CGROUP_DEVICE=y
+
+CONFIG_CGROUP_CPUACCT=y
+
+CONFIG_CGROUP_PERF=y
+
+CONFIG_CGROUP_BPF=y
+
+# CONFIG_CGROUP_DEBUG is not set
+
+CONFIG_SOCK_CGROUP_DATA=y
+
+CONFIG_NETFILTER_XT_MATCH_CGROUP=m
+
+CONFIG_NET_CLS_CGROUP=m
+
+CONFIG_CGROUP_NET_PRIO=y
+
+CONFIG_CGROUP_NET_CLASSID=y
+
+对应的CGROUP项为“y”代表已经打开linux cgroups功能。
+
+2.3 Cgroups 组成
+Cgroups主要由task,cgroup,subsystem及hierarchy构成。下面分别介绍下各自的概念。
+
+Task : 在Cgroups中，task就是系统的一个进程。
+Cgroup : Cgroups中的资源控制都以cgroup为单位实现的。cgroup表示按照某种资源控制标准划分而成的任务组，包含一个或多个Subsystems。一个任务可以加入某个cgroup，也可以从某个cgroup迁移到另外一个cgroup。
+Subsystem : Cgroups中的subsystem就是一个资源调度控制器（Resource Controller）。比如CPU子系统可以控制CPU时间分配，内存子系统可以限制cgroup内存使用量。
+Hierarchy : hierarchy由一系列cgroup以一个树状结构排列而成，每个hierarchy通过绑定对应的subsystem进行资源调度。hierarchy中的cgroup节点可以包含零或多个子节点，子节点继承父节点的属性。整个系统可以有多个hierarchy。
+2.4 组织结合和基本规则
+       主要介绍Subsystems, Hierarchies,Control Group和Tasks之间组织结构和规则：
+
+规则一：
+       同一个hierarchy能够附加一个或多个subsystem。如 cpu 和 memory subsystems(或者任意多个subsystems)附加到同一个hierarchy。
+
+规则二：
+       一个 subsystem 可以附加到多个 hierarchy，当且仅当这些 hierarchy 只有这唯一一个 subsystem。即某个hierarchy（hierarchy A）中的subsystem（如CPU）不能附加到已经附加了其他subsystem的hierarchy（如hierarchy B）中。也就是说已经附加在某个 hierarchy 上的 subsystem 不能附加到其他含有别的 subsystem 的 hierarchy 上。
+
+规则三：
+       系统每次新建一个hierarchy时，该系统上的所有task默认构成了这个新建的hierarchy的初始化cgroup，这个cgroup也称为root cgroup。对于你创建的每个hierarchy，task只能存在于其中一个cgroup中，即一个task不能存在于同一个hierarchy的不同cgroup中，但是一个task可以存在在不同hierarchy中的多个cgroup中。如果操作时把一个task添加到同一个hierarchy中的另一个cgroup中，则会从第一个cgroup中移除
+
+如：
+
+cpu 和 memory subsystem被附加到 cpu_mem_cg 的hierarchy。而 net_cls subsystem被附加到 net_cls hierarchy。并且httpd进程被同时加到了 cpu_mem_cg hierarchy的 cg1 cgroup中和 net hierarchy的 cg2 cgroup中。并通过两个hierarchy的subsystem分别对httpd进程进行cpu,memory及网络带宽的限制。
+
+规则四：
+       进程（task）在 fork 自身时创建的子任务（child task）默认与原 task 在同一个 cgroup 中，但是 child task 允许被移动到不同的 cgroup 中。即 fork 完成后，父子进程间是完全独立的。
+
+2.5 hierarchy和cgroup操作
+hierarchy
+1）新建hierarchy
+
+mkdir cgroup/hy_cpu_mem
+
+2）使用mount命令挂载hierarchy（hy_cpu_mem），并附加cpu、memory到该hierarchy上
+
+       mount -t cgroup -o cpu,cpuset,memory hy_cpu_mem cgroup/hy_cpu_mem
+
+3）如果想在已有的hierarchy上attch或detach，使用remount命令detach subsystem
+
+       mount -t cgroup -o cpu,cpuset,hy_cpu_mem cgroup/hy_cpu_mem  #detach memory
+
+4）卸载hierarchy
+
+       umount cgroup/hy_cpu_mem
+
+cgroup
+创建cgroup
+mkdir cgroup/hy_cpu_mem/cgroup1
+
+设置cgroup参数
+sudo echo 100000 > cpu.cfs_period_us
+
+移动task（进程）
+只要把对应的进程PID加入到新cgroup的task中即可，如：echo 30167 > newcgroup/tasks
+
+2.6 subsystem介绍
+Linxu中为了方便用户使用cgroups，已经把其实现成了文件系统，其目录在/var/fs/cgroup下：
+
+$ ll /sys/fs/cgroup
+
+总用量 0
+
+dr-xr-xr-x 5 root root  0 6月  26 15:52 blkio
+
+lrwxrwxrwx 1 root root 11 6月  26 15:52 cpu -> cpu,cpuacct
+
+lrwxrwxrwx 1 root root 11 6月  26 15:52 cpuacct -> cpu,cpuacct
+
+dr-xr-xr-x 5 root root  0 6月  26 15:52 cpu,cpuacct
+
+dr-xr-xr-x 3 root root  0 6月  26 15:52 cpuset
+
+dr-xr-xr-x 5 root root  0 6月  26 15:52 devices
+
+dr-xr-xr-x 3 root root  0 6月  26 15:52 freezer
+
+dr-xr-xr-x 3 root root  0 6月  26 15:52 hugetlb
+
+dr-xr-xr-x 5 root root  0 6月  26 15:52 memory
+
+lrwxrwxrwx 1 root root 16 6月  26 15:52 net_cls -> net_cls,net_prio
+
+dr-xr-xr-x 3 root root  0 6月  26 15:52 net_cls,net_prio
+
+lrwxrwxrwx 1 root root 16 6月  26 15:52 net_prio -> net_cls,net_prio
+
+dr-xr-xr-x 3 root root  0 6月  26 15:52 perf_event
+
+dr-xr-xr-x 5 root root  0 6月  26 15:52 pids
+
+dr-xr-xr-x 2 root root  0 6月  26 15:52 rdma
+
+dr-xr-xr-x 6 root root  0 6月  26 15:52 systemd
+
+dr-xr-xr-x 5 root root  0 6月  26 15:52 unified
+
+我们可以看到/sys/fs/cgroug目录下有多个子目录，这些目录都可以认为是收cgroups管理的subsystem资源。每格subsystem对应如下：
+
+blkio -- 这个子系统为块设备设定输入/输出限制，比如物理设备（磁盘，固态硬盘，USB 等等）。
+
+cpu -- 这个子系统使用调度程序提供对 CPU 的 cgroup 任务访问。
+
+cpuacct -- 这个子系统自动生成 cgroup 中任务所使用的 CPU 报告。
+
+cpuset -- 这个子系统为 cgroup 中的任务分配独立 CPU（在多核系统）和内存节点。
+
+devices -- 这个子系统可允许或者拒绝 cgroup 中的任务访问设备。
+
+freezer -- 这个子系统挂起或者恢复 cgroup 中的任务。
+
+memory -- 这个子系统设定 cgroup 中任务使用的内存限制，并自动生成由那些任务使用的内存资源报告。
+
+net_cls -- 这个子系统使用等级识别符（classid）标记网络数据包，可允许 Linux 流量控制程序（tc）识别从具体 cgroup 中生成的数据包。
+
+ns -- 名称空间子系统。
+net_prio — 这个子系统用来设计网络流量的优先级
+hugetlb — 这个子系统主要针对于HugeTLB系统进行限制，这是一个大页文件系统。
+2.7 subsystem配置参数介绍
+2.7.1 blkio - BLOCK IO 资源控制
+限额类 限额类是主要有两种策略，一种是基于完全公平队列调度（CFQ：Completely Fair Queuing ）的按权重分配各个 cgroup 所能占用总体资源的百分比，好处是当资源空闲时可以充分利用，但只能用于最底层节点 cgroup 的配置；另一种则是设定资源使用上限，这种限额在各个层次的 cgroup 都可以配置，但这种限制较为生硬，并且容器之间依然会出现资源的竞争。
+
+ 
+
+按比例分配块设备 IO 资源
+blkio.weight：填写 100-1000 的一个整数值，作为相对权重比率，作为通用的设备分配比。
+blkio.weight_device： 针对特定设备的权重比，写入格式为device_types:node_numbers weight，空格前的参数段指定设备，weight参数与blkio.weight相同并覆盖原有的通用分配比。{![查看一个设备的device_types:node_numbers可以使用：ls -l /dev/DEV，看到的用逗号分隔的两个数字就是。有的文章也称之为major_number:minor_number。]}
+控制 IO 读写速度上限
+blkio.throttle.read_bps_device：按每秒读取块设备的数据量设定上限，格式device_types:node_numbers bytes_per_second。
+blkio.throttle.write_bps_device：按每秒写入块设备的数据量设定上限，格式device_types:node_numbers bytes_per_second。
+blkio.throttle.read_iops_device：按每秒读操作次数设定上限，格式device_types:node_numbers operations_per_second。
+blkio.throttle.write_iops_device：按每秒写操作次数设定上限，格式device_types:node_numbers operations_per_second
+针对特定操作 (read, write, sync, 或 async) 设定读写速度上限
+blkio.throttle.io_serviced：针对特定操作按每秒操作次数设定上限，格式device_types:node_numbers operation operations_per_second
+blkio.throttle.io_service_bytes：针对特定操作按每秒数据量设定上限，格式device_types:node_numbers operation bytes_per_second
+统计与监控 以下内容都是只读的状态报告，通过这些统计项更好地统计、监控进程的 io 情况。
+blkio.reset_stats：重置统计信息，写入一个 int 值即可。
+blkio.time：统计 cgroup 对设备的访问时间，按格式device_types:node_numbers milliseconds读取信息即可，以下类似。
+blkio.io_serviced：统计 cgroup 对特定设备的 IO 操作（包括 read、write、sync 及 async）次数，格式device_types:node_numbers operation number
+blkio.sectors：统计 cgroup 对设备扇区访问次数，格式 device_types:node_numbers sector_count
+blkio.io_service_bytes：统计 cgroup 对特定设备 IO 操作（包括 read、write、sync 及 async）的数据量，格式device_types:node_numbers operation bytes
+blkio.io_queued：统计 cgroup 的队列中对 IO 操作（包括 read、write、sync 及 async）的请求次数，格式number operation
+blkio.io_service_time：统计 cgroup 对特定设备的 IO 操作（包括 read、write、sync 及 async）时间 (单位为 ns)，格式device_types:node_numbers operation time
+blkio.io_merged：统计 cgroup 将 BIOS 请求合并到 IO 操作（包括 read、write、sync 及 async）请求的次数，格式number operation
+blkio.io_wait_time：统计 cgroup 在各设​​​备​​​中各类型​​​IO 操作（包括 read、write、sync 及 async）在队列中的等待时间​(单位 ns)，格式device_types:node_numbers operation time
+__blkio.__recursive_*：各类型的统计都有一个递归版本，Docker 中使用的都是这个版本。获取的数据与非递归版本是一样的，但是包括 cgroup 所有层级的监控数据。
+2.7.2 cpu - CPU 资源控制
+CPU 资源的控制也有两种策略，一种是完全公平调度 （CFS：Completely Fair Scheduler）策略，提供了限额和按比例分配两种方式进行资源控制；另一种是实时调度（Real-Time Scheduler）策略，针对实时进程按周期分配固定的运行时间。配置时间都以微秒（µs）为单位，文件名中用us表示。
+
+ 
+
+CFS 调度策略下的配置
+
+ 
+
+设定 CPU 使用周期使用时间上限
+cpu.cfs_period_us：设定周期时间，必须与cfs_quota_us配合使用。
+cpu.cfs_quota_us ：设定周期内最多可使用的时间。这里的配置指 task 对单个 cpu 的使用上限，若cfs_quota_us是cfs_period_us的两倍，就表示在两个核上完全使用。数值范围为 1000 - 1000,000（微秒）。
+cpu.stat：统计信息，包含nr_periods（表示经历了几个cfs_period_us周期）、nr_throttled（表示 task 被限制的次数）及throttled_time（表示 task 被限制的总时长）。
+按权重比例设定 CPU 的分配
+cpu.shares：设定一个整数（必须大于等于 2）表示相对权重，最后除以权重总和算出相对比例，按比例分配 CPU 时间。（如 cgroup A 设置 100，cgroup B 设置 300，那么 cgroup A 中的 task 运行 25% 的 CPU 时间。对于一个 4 核 CPU 的系统来说，cgroup A 中的 task 可以 100% 占有某一个 CPU，这个比例是相对整体的一个值。）
+RT 调度策略下的配置 实时调度策略与公平调度策略中的按周期分配时间的方法类似，也是在周期内分配一个固定的运行时间。
+ 
+
+cpu.rt_period_us ：设定周期时间。
+cpu.rt_runtime_us：设定周期中的运行时间。
+2.7.3 cpuacct - CPU 资源报告
+这个子系统的配置是cpu子系统的补充，提供 CPU 资源用量的统计，时间单位都是纳秒。
+
+cpuacct.usage：统计 cgroup 中所有 task 的 cpu 使用时长
+cpuacct.stat：统计 cgroup 中所有 task 的用户态和内核态分别使用 cpu 的时长
+cpuacct.usage_percpu：统计 cgroup 中所有 task 使用每个 cpu 的时长
+2.7.4 cpuset - CPU 绑定
+为 task 分配独立 CPU 资源的子系统，参数较多，这里只选讲两个必须配置的参数，同时 Docker 中目前也只用到这两个。
+
+ 
+
+cpuset.cpus：在这个文件中填写 cgroup 可使用的 CPU 编号，如0-2,16代表 0、1、2 和 16 这 4 个 CPU。
+cpuset.mems：与 CPU 类似，表示 cgroup 可使用的memory node，格式同上
+2.7.5 device - 限制 task 对 device 的使用
+** 设备黑 / 白名单过滤 **
+
+devices.allow：允许名单，语法type device_types:node_numbers access type ；type有三种类型：b（块设备）、c（字符设备）、a（全部设备）；access也有三种方式：r（读）、w（写）、m（创建）。
+devices.deny：禁止名单，语法格式同上。
+统计报告
+
+devices.list：报​​​告​​​为​​​这​​​个​​​ cgroup 中​​​的​task 设​​​定​​​访​​​问​​​控​​​制​​​的​​​设​​​备
+2.7.6 freezer - 暂停 / 恢复 cgroup 中的 task
+只有一个属性，表示进程的状态，把 task 放到 freezer 所在的 cgroup，再把 state 改为 FROZEN，就可以暂停进程。不允许在 cgroup 处于 FROZEN 状态时加入进程。 * **freezer.state **，包括如下三种状态： - FROZEN 停止 - FREEZING 正在停止，这个是只读状态，不能写入这个值。 - THAWED 恢复
+
+ 
+
+2.7.7 memory - 内存资源管理
+限额类
+
+ 
+
+memory.limit_bytes：强制限制最大内存使用量，单位有k、m、g三种，填-1则代表无限制。
+memory.soft_limit_bytes：软限制，只有比强制限制设置的值小时才有意义。填写格式同上。当整体内存紧张的情况下，task 获取的内存就被限制在软限制额度之内，以保证不会有太多进程因内存挨饿。可以看到，加入了内存的资源限制并不代表没有资源竞争。
+memory.memsw.limit_bytes：设定最大内存与 swap 区内存之和的用量限制。填写格式同上。
+报警与自动控制
+
+ 
+
+memory.oom_control：改参数填 0 或 1， 0表示开启，当 cgroup 中的进程使用资源超过界限时立即杀死进程，1表示不启用。默认情况下，包含 memory 子系统的 cgroup 都启用。当oom_control不启用时，实际使用内存超过界限时进程会被暂停直到有空闲的内存资源。
+统计与监控类
+
+ 
+
+memory.usage_bytes：报​​​告​​​该​​​ cgroup 中​​​进​​​程​​​使​​​用​​​的​​​当​​​前​​​总​​​内​​​存​​​用​​​量（以字节为单位）
+memory.max_usage_bytes：报​​​告​​​该​​​ cgroup 中​​​进​​​程​​​使​​​用​​​的​​​最​​​大​​​内​​​存​​​用​​​量
+memory.failcnt：报​​​告​​​内​​​存​​​达​​​到​​​在​​​ memory.limit_in_bytes设​​​定​​​的​​​限​​​制​​​值​​​的​​​次​​​数​​​
+memory.stat：包含大量的内存统计数据。
+cache：页​​​缓​​​存​​​，包​​​括​​​ tmpfs（shmem），单位为字节。
+rss：匿​​​名​​​和​​​ swap 缓​​​存​​​，不​​​包​​​括​​​ tmpfs（shmem），单位为字节。
+mapped_file：memory-mapped 映​​​射​​​的​​​文​​​件​​​大​​​小​​​，包​​​括​​​ tmpfs（shmem），单​​​位​​​为​​​字​​​节​​​
+pgpgin：存​​​入​​​内​​​存​​​中​​​的​​​页​​​数​​​
+pgpgout：从​​​内​​​存​​​中​​​读​​​出​​​的​​​页​​​数
+swap：swap 用​​​量​​​，单​​​位​​​为​​​字​​​节​​​
+active_anon：在​​​活​​​跃​​​的​​​最​​​近​​​最​​​少​​​使​​​用​​​（least-recently-used，LRU）列​​​表​​​中​​​的​​​匿​​​名​​​和​​​ swap 缓​​​存​​​，包​​​括​​​ tmpfs（shmem），单​​​位​​​为​​​字​​​节​​​
+inactive_anon：不​​​活​​​跃​​​的​​​ LRU 列​​​表​​​中​​​的​​​匿​​​名​​​和​​​ swap 缓​​​存​​​，包​​​括​​​ tmpfs（shmem），单​​​位​​​为​​​字​​​节
+active_file：活​​​跃​​​ LRU 列​​​表​​​中​​​的​​​ file-backed 内​​​存​​​，以​​​字​​​节​​​为​​​单​​​位
+inactive_file：不​​​活​​​跃​​​ LRU 列​​​表​​​中​​​的​​​ file-backed 内​​​存​​​，以​​​字​​​节​​​为​​​单​​​位
+unevictable：无​​​法​​​再​​​生​​​的​​​内​​​存​​​，以​​​字​​​节​​​为​​​单​​​位​​​
+hierarchical_memory_limit：包​​​含​​​ memory cgroup 的​​​层​​​级​​​的​​​内​​​存​​​限​​​制​​​，单​​​位​​​为​​​字​​​节​​​
+hierarchical_memsw_limit：包​​​含​​​ memory cgroup 的​​​层​​​级​​​的​​​内​​​存​​​加​​​ swap 限​​​制​​​，单​​​位​​​为​​​字​​​节​​​
+ 
+
+linux cgroups应用实例
+前提
+假设我们编写了一个死循环程序test
+
+#include <stdio.h>
+
+int main(){
+        long i=0;
+
+        while(1){
+                i++;
+
+        }
+
+        return 0;
+
+}
+
+占用cpu达到100%：
+
+
+
+例1：显示CPU使用比例
+$ mkdir /sys/fs/cgroup/cpu/test
+
+$ cd /sys/fs/cgroup/cpu/ test
+
+$ ls
+
+cgroup.clone_children  cgroup.procs  cpuacct.stat  cpuacct.usage  cpuacct.usage_percpu  cpu.cfs_period_us  cpu.cfs_quota_us  cpu.shares  cpu.stat  notify_on_release  tasks
+
+$ cat cpu.cfs_quota_us
+
+-1
+
+$ sudo echo 100000 > cpu.cfs_period_us
+
+$ sudo echo 20000 > cpu.cfs_quota_us
+
+$ cat cpu.cfs_quota_us
+
+$ echo 30167 > tasks
+
+注意：看下cgroups是不是只读，如果是只读需要重新挂载为读写：sudo mount -o remount,rw /sys/fs/cgroup。另外注意权限，如果出现sudo还是写不了，那是因为“>”也是一个命令，sudo只是让echo具有root权限，而“>”还是普通权限，遇到这种情况可以通过以下方法解决：
+
+1）利用sh –c命令让bash把字符串当成完整一个命令执行，如：sudo sh –c “echo hello > 1.txt”
+
+2）利用管道和tee命令：
+
+       echo a | sudo tee 1.txt；或追加：echo a | sudo tee –a 1.txt
+
+3）进入root用户，sudo –s
+
+重新查看test占用CPU率：
+
+
+
+可以通过资源控制后，test进程最高占用20%的CPU资料，也就是我们设置的赋值。另外，同样的进程共同占用所分配的资料，如同时启动两个test，那么两个test共同占用20%的CPU资源。
+
+例2：限制进程使用memory
+$ mkdir test
+
+$ cd test
+
+$ cat memory.limit_in_bytes
+
+$ echo 64k > memory.limit_in_bytes
+
+$ echo 30167 > tasks
+
+这样就限制了test进程最多可使用64K内存，超过会被杀掉。
+
+例3：现在进程IO资源
+启动压力测试命令：
+
+       sudo dd if=/dev/sda1 of=/dev/null   #将sda1整盘数据输出到/dev/null
+
+查看IO使用情况：
+
+
+
+可以看到此时自盘读取速度为7.97/M/s。
+
+接下来开始控制IO使用：
+
+$ cd /sys/fs/cgroup/blkio
+
+$ mkdir io
+
+$ cd io
+
+$ ll /dev/sda1
+
+$ brw-rw---- 1 root disk 8, 1 6月  18 13:55 /dev/sda1
+
+$ sudo echo '8:0 1048576' > blkio.throttle.read_bps_device
+
+$ sudo echo 30618 > tasks
+
+这样，这个进程的IO读速度被限制在1M/S秒
+
+
