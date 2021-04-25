@@ -438,3 +438,5 @@ $ sudo echo 30618 > tasks
 这样，这个进程的IO读速度被限制在1M/S秒
 
 
+Linux资源管理之cgroups简介
+https://tech.meituan.com/2015/03/31/cgroups.html
