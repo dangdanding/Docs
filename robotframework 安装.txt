@@ -8,7 +8,7 @@ Robot Framework安装教程，需要安装以下：
 3，Robot Framework （此工具本身）
 pip3 install robotframework
 
-4，wxPython （Python 非常有名的一个GUI 库，支撑Ride的运行库）
+4，wxPython （Python 非常有名的一个GUI 库，支撑Ride的运行库）: pip会自动安装依赖库
 pip3 install wxPython
 
 5，robotframework-ride
