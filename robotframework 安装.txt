@@ -3,12 +3,16 @@ Robot Framework安装教程，需要安装以下：
 
 1，Python2.7以上版本—这里用的是 Python3.8
 2，pip 和 setuptools （Python 的套件管理程式，最新版的Python 2.7.13已包含）
+添加C:\Users\Administrator\AppData\Local\Programs\Python\Python39\Scripts系统到环境变量PATH
 
 3，Robot Framework （此工具本身）
+pip3 install robotframework
 
 4，wxPython （Python 非常有名的一个GUI 库，支撑Ride的运行库）
+pip3 install wxPython
 
 5，robotframework-ride
+pip3 install robotframework-ride
 
 6，selenium2library （selenium2测试库，基于webdriver驱动）
 
