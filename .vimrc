@@ -3,7 +3,6 @@ syntax on
 
 set nu
 
-
 "set mouse
 set mouse=a
 set selection=exclusive
@@ -43,3 +42,10 @@ set nowrap         " 不自动换行
 set wrap           " 自动换行
 set linebreak      " 整词换行
 set whichwrap=b,s,<,>,[,]       " 光标从行首和行末时可以跳到另一行去
+
+"robot语法高亮插件
+
+"          git clone git://github.com/mfukar/robotframework-vim.git
+"          mkdir ~/.vim/
+"          cd robotframework-vim && cp -R * ~/.vim/
+
