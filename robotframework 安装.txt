@@ -11,6 +11,8 @@ pip3 install robotframework
 4，wxPython （Python 非常有名的一个GUI 库，支撑Ride的运行库）: pip会自动安装依赖库
 pip3 install wxPython
 
+pip install wxPython==4.0.7.post2 dependency for rid-1.7.4.2
+
 5，robotframework-ride
 pip3 install robotframework-ride
 
