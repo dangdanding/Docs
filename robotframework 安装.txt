@@ -54,6 +54,15 @@ setuptools          47.1.0
 six                 1.16.0
 wxPython            4.0.7.post2
 
+
+vi语法高亮显示robot脚本文件插件
+
+          git clone git://github.com/mfukar/robotframework-vim.git
+
+          mkdir ~/.vim/
+
+          cd robotframework-vim && cp -R * ~/.vim/
+
 pip无法连接或连接超时解决方案
 设置超时时间：pip --default-timeout=600 install  XXX
 或者制定国内镜像站
