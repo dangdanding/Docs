@@ -35,6 +35,25 @@ robotframework-ride是基于wxPython的，必须先安装wxPython。但因为rob
 10，autoit （autoit客户端程序，实际运用中，必须装了autoit才能用AutoItLibrary ）
 11, robotframework-sshlibrary安装命令：pip install robotframework-sshlibrary
 
+实测：
+C:\Users\Administrator>python --version
+Python 3.7.9
+
+C:\Users\Administrator>pip list
+Package             Version
+------------------- -----------
+numpy               1.20.2
+Pillow              8.2.0
+pip                 21.1.1
+Pygments            2.9.0
+Pypubsub            4.0.3
+pywin32             300
+robotframework      4.0.1
+robotframework-ride 1.7.4.2
+setuptools          47.1.0
+six                 1.16.0
+wxPython            4.0.7.post2
+
 pip无法连接或连接超时解决方案
 设置超时时间：pip --default-timeout=600 install  XXX
 或者制定国内镜像站
