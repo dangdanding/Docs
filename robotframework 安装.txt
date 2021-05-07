@@ -14,6 +14,14 @@ pip3 install wxPython
 5，robotframework-ride
 pip3 install robotframework-ride
 
+robotframework-ride是基于wxPython的，必须先安装wxPython。但因为robotframework-ride对于版本的要求很高，必须一一对应，如果先去下载最新版的wxPython，再来装最新版的robotframework-ride，可能会出现运行失败的情况。因此我们先安装robotframework-ride。
+
+    下载地址：https://pypi.org/project/robotframework-ride/
+
+    下载后，解压缩，进入robotframework-ride文件夹，按住shift，点击右键—点击在此处打开命令窗口—输入命令：python setup.py install
+
+    安装完成后，输入命令：ride.py，因为还没有安装wxPython，因此会类似下方的提示，告诉我们需要安装的wxPython版本以及下载地址。此时我们可以根据提示，再去下载提示中的wxPython版本
+
 6，selenium2library （selenium2测试库，基于webdriver驱动）
 
 7，geckodriver, chromedriver 和 IEDriverServer （浏览器驱动，据说45以上的版本Firefox驱动也不再是默认包含）
