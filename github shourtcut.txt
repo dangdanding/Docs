@@ -26,6 +26,11 @@ git config --global user.email "你的GitHub注册邮箱"
 git clone https://github.com/robotframework/SSHLibrary
 
 #7. 关联一个远程库命令，git@后面填写你的github repositor`
+git remote -v
+git remote show
+git remote rm remote_name
+git remote rm name  # 删除远程仓库
+git remote rename old_name new_name  # 修改仓库名
 git remote add origin_http https://github.com/robotframework/SSHLibrary.git
 git remote add origin git@github.com:userName/yourProject.git
 git push origin master 
