@@ -59,7 +59,11 @@ git branch -d branch_name
 git push origin :name   (分支名前的冒号代表删除)
 
 #github.com缺省分支名为main
-git push <远程主机名> <本地分支名>:<远程分支名>
+git remote add origin git@github.com:userName/yourProject.git
+#git push <远程主机名> <本地分支名>:<远程分支名>
+#check remote
+git remote -v
+
 git push origin master:main
 git push origin main:main
 
