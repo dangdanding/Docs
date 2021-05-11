@@ -18,9 +18,12 @@ git init
 git config --global user.name "你的GitHub登陆名"
 git config --global user.email "你的GitHub注册邮箱"
 git clone https://github.com/robotframework/SSHLibrary
+
 #7. 关联一个远程库命令，git@后面填写你的github repositor`
+git remote add origin_http https://github.com/robotframework/SSHLibrary.git
 git remote add origin git@github.com:userName/yourProject.git
 git push -u origin master 
+
 #8. commands
 git branch
 git status -uno
@@ -36,4 +39,11 @@ git reset --hard HEAD^^
 git reset --hard HEAD^^
 git reset --hard HEAD~n
 git reset --hard commit-id
+
+#8.设置记住密码（默认15分钟）：
+git config –global credential.helper cache
+#9. 如果想自己设置时间，可以这样做：这样就设置一个小时之后失效
+git config credential.helper ‘cache –timeout=3600’
+#10. 长期存储密码：
+git config –global credential.helper store
 
