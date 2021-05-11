@@ -1,0 +1,39 @@
+#1. Register your account name on github.com
+#2. download git to your windows desktop and get git bash ready(Linux has git available with its distribution"
+#3. create RSA public key(use your own email address which you registered your account on github
+ssh-keygen -t rsa -C emailname@email.com 
+#4. update your pubic key file to github under your account settings
+#https://github.com/settings/keys
+#https://docs.github.com/en/github/authenticating-to-github/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent
+#https://docs.github.com/en/github/authenticating-to-github/testing-your-ssh-connection
+#5. test connectivity to github.com via ssh
+ssh -T git@github.com
+#if ok you will get below message:
+#Hi username! You've successfully authenticated, but GitHub does not provide shell access.
+
+#6. create your local directory to hold git repository as below:
+mkdir git.rep
+cd git.rep
+git init
+git config --global user.name "你的GitHub登陆名"
+git config --global user.email "你的GitHub注册邮箱"
+git clone https://github.com/robotframework/SSHLibrary
+#7. 关联一个远程库命令，git@后面填写你的github repositor`
+git remote add origin git@github.com:userName/yourProject.git
+git push -u origin master 
+#8. commands
+git branch
+git status -uno
+git remote -v
+git add
+git commit -a -m
+git push origin master
+git pull
+git log
+git diff
+git reset --hard HEAD^
+git reset --hard HEAD^^
+git reset --hard HEAD^^
+git reset --hard HEAD~n
+git reset --hard commit-id
+
