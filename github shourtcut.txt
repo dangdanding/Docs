@@ -35,6 +35,8 @@ git remote add origin_http https://github.com/robotframework/SSHLibrary.git
 git remote add origin git@github.com:userName/yourProject.git
 git push origin master 
 
+git push --set-upstream origin main
+
 #8. commands
 git branch
 git status -uno
