@@ -47,3 +47,27 @@ git config credential.helper ‘cache –timeout=3600’
 #10. 长期存储密码：
 git config –global credential.helper store
 
+
+$ git remote  add origin_ssh git@github.com:git_user/git_rep.git
+admin@DESKTOP-L1ORG9F MINGW64 /f/Git/git_rep (master)
+$ git remote -v
+origin  https://github.com/git_user/git_rep.git (fetch)
+origin  https://github.com/git_user/git_rep.git (push)
+origin_ssh      git@github.com:git_user/git_rep.git (fetch)
+origin_ssh      git@github.com:git_user/git_rep.git (push)
+admin@DESKTOP-L1ORG9F MINGW64 /f/Git/git_rep (master)
+$ git push origin_ssh master
+The authenticity of host 'github.com (192.30.253.112)' can't be established.
+RSA key fingerprint is SHA256:nThbg6kXUpJWGl7E1IGOCspRomTxdCARLviKw6E5SY8.
+Are you sure you want to continue connecting (yes/no)? y
+Please type 'yes' or 'no': yes
+Warning: Permanently added 'github.com,192.30.253.112' (RSA) to the list of known hosts.
+Enumerating objects: 5, done.
+Counting objects: 100% (5/5), done.
+Delta compression using up to 12 threads
+Compressing objects: 100% (2/2), done.
+Writing objects: 100% (3/3), 276 bytes | 276.00 KiB/s, done.
+Total 3 (delta 1), reused 0 (delta 0)
+remote: Resolving deltas: 100% (1/1), completed with 1 local object.
+To github.com:git_user/git_rep.git
+
