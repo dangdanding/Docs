@@ -51,6 +51,10 @@ git branch -d branch_name
 #删除服务器上的分支：
 git push origin :name   (分支名前的冒号代表删除)
 
+#github.com缺省分支名为main
+git push <远程主机名> <本地分支名>:<远程分支名>
+git push origin master:main
+
 git checkout -b branch_name
 
 git merge src_branch dst_branch
