@@ -30,15 +30,26 @@ git status -uno
 git remote -v
 git add
 git commit -a -m
-git push origin master
 git pull
+
 git log
+git reflog
+
 git diff
+
 git reset --hard HEAD^
 git reset --hard HEAD^^
 git reset --hard HEAD^^
 git reset --hard HEAD~n
 git reset --hard commit-id
+
+git branch
+bit branch branch_name
+git checkout -b branch_name
+
+
+git remote add origin git@github.com:userName/yourProject.git
+git push -u origin master
 
 #8.设置记住密码（默认15分钟）：
 git config –global credential.helper cache
