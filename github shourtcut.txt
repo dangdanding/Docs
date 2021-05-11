@@ -45,7 +45,16 @@ git reset --hard commit-id
 
 git branch
 bit branch branch_name
+#删除本地分支：
+git branch -d branch_name
+
+#删除服务器上的分支：
+git push origin :name   (分支名前的冒号代表删除)
+
 git checkout -b branch_name
+
+git merge src_branch dst_branch
+
 
 
 git remote add origin git@github.com:userName/yourProject.git
