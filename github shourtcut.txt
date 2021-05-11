@@ -1,4 +1,4 @@
-#working area: 工作区,即自己当前分支所修改的代码，git add xx 之前的！不包括 git add xx 和 git commit xxx 之后的。
+﻿#working area: 工作区,即自己当前分支所修改的代码，git add xx 之前的！不包括 git add xx 和 git commit xxx 之后的。
 
 #stage: 暂存区,已经 git add xxx 进去，且未 git commit xxx 的。
 
@@ -89,14 +89,14 @@ git config credential.helper ‘cache –timeout=3600’
 git config –global credential.helper store
 
 
-$ git remote  add origin_ssh git@github.com:git_user/git_rep.git
-admin@DESKTOP-L1ORG9F MINGW64 /f/Git/git_rep (master)
+$ git remote  add origin_ssh git@github.com:git_user/git_repo.git
+admin@DESKTOP-L1ORG9F MINGW64 /f/Git/git_repo (master)
 $ git remote -v
-origin  https://github.com/git_user/git_rep.git (fetch)
-origin  https://github.com/git_user/git_rep.git (push)
-origin_ssh      git@github.com:git_user/git_rep.git (fetch)
-origin_ssh      git@github.com:git_user/git_rep.git (push)
-admin@DESKTOP-L1ORG9F MINGW64 /f/Git/git_rep (master)
+origin  https://github.com/git_user/git_repo.git (fetch)
+origin  https://github.com/git_user/git_repo.git (push)
+origin_ssh      git@github.com:git_user/git_repo.git (fetch)
+origin_ssh      git@github.com:git_user/git_repo.git (push)
+admin@DESKTOP-L1ORG9F MINGW64 /f/Git/git_repo (master)
 $ git push origin_ssh master
 The authenticity of host 'github.com (192.30.253.112)' can't be established.
 RSA key fingerprint is SHA256:nThbg6kXUpJWGl7E1IGOCspRomTxdCARLviKw6E5SY8.
@@ -110,7 +110,7 @@ Compressing objects: 100% (2/2), done.
 Writing objects: 100% (3/3), 276 bytes | 276.00 KiB/s, done.
 Total 3 (delta 1), reused 0 (delta 0)
 remote: Resolving deltas: 100% (1/1), completed with 1 local object.
-To github.com:git_user/git_rep.git
+To github.com:git_user/git_repo.git
 
 简单的代码提交流程
 git status 查看工作区代码相对于暂存区的差别
