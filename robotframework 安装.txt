@@ -37,6 +37,10 @@ robotframework-ride是基于wxPython的，必须先安装wxPython。但因为rob
 
 reference:
 https://www.cnblogs.com/jun-zi/p/12055300.html
+http://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html
+http://robotframework.org/robotframework/
+https://github.com/robotframework/SSHLibrary/blob/master/src/SSHLibrary/library.py
+https://ktbyers.github.io/netmiko/docs/netmiko/index.html
 
 实测：
 C:\Users\Administrator>python --version
