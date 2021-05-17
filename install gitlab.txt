@@ -1,0 +1,71 @@
+1、配置yum源
+vim /etc/yum.repos.d/gitlab-ce.repo
+复制以下内容：
+
+[gitlab-ce]
+name=Gitlab CE Repository
+baseurl=https://mirrors.tuna.tsinghua.edu.cn/gitlab-ce/yum/el$releasever/
+gpgcheck=0
+enabled=1
+
+2、更新本地yum缓存
+sudo yum makecache
+
+3、安装GitLab社区版
+sudo yum install gitlab-ce #自动安装最新版
+sudo yum install gitlab-ce-x.x.x #安装指定版本
+
+开SSH
+systemctl enable sshd
+
+关闭SELINUX
+/etc/sysconfig/selinux
+
+4. 
+安装完成后：
+
+gitlab-ctl reconfigure    #使配置文件生效 但是会初始化除了gitlab.rb之外的所有文件
+
+gitlab-ctl status        #查看状态
+
+gitlab-ctl stop          #停服务
+
+gitlab-ctl start         #起服务
+
+gitlab-ctl tail          #查看日志的命令（Gitlab 默认的日志文件存放在/var/log/gitlab 目录下）
+
+相关目录信息
+
+.git/config                              #版本库特定的配置设置，可用--file修改
+
+~/.gitconfig                             #用户特定的配置设置，可用--global修改
+
+/var/opt/gitlab/git-data/repositories/root    #库默认存储目录
+
+/opt/gitlab                             #是gitlab的应用代码和相应的依赖程序
+
+/var/opt/gitlab       #此目录下是运行gitlab-ctl reconfigure命令编译后的应用数据和配置文件，不需要人为修改配置
+
+/etc/gitlab #此目录下存放了以omnibus-gitlab包安装方式时的配置文件，这里的配置文件才需要管理员手动编译配置
+
+/var/log/gitlab                          #此目录下存放了gitlab各个组件产生的日志
+
+/var/opt/gitlab/backups/                  #备份文件生成的目录
+
+相关文件
+
+/opt/gitlab/embedded/service/gitlab-rails/config  #配置文件（修改clone的ip地址）
+
+/etc/gitlab/gitlab.rb                      #设置相关选项进行配置（gitlab地址就在这）
+
+/var/opt/gitlab/git-data                   #Git存储库数据（默认
+
+4、运行服务
+
+gitlab-ctl start
+
+5、登录测试
+
+首次登录需要修改root密码
+
+
