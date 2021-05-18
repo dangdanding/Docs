@@ -5,6 +5,7 @@ set nu
 
 
 set mouse=a
+set mouse=nv
 set selection=exclusive
 set selectmode=mouse,key
 
@@ -25,7 +26,9 @@ set ambiwidth=double
 
 set tabstop=4
 set shiftwidth=4
+set softtabstop=4
 set autoindent
+set expandtab
 "显示括号匹配
 set showmatch
 "括号匹配显示时间为1(单位是十分之一秒)
