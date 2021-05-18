@@ -6,13 +6,15 @@ set nu
 
 set mouse=a
 set mouse=nv
+"将所有鼠标选择的文本放在未命名寄存器中和剪切板寄存器中
+set clipboard=unnamed
+
 set selection=exclusive
 set selectmode=mouse,key
 
 set backspace=2
 
 filetype on
-
 filetype plugin on
 
 filetype indent on
