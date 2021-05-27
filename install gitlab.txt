@@ -68,4 +68,16 @@ gitlab-ctl start
 
 首次登录需要修改root密码
 
+Modify HTTP service if necessary
+1. modify default running hostname and http port
+/var/opt/gitlab/gitlab-rails/etc/gitlab.yaml
+2. modify nginx configuration
+/var/opt/gitlab/nginx/conf/gitlab-http.conf
+gitlab.yaml and nginx share the same listening port
+3./var/opt/gitlab/gitlab-rails/etc/unicorn.rb
 
+more info:
+https://docs.gitlab.com/omnibus/settings/configuration.html#configuring-the-external-url-for-gitlab
+https://docs.gitlab.com/ee/install/next_steps.html
+https://www.icode9.com/content-4-394135.html
+https://cloud.tencent.com/developer/article/1139779
