@@ -1,4 +1,4 @@
-1、配置yum源
+﻿1、配置yum源
 vim /etc/yum.repos.d/gitlab-ce.repo
 复制以下内容：
 
@@ -12,6 +12,18 @@ enabled=1
 sudo yum makecache
 
 3、安装GitLab社区版
+系统不应该存在以下用户， 这些用户在安装gitlab 的过程中会自己创建，
+如果已近存在会造成后面的 编译失败或者是已经存在的用户被修改， 出现问题会造成安装失败。
+gitlab-www
+git
+gitlab-redis
+gitlab-redis
+gitlab-prometheus
+
+gitlab 安装完成会默认使用一下端口 80、8060、8080、9090、9100、9121、9168、9187。
+为了顺利安装成功， 最好可以确保以上端口没有被使用。 如果已经被使用了， 则需要在启动服务之前修改gtilab默认端口
+
+安装命令：
 sudo yum install gitlab-ce #自动安装最新版
 sudo yum install gitlab-ce-x.x.x #安装指定版本
 
@@ -23,6 +35,41 @@ systemctl enable sshd
 
 4. 
 安装完成后：
+
+修改gitlab 访问端口
+编辑文件  /etc/gitlab/gitlab.rb    vim /etc/gitlab/gitlab.rb
+修改配置： external_url 'http://127.0.0.1:8090'
+将此处内容修改 为服务器的域名或者ip地址， 以及访问的端口。 此处修改了， 即修改了git仓库下载地址。
+如果仅仅只是修改访问端口及git仓库下载地址那么只需要修改这里的一个配置即可、重新编译, 并重启服务使其nginx 配置生效, 
+重启完成， 即可使用新的端口访问， 重启完成之后可能需要一定时间加载过程。
+
+冲突端口修改， 因为 80， 8080， 9090 这几个端口比较常用， 一般在服务区中可能已经被使用, 一般只需要这个几个端口即可
+
+80 端口：
+
+         即上面一步， 修改默认访问端口
+
+8080 端口：
+
+        编辑文件： /etc/gitlab/gitlab.rb 
+
+       修改配置 ， 此次出的两个配置默认是注释， 解开注释修改即可， 这里将， 默认的 8080 修改为 8066 
+
+        unicorn['listen'] = '127.0.0.1'
+        unicorn['port'] = 8066
+
+9090 端口：
+
+      编辑文件： /etc/gitlab/gitlab.rb 
+
+      修改配置, 此处将 默认 9090  端口修改为 9091 端口
+      prometheus['listen_address'] = '127.0.0.1:9091'
+
+以上任何配置修改完成都需要重新执行编译命令， 编译完成后重启服务。 等待服务重启完成后， 即可访问。
+
+
+添加nginx解析：/usr/local/nginx/conf/vhost/gitlab.conf
+
 
 gitlab-ctl reconfigure    #使配置文件生效 但是会初始化除了gitlab.rb之外的所有文件
 
