@@ -56,6 +56,13 @@ git reset --hard HEAD^^
 git reset --hard HEAD~n
 git reset --hard commit-id
 
+  #branch dev
+  git checkout dev
+  git pull origin dev
+  git branch --set-upstream-to=origin/dev dev
+  git push --set-upstream origin dev
+
+
 #create branch:branch_name
 git checkout -b branch_name
 

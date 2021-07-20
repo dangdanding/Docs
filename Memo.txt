@@ -1,0 +1,353 @@
+1073741824
+
+config mode: download image
+
+centos7.6 + MLNX_OFED_LINUX-5.2-2.2.3.0 + trex-2.87
+
+Intel(R) Xeon(R) CPU E5-2665 0 @ 2.40GHz
+64b:  ./t-rex-64 -i -v 7 -c 15，   start -f stl/tests/single_cont1.py -p 0 --pin -m 100%: 64bit frame L1 bps: 65.3Gbps, cpu 93.0%
+128b:  ./t-rex-64 -i -v 7 -c 15， start -f stl/tests/single_cont1.py -p 0 --pin -m 100%: 64bit frame L1 bps: 58.3Gbps, cpu 88%
+256b:  ./t-rex-64 -i -v 7 -c 15， start -f stl/tests/single_cont1.py -p 0 --pin -m 100%: 64bit frame L1 bps: 54.3Gbps, cpu 85%
+
+64b:  ./t-rex-64 -i -v 7 -c 1，     start -f stl/tests/single_cont1.py -p 0 --pin -m 100%: 64bit frame L1 bps: 18.3Gbps, cpu 100%
+128b:  ./t-rex-64 -i -v 7 -c 1，  start -f stl/tests/single_cont1.py -p 0 --pin -m 100%: 64bit frame L1 bps: 32.3Gbps, cpu 87%
+128b:  ./t-rex-64 -i -v 7 -c 1，  start -f stl/tests/single_cont_256b.py -p 0 --pin -m 100%: 64bit frame L1 bps: 46.3Gbps, cpu 94%
+
+
+
+
+
+
+centos9.6, v2.88, ofed-5.2
+EAL: Detected 32 lcore(s)
+EAL: Detected 2 NUMA nodes
+EAL: Static memory layout is selected, amount of reserved memory can be adjusted with -m or --socket-mem
+EAL: Multi-process socket /var/run/dpdk/rte/mp_socket
+EAL: Selected IOVA mode 'PA'
+ EAL: Probing VFIO support...
+EAL: Could not find space for memseg. Please increase CONFIG_RTE_MAX_MEMSEG_PER_TYPE and/or CONFIG_RTE_MAX_MEM_PER_TYPE in configuration.
+EAL: Couldn't remap hugepage files into memseg lists
+EAL: FATAL: Cannot init memory
+EAL: Cannot init memory
+ You might need to run ./trex-cfg  once  
+EAL: Error - exiting with code: 1
+  Cause: Invalid EAL arguments
+Killing Scapy server...
+
+centos7.6, MLNX_OFED_LINUX-4.6-1.0.1.1-rhel7.6-x86_64, trex-v2.86
+EAL: Static memory layout is selected, amount of reserved memory can be adjusted with -m or --socket-mem
+EAL: so/x86_64/libmlx5-64.so: undefined symbol: mlx5dv_devx_umem_reg
+EAL: FATAL: Cannot init plugins
+EAL: Cannot init plugins
+  You might need to run ./trex-cfg  once  
+EAL: Error - exiting with code: 1
+  Cause: Invalid EAL arguments
+Killing Scapy server... Scapy server is killed
+[root@localhost v2.86]# 
+ brcm-shell
+
+libdoc LibByz.py LibByz.html
+
+./dpdk_setup_ports.py -t
+./dpdk_setup_ports.py -i
+ ./t-rex-64 -f cap2/dns.yaml -c 4 -m 1 -d 10
+
+ConnectX-5 on centos7.9:
+driver: 
+https://www.mellanox.com/products/infiniband-drivers/linux/mlnx_ofed
+MLNX_OFED_LINUX-5.2-1.0.4.0-rhel7.9-x86_64.tgz
+
+https://community.mellanox.com/s/article/getting-started-with-connectx-5-100gb-s-adapters-for-linux
+https://www.mellanox.com/related-docs/prod_software/Performance_Tuning_Guide_for_Mellanox_Network_Adapters.pdf
+
+To load the new driver, run:
+/etc/init.d/openibd restart
+ mlxfwreset -d mlx5_0 --yes r
+mst start
+
+ service firewalld stop
+ systemctl disable firewalld
+ service iptables stop
+
+ ibv_devinfo | grep vendor_part_id
+ mlxconfig -d /dev/mst/mt4121_pciconf0 q
+
+ ifconfig enp7s0f0 192.168.1.1/24 up
+ ifconfig enp7s0f1 192.168.2.1/24 up
+ ifconfig enp7s0f1 mtu 9000
+ ifconfig enp7s0f0 mtu 9000
+
+ibv_devinfo
+ofed_info
+ofed_info -s
+
+ ibdev2netdev
+mlx5_0 port 1 ==> enp7s0f0 (Down)
+mlx5_1 port 1 ==> enp7s0f1 (Down)
+
+ lspci | grep Mellanox
+mii-tool
+
+http://www.h3c.com/cn/d_202007/1317229_30005_0.htm
+
+mlxlink -d /dev/mst/mt4121_pciconf0 -a UP
+ibstat
+ibdiagnet
+connectx_port_config
+ca_self_test.ofed
+ibv_devices
+
+
+使用numactl来查看node0和node1上认领的cpu核数,以及内存资源
+numactl --hardware
+cat /sys/devices/system/node/node*/meminfo | fgrep Huge
+
+
+
+EAL: 128 hugepages of size 1073741824 reserved, but no mounted hugetlbfs found for that size
+echo 8192 > /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages
+echo 8192 > /sys/devices/system/node/node1/hugepages/hugepages-2048kB/nr_hugepages
+echo 16 > /sys/devices/system/node/node0/hugepages/hugepages-1048576kB/nr_hugepages
+echo 16 > /sys/devices/system/node/node1/hugepages/hugepages-1048576kB/nr_hugepages
+mkdir -p /mnt/huge2m
+mkdir -p /mnt/huge1g
+umount /mnt/huge1g
+umount /mnt/huge2m
+mount -t hugetlbfs none /mnt/huge1g -o pagesize=1GB
+mount -t hugetlbfs none /mnt/huge2m -o pagesize=2MB
+
+使用内核可调vm.nr_hugepages配置hugepages
+1. 编辑/etc/sysctl.conf文件，并在nr_hugepages参数中指定hugepages的数量。该条目使参数在重新引导时保持不变，但在运行下一步中描述的' sysctl -p '命令之前不会生效。
+# vi /etc/sysctl.conf
+vm.nr_hugepages = 10
+2. 执行' sysctl -p '命令以启用hugepages参数。
+# sysctl -p
+...
+vm.nr_hugepages = 10
+　　注意:建议在配置hugepages之后重新启动系统，因为当系统启动时，拥有连续内存的空间(用于hugepages分配)的机会要大得多。
+要验证hugepages参数设置，可以对下面给出的两个方法使用任意一个:
+1. 检查文件/proc/meminfo:
+# cat /proc/meminfo | grep Huge
+HugePages_Total:    10
+HugePages_Free:     10
+HugePages_Rsvd:      0
+Hugepagesize:     2048 kB
+解释:
+HugePages_Total——大页面池的大小。
+HugePages_Free -池中未使用的巨大页面的数量。
+HugePages_Rsvd -承诺从池中分配但尚未分配的巨大页面数量。
+HugePages_Surp -是“盈余”的缩写，是池中超过/proc/sys/vm/nr_hugepages值的巨大页面数。最大剩余的巨大页面数量由/proc/sys/vm/nr_overcommit_hugepages控制
+ # sysctl a | grep nr_hugepages
+vm.nr_hugepages = 10
+
+执行' sysctl -p '命令以启用hugepages参数。
+# sysctl -p
+
+Mellanox OFED 安装的信息
+/etc/infiniband/info
+
+看自动加载的模块列表
+/etc/infiniband/openib.conf
+
+
+
+
+Redhat 或者Centos系统中可以通过命令# grep -i numa /var/log/dmesg 查看输出结果：
+如果输出结果为：No NUMA configuration found，说明numa为disable，如果不是上面的内容说明numa为enable
+export RTE_SDK=/root/dpdk-stable-19.11.8/          
+export RTE_TARGET=x86_64-native-linuxapp-gcc  
+export DESTDIR=/root/dpdk-stable-19.11.8/        
+
+1.测试l2fwd
+进入/root/dpdk/example/l2fwd下，执行make命令编译l2fwd。 l2fwd命令执行的格式如下:
+
+./build/l2fwd [EAL options] -- -p PORTMASK [-q NQ] -T PERIOD
+EAL options:
+
+-c COREMASK: A hexadecimal bitmask of cores to run on
+-n NUM : Number of memory channels
+-p PORTMASK : A hexadecimal bitmask of the ports to configure
+-q NQ: A number of queues (=ports) per lcore (default is 1)
+-T PERIOD: statistics will be refreshed each PERIOD seconds (0 to disable, 10 default, 86400 maximum)
+
+本次测试2个万兆口,命令如下:
+
+./build/l2fwd –c 0x0F –n 2 -- -p 0x03 -T 1
+参数讲解：
+
+-c 0x0F 指分配4个core给dpdk程序，这个参数是主参数，必须设定； -n 2 指内存通道数
+-- 由于程序有主次参数之分，主参数是在指所有实例程序都可以用的参数；次参数，是指每个实例程序自身拥有的参数， -- 之后的为次参数；
+-p 0x3 设置dpdk起点的端口数，也是以16进制的源码作为标志位， 0x3是指后两位为1，也就是起点两个端口，0和1为一对；
+-T 1 在执行程序的时候，会有一些统计数据打印到屏幕上，这个的 参数是设定多长时间统计一次，显示到屏幕，1秒钟一次；
+
+
+aliyun yum source:
+http://mirrors.aliyun.com/centos/
+
+update centos to centos7.9
+rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
+yum install https://www.elrepo.org/elrepo-release-7.el7.elrepo.noarch.rpm
+
+[root@wanzhao root]# cat /etc/yum.repos.d/Centos-7.repo 
+# CentOS-Base.repo
+[base]
+name=CentOS-$releasever - Base - mirrors.aliyun.com
+releasever=7.9.2009
+basearch=x86_64
+failovermethod=priority
+baseurl=http://mirrors.aliyun.com/centos/$releasever/os/$basearch/
+        http://mirrors.aliyuncs.com/centos/$releasever/os/$basearch/
+        http://mirrors.cloud.aliyuncs.com/centos/$releasever/os/$basearch/
+gpgcheck=1
+gpgkey=http://mirrors.aliyun.com/centos/RPM-GPG-KEY-CentOS-7
+ 
+#released updates 
+[updates]
+name=CentOS-$releasever - Updates - mirrors.aliyun.com
+failovermethod=priority
+baseurl=http://mirrors.aliyun.com/centos/$releasever/updates/$basearch/
+        http://mirrors.aliyuncs.com/centos/$releasever/updates/$basearch/
+        http://mirrors.cloud.aliyuncs.com/centos/$releasever/updates/$basearch/
+gpgcheck=1
+gpgkey=http://mirrors.aliyun.com/centos/RPM-GPG-KEY-CentOS-7
+ 
+#additional packages that may be useful
+[extras]
+name=CentOS-$releasever - Extras - mirrors.aliyun.com
+failovermethod=priority
+baseurl=http://mirrors.aliyun.com/centos/$releasever/extras/$basearch/
+        http://mirrors.aliyuncs.com/centos/$releasever/extras/$basearch/
+        http://mirrors.cloud.aliyuncs.com/centos/$releasever/extras/$basearch/
+gpgcheck=1
+gpgkey=http://mirrors.aliyun.com/centos/RPM-GPG-KEY-CentOS-7
+ 
+#additional packages that extend functionality of existing packages
+[centosplus]
+name=CentOS-$releasever - Plus - mirrors.aliyun.com
+failovermethod=priority
+baseurl=http://mirrors.aliyun.com/centos/$releasever/centosplus/$basearch/
+        http://mirrors.aliyuncs.com/centos/$releasever/centosplus/$basearch/
+        http://mirrors.cloud.aliyuncs.com/centos/$releasever/centosplus/$basearch/
+gpgcheck=1
+enabled=0
+gpgkey=http://mirrors.aliyun.com/centos/RPM-GPG-KEY-CentOS-7
+ 
+#contrib - packages by Centos Users
+[contrib]
+name=CentOS-$releasever - Contrib - mirrors.aliyun.com
+failovermethod=priority
+baseurl=http://mirrors.aliyun.com/centos/$releasever/contrib/$basearch/
+        http://mirrors.aliyuncs.com/centos/$releasever/contrib/$basearch/
+        http://mirrors.cloud.aliyuncs.com/centos/$releasever/contrib/$basearch/
+gpgcheck=1
+enabled=0
+gpgkey=http://mirrors.aliyun.com/centos/RPM-GPG-KEY-CentOS-7
+
+
+
+lspci
+ethtool
+lspci |grep Mellanox
+mst start
+
+
+update yum source
+cd /etc/yum.repo.d/ 
+mkdir repo_bak
+mv *.repo repo_bak/
+wget http://mirrors.aliyun.com/repo/Centos-7.repo
+yum clean all
+yum makecache
+yum list | grep epel-release 
+yum install -y epel-release
+wget -O /etc/yum.repos.d/epel-7.repo http://mirrors.aliyun.com/repo/epel-7.repo
+yum clean all 清除yum缓存
+yum makecache 生成yum缓存
+yum repolist enabled
+
+OFED:
+https://www.mellanox.com/products/infiniband-drivers/linux/mlnx_ofed
+
+Getting Started with ConnectX-5 100Gb/s Adapters for Linux
+https://blog.csdn.net/superbfly/article/details/107303353
+
+wget --no-cache https://trex-tgn.cisco.com/trex/release/v2.86.tar.gz --no-check-certificate
+
+TRex OFED matrix
+trex v2.86, OFED only 4.6, CentOS 7.6
+trex v2.89 and above, only GA 5.3-1,CentOS 7.9
+
+./t-rex-64 -f /tmp/trex/dns.yaml -c 4 --cfg /tmp/trex/trex_cfg_vlan1.yaml -d 1 -m 1
+
+ ./bp-sim-64-debug -f /tmp/trex/dns.yaml  -o my.erf -v 3
+
+[root@unicom v2.89]# /home/dpdk-devbind.py --help
+
+　　ls()  命令可以查看所有支持的协议
+　　ls(IP) 命令列出ip协议头部字段格式，只要想查看哪个协议的参数，括号里就填哪个协议
+　　IP().show()　列出ip包的信息
+　　lsc() 命令列出scapy的所有命令 
+　　conf 命令列出scapy 的配置参数
+通过上述输出结果，我们可以看得出每个层的数据包有哪些属性可以取出。
+　　这里P代表的是Ethernet层。P.dst (取出dst属性)、P.src (取出src属性)、P.type (取出type属性)
+
+　　每一层都有一个 payload 属性，可以不断进入下一层。
+
+　　p.payload：IP层（可用 p.payload.*  取出IP层的属性）
+　　p.payload.payload：TCP/UDP层（可用 p.payload.payload.*  取出TCP/UDP层的属性）
+　　p.payload.payload.payload：RAW层（可用 p.payload.payload.payload.*  取出RAW层的属性）
+
+# UDP header
+Ether()/IP(src="16.0.0.1",dst="48.0.0.1")/UDP(dport=12,sport=1025)
+
+# UDP over one vlan
+Ether()/Dot1Q(vlan=12)/IP(src="16.0.0.1",dst="48.0.0.1")/UDP(dport=12,sport=1025)
+
+# UDP QinQ
+Ether()/Dot1Q(vlan=12)/Dot1Q(vlan=12)/IP(src="16.0.0.1",dst="48.0.0.1")/UDP(dport=12,sport=1025)
+
+#TCP over IP over VLAN
+Ether()/Dot1Q(vlan=12)/IP(src="16.0.0.1",dst="48.0.0.1")/TCP(dport=12,sport=1025)
+
+# IPv6 over vlan
+Ether()/Dot1Q(vlan=12)/IPv6(src="::5")/TCP(dport=12,sport=1025)
+
+#Ipv6 over UDP over IP
+Ether()/IP()/UDP()/IPv6(src="::5")/TCP(dport=12,sport=1025)
+
+#DNS packet
+Ether()/IP()/UDP()/DNS()
+　　
+　　2.2 根据列表标签查找输出
+
+　　我们可以查看第一个数据包：package[0]是查看第一个数据包的数据，package[0].show()是查看第一个数据包的详细信息，scapy是按照按照 TCP/IP 四层参考模型显示详细包信息的，即：链路层 [Ethernet]、网络层[IP]、传输层[TCP/UDP]、应用层[RAW] 。我们还可以通过协议来查看指定的包：
+
+　　package[UDP][0].show() ，因为我们这里只有UDP的数据包，所以就没有这样使用。，而我们也可以直接只获取指定层的数据，如： pcap[UDP][1][Ether].dst   这个包里面是等于ff:ff:ff:ff:ff:ff
+
+
+
+from scapy.all import *
+p = rdpcap('pcap.pcap')
+p[0]
+
+<Ether  dst=00:8c:fa:06:c0:69 src=00:8c:fa:06:c0:68 type=n_802_1Q |<Dot1Q  prio=0 id=0 vlan=1 type=IPv4 |<IP  version=4 ihl=5 tos=0x0 len=59 id=14550 flags= frag=0 ttl=128 proto=udp chksum=0xec15 src=10.100.0.1 dst=10.100.0.254 |<UDP  sport=41668 dport=domain len=39 chksum=0x84aa |<DNS  id=48 qr=0 opcode=QUERY aa=0 tc=0 rd=0 ra=0 z=0 ad=0 cd=0 rcode=ok qdcount=1 ancount=0 nscount=0 arcount=0 qd=<DNSQR  qname='www.cisco.com.' qtype=A qclass=IN |> an=None ns=None ar=None |>>>>>
+
+
+cd /etc/yum.repos.d/
+cp -r CentOS-Base.repo CentOS-Base-repo.bak
+wget http://mirrors.163.com/.help/CentOS7-Base-163.repo
+yum clean all
+mv CentOS7-Base-163.repo CentOS-Base.repo
+yum makecache
+yum update
+
+
+10.87.30.81: trex-v2.87, MLNX_OFED_LINUX-5.2-2.2.3.0-rhel7.6-x86_64.tgz
+10.87.30.52: robot shell server, gitlab server
+10.87.30.151: trex-v2.89, trex-v2.66(gui client)
+
+
+
+枝江市档案托管单位为枝江市公共就业和人才服务局（地址：枝江市公园路113号2楼人力资源市场），联系方式：0717-4219180。为确保档案安全顺利到达，本人可在档案寄出后，及时与枝江市公共就业和人才服务局联系查询到档情况。
+
+据了解，能够从档案里复印或借用的材料有：成绩单、学位证明、毕业生登记表、职称材料、党员材料（主要用于预备期满转正）、报到证等其他经审批同意的事项。本人凭身份证就可以到档案托管机构办理复印或借用手续，因特殊情况本人不能办理的可以委托他人代办，凭委托人签字的《委托书》及委托人的身份证复印件、被委托人的身份证原件即可办理。借用党员材料的，需另持组织关系所在党委（总支、支部）的介绍信。

@@ -1,0 +1,114 @@
+﻿
+CentOS:
+CentOS Linux release 7.7.1908 (Core)
+
+https://www.mellanox.com/products/infiniband-drivers/linux/mlnx_ofed
+
+MLNX_OFED_LINUX-4.7-1.0.0.1-rhel7.7-x86_64:
+https://www.mellanox.com/downloads/ofed/MLNX_OFED-4.7-1.0.0.1/MLNX_OFED_LINUX-4.7-1.0.0.1-rhel7.7-x86_64.tgz
+
+Mellanox support from trex site:
+https://trex-tgn.cisco.com/trex/doc/trex_appendix_mellanox.html#_distro_installation
+
+2. Distro Installation
+We tested the following distro with TRex and OFED. Others might work too.
+
+CentOS 7.6 (This is the only verified distro) - up to v2.87
+
+CentOS 7.9 (This is the only verified distro) - v2.88 and up
+
+Following distros were tested and did not work for us in the past (with older OFEDs).
+
+Fedora 21 (3.17.4-301.fc21.x86_64)
+
+Ubuntu 14.04.3 LTS (GNU/Linux 3.19.0-25-generic x86_64) — crash when RSS was enabled MLX RSS issue
+
+3. OFED Installation
+Information was taken from Install OFED
+
+Download OFED 4.6-1.0.1 tar for RHEL 7.6 distro. - up to v2.87
+
+Download MLNX_OFED_LINUX-5.2-1.0.4.0-rhel7.9-x86_64.tgz tar for RHEL 7.9 distro. - v2.87 and up
+
+
+
+
+[root@wanzhao v2.89]# ./t-rex-64 -i
+Warning: Mellanox NICs were tested only with RedHat/CentOS 7.9
+Correct usage with other Linux distributions is not guaranteed.
+Installed OFED version is 'b'MLNX_OFED_LINUX-4.7-1.0.0.1 (OFED-4.7-1.0.0):'', should be at least '5.2' and up.
+ERROR encountered while configuring TRex system
+[root@wanzhao v2.89]# ./t-rex-64 -i
+Warning: Mellanox NICs were tested only with RedHat/CentOS 7.9
+Correct usage with other Linux distributions is not guaranteed.
+Starting Scapy server..... Scapy server is started
+The ports are bound/configured.
+Starting  TRex v2.89 please wait  ... 
+EAL: so/x86_64/libmlx5-64.so: symbol mlx5dv_dr_action_create_aso, version MLX5_OFED not defined in file libmlx5.so.1 with link time reference
+EAL: FATAL: Cannot init plugins
+EAL: Cannot init plugins
+ You might need to run ./trex-cfg  once  
+EAL: Error - exiting with code: 1
+  Cause: Invalid EAL arguments
+Killing Scapy server... Scapy server is killed
+
+
+centos7.7 trex-v2.89下试过以下ofed均失败.
+MLNX_EN_SRC-5.3-1.0.0.1.tgz                     
+MLNX_OFED_LINUX-4.7-1.0.0.1-rhel7.7-x86_64.tgz  
+MLNX_OFED_LINUX-5.4-1.0.3.0-rhel7.7-x86_64.tgz
+MLNX_OFED_LINUX-4.6-1.0.1.1-rhel7.6-x86_64.tgz  
+MLNX_OFED_LINUX-5.1-2.3.7.1-rhel7.7-x86_64.tgz  
+MLNX_OFED_SRC-4.6-1.0.1.1.tgz
+
+
+centos7.7 trex-v2.87下试过ofed均失败.
+[root@wanzhao v2.87]# ./t-rex-64 -i
+Warning: Mellanox NICs were tested only with RedHat/CentOS 7.6
+Correct usage with other Linux distributions is not guaranteed.
+Starting Scapy server...... Scapy server is started
+The ports are bound/configured.
+Starting  TRex v2.87 please wait  ... 
+EAL: Could not find space for memseg. Please increase CONFIG_RTE_MAX_MEMSEG_PER_TYPE and/or CONFIG_RTE_MAX_MEM_PER_TYPE in configuration.
+EAL: Couldn't remap hugepage files into memseg lists
+EAL: FATAL: Cannot init memory
+EAL: Cannot init memory
+ You might need to run ./trex-cfg  once  
+EAL: Error - exiting with code: 1
+  Cause: Invalid EAL arguments
+Killing Scapy server... Scapy server is killed
+[root@wanzhao v2.87]# 
+
+centos7.7 trex-v2.87 + MLNX_OFED_LINUX-5.2-1.0.4.0-rhel7.7-x86_64
+[root@wanzhao v2.87]# ./t-rex-64 -i
+Warning: Mellanox NICs were tested only with RedHat/CentOS 7.6
+Correct usage with other Linux distributions is not guaranteed.
+Starting Scapy server..... Scapy server is started
+The ports are bound/configured.
+Starting  TRex v2.87 please wait  ... 
+EAL: Could not find space for memseg. Please increase CONFIG_RTE_MAX_MEMSEG_PER_TYPE and/or CONFIG_RTE_MAX_MEM_PER_TYPE in configuration.
+EAL: Couldn't remap hugepage files into memseg lists
+EAL: FATAL: Cannot init memory
+EAL: Cannot init memory
+ You might need to run ./trex-cfg  once  
+EAL: Error - exiting with code: 1
+  Cause: Invalid EAL arguments
+Killing Scapy server... Scapy server is killed
+
+
+centos7.7 trex-v2.89 + MLNX_OFED_LINUX-5.2-1.0.4.0-rhel7.7-x86_64
+[root@wanzhao v2.89]# ./t-rex-64 -i
+Warning: Mellanox NICs were tested only with RedHat/CentOS 7.9
+Correct usage with other Linux distributions is not guaranteed.
+Starting Scapy server....... Scapy server is started
+The ports are bound/configured.
+Starting  TRex v2.89 please wait  ... 
+EAL: Could not find space for memseg. Please increase 32768 and/or 65536 in configuration.
+EAL: Couldn't remap hugepage files into memseg lists
+EAL: FATAL: Cannot init memory
+EAL: Cannot init memory
+ You might need to run ./trex-cfg  once  
+EAL: Error - exiting with code: 1
+  Cause: Invalid EAL arguments
+Killing Scapy server... Scapy server is killed
+[root@wanzhao v2.89]# 

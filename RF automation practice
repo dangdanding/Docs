@@ -31,3 +31,17 @@ Attribute access
     Login    ${USER.name}    ${USER.password}
     
     
+自动化用例跑的足够长之后会随机出现OSError: Socket is closed
+原因
+原因是TCP连接超时，连接被执行机所在系统断开
+在SSHLibrary\pythonclient.py文件中增加如下代码：
+self._shell.keep_this = client
+这一行应该是保活ssh channel
+
+class Shell(AbstractShell):
+ 
+    def __init__(self, client, term_type, term_width, term_height):
+        self._shell = client.invoke_shell(term_type, term_width, term_height)
+        # add use to solve socket.error: Socket is closed
+        self._shell.keep_this = client
+

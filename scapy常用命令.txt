@@ -1,0 +1,489 @@
+Scapy常用命令
+
+from scapy.all import *
+p = rdpcap('pcap.pcap')
+
+
+try:
+    pcap_file = PcapReader("pcap.pcap")
+	
+	while True:
+	    pkt = pcap_file.read_packet()
+		if pkt:
+		    #对数据包data进行处理
+		    pass
+		else:
+		    break
+		#endof while
+	
+	pcap_file.close() #close pcap_file
+			
+except Scapy_Exception as e:
+    print(e)
+	
+
+我想使用Scapy解析包负载的前两个字节。最好的方法是什么？是否需要偏移计算？
+首先需要解析负载，尽管下面将解析整个PCAP文件，是否有更有效的方法来获取每个负载的前两个字节？link
+>>> fp = open("payloads.dat","wb")
+>>> def handler(packet):
+...     fp.write(str(packet.payload.payload.payload))
+...
+>>> sniff(offline="capture1.dump",prn=handler,filter="tcp or udp")
+您可以尝试fp.write(str(packet.payload.payload.payload)[:2])只获取前两个字节。
+您还可以通过fp.write(str(packet[TCP].payload)[:2])跳过所有这些有效负载。
+或者，可以定义一个SSL包对象，将其绑定到适当的端口，然后打印SSL层。
+class SSL(Packet):
+  name = "SSL" fields_desc = [ ShortField("firstBytes", None) ]
+
+bind_layers( TCP, SSL, sport=443 )
+bind_layers( TCP, SSL, dport=443 )
+
+def handler(packet):
+... fp.write(str(packet[SSL]))
+
+
+如何使用scapy从数据包中读取整个ip层和tcp层？
+>>> pkt = ICMP()/IP()/TCP() 
+>>> ipHeader = pkt.getlayer(IP) 
+>>> ipHeader 
+<IP frag=0 proto=tcp |<TCP |>> 
+>>> 
+>>> pkt = Ether()/IP()/TCP() 
+>>> ip = pkt.getlayer(IP) 
+>>> ip 
+<IP frag=0 proto=tcp |<TCP |>> 
+>>> ip.remove_payload() 
+>>> ip 
+<IP |> 
+>>> 
+
+将数据包对象转换为dict对象
+from scapy.all import * 
+from cStringIO import StringIO 
+import sys 
+class Capturing(list): 
+     """ 
+     This class will capture sys.out. 
+     More info: 
+     http://stackoverflow.com/questions/16571150/how-to-capture-stdout-output-from-a-python-function-call 
+     """ 
+    def __enter__(self): 
+     self._stdout = sys.stdout 
+     sys.stdout = self._stringio = StringIO() 
+     return self 
+    def __exit__(self, *args): 
+     self.extend(self._stringio.getvalue().splitlines()) 
+     del self._stringio # free up some memory 
+     sys.stdout = self._stdout 
+class PacketDict(dict): 
+     """ 
+     This class will convert packet into a dict by using the result of packet.show2(). Furthermore the original 
+     packet will be also saved as attribute '.packet'. 
+     More class functions could be added, currently only support 'haslayer()'. 
+     Scapy version: scapy-2.3.3 
+     """ 
+    def __init__(self, pkt): 
+     self.packet = pkt 
+     self.__packet_to_dict() 
+    def __extract_key(self, line): 
+     a = line.lstrip("###[ ").rstrip(" ]### ") 
+     return a 
+    def __extract_value_to_dict(self, line): 
+     if line.find("=") > -1: 
+      b = line.replace(" ","") 
+      a = b.split("=") 
+      return {a[0]: a[1]} 
+     return {line.replace(" ",""): None} 
+    def __packet_to_dict(self): 
+     with Capturing() as packet_in_list: 
+      self.packet.show2() 
+     current_dict = self 
+     for line in packet_in_list: 
+      if line.strip() != "": 
+       line = line.replace("|","") 
+       if line.find('###[') > -1: 
+        key = self.__extract_key(line) 
+        current_dict[key] = {} 
+        current_dict = current_dict[key] 
+        continue 
+       current_dict.update(self.__extract_value_to_dict(line)) 
+    def haslayer(self, pkt_cls): 
+     return self.packet.haslayer(pkt_cls) 
+
+if __name__ == "__main__": 
+    packet_list = rdpcap("/media/sf_ubshare/pcap/test.pcap") 
+    for packet in packet_list: 
+     a = PacketDict(packet) 
+     print a['Ethernet']['IP']['ihl'] 
+     print a.haslayer('ISAKMP') 
+
+    if packet:
+        #packet.show2()
+        if args.verbose:
+            log (f"\n\nhandling pkt:{num} ==================================show packet fields\n\n", args.verbose)
+            ls(packet)
+            p=repr(packet)
+            log (f"\n\nshow packet layers: \n{p}\n<<<<<EOF", args.verbose)
+            #p = repr(packet.payload)
+            #log (f"\n\nshow 2nd layer: \n\n{p}", args.verbose)
+            
+        #delete checksum and show2() will recalculate checksum again
+        if args.l4_chksum != None or args.ip_chksum:
+            del(packet[IP].chksum)
+            del(packet['UDP'].chksum)
+            p= packet.show2(dump=True)
+            log(f'\n\ndump packet detail withs recacultated checksum: \n\{p}\n<<<<<EOF', args.verbose)
+            chksum = re.findall(r'chksum\s+=\s+(0x\w+)', p)
+            log(f'got chksum: ip: {chksum[0]}, udp: {chksum[1]}', args.verbose)
+            
+        try:
+            eth_type = packet['Ether'].type
+            log("ethernet type: {}".format((eth_type)),args.verbose)
+            smac = packet['Ether'].src
+            dmac = packet['Ether'].dst
+            log(f"eth src mac: {smac}, dst mac: {dmac}", args.verbose)
+        except:
+            log("failed to get ethernet type",args.verbose)
+            eth_type = 0
+
+    ls():显示所有支持的数据包对象，可带参数也可不带，参数可以是任意具体的包
+　　ls(IP) 命令列出ip协议头部字段格式，只要想查看哪个协议的参数，括号里就填哪个协议
+　　IP().show()　列出ip包的信息
+　　lsc() 命令列出scapy的所有命令 
+　　conf 命令列出scapy 的配置参数
+    ls(IP)
+	dir(IP())
+	help(IP())
+	
+	show（）是显示一个静态版本，show2（）显示更处理后的信息，例如IP().show2，能显示计算好的checksum
+
+scapy基本发包和解析
+>>> p,q=sr(IP(dst="172.24.212.7")/TCP(dport=[21,22,23]))
+Begin emission:
+..Finished sending 3 packets.
+....**..*
+Received 11 packets, got 3 answers, remaining 0 packets
+>>>
+>>> p.show()
+0000 IP / TCP 172.24.212.1:ftp_data > 172.24.212.7:ftp S ==> IP / TCP 172.24.212.7:ftp > 172.24.212.1:ftp_data SA / Padding
+0001 IP / TCP 172.24.212.1:ftp_data > 172.24.212.7:ssh S ==> IP / TCP 172.24.212.7:ssh > 172.24.212.1:ftp_data RA / Padding
+0002 IP / TCP 172.24.212.1:ftp_data > 172.24.212.7:telnet S ==> IP / TCP 172.24.212.7:telnet > 172.24.212.1:ftp_data SA / Padding
+
+p是一个列表，例如上面有3个元素， 每个元素也是一个元组，里面有两个成对元素，一个发的包，一个是应答包
+>>> p[0]
+(<IP  frag=0 proto=tcp dst=172.24.212.7 |<TCP  dport=ftp |>>,
+ <IP  version=4 ihl=5 tos=0x0 len=44 id=20600 flags=DF frag=0 ttl=128 proto=tcp chksum=0xaa19 src=172.24.212.7 dst=172.24.212.1 |<TCP  sport=ftp dport=ftp_data seq=2082467435 ack=1 dataofs=6 reserved=0 flags=SA window=8192 chksum=0xd27 urgptr=0 options=[('MSS', 1460)] |<Padding  load='\x00\x00' |>>>)
+
+有应答包的三个包中，第一个发出的包，p[0][0]，其对应的包是p[0][1]
+p[0][0].show()
+p[0][1].show()
+	
+构造icmp
+str='icmp payload'
+pkt=IP(src,dst=192.168.1.1)/ICMP(type=8)/Raw(str)
+
+dhcp:
+pkt=Ether(src=self.smac,dst="ff:ff:ff:ff:ff:ff")/IP(src=self.sip,dst="255.255.255.255")/UDP(sport=68,dport=67)/BOOTP(chaddr=[mac2str(self.smac)],ciaddr=self.ciaddr,xid=translate_id)/DHCP(options=[("message-type","request"),("hostname",self.hostname),"end",('pad',self.pad)])
+
+igmpv2:
+from scapy.contrib.igmp import *
+pkt=Ether(src,dst)/ip(src,dst)/IGMP(type=0x11,mrode=20,gaddr="")/Padding('000000000')
+
+igmpv3:
+from scapy.contrib.igmp import *
+from scapy.contrib.igmp import *
+a=Ether()
+b=IP(src,dst)
+c=IGMPv3(type=0x11,mrcode=10)
+d=IGMPv3mq(gaddr='',qqic=125,qrv=2,srcaddrs=['192.168.10.1','192.168.11.1'])
+pkt=a/b/c/d
+
+udp:
+pkt=Ether(src,dst)/ip(src,dst)/UDP(sport,dport)/Raw()
+
+tcp:
+pkt=Ether(src,dst)/ip(src,dst)/TCP(sport,dport)/Raw()
+
+pppoe:
+pkt=Ether(src,dst)/PPP()
+
+报文长度填充实例如下所示
+Padding(str='11111111')
+>>> Raw(load='advd')
+
+dhcpv6:
+from scapy.all import *
+ethernet = Ether(dst='00:0c:29:47:f3:2f',src='c8:3a:35:09:ef:a1',type=0x86dd)
+ip = IPv6(src ='2001:db8:3333::16',dst='ff02::2')
+udp =UDP(sport=546,dport=547)
+# dhcpv6 = DHCP6(msgtype = 1)
+dhcpv6 = DHCP6_Solicit()
+cid = DHCP6OptClientId()
+iana = DHCP6OptIA_NA()
+iapd_p = DHCP6OptIAPrefix()
+iapd = DHCP6OptIA_PD(iapdopt=[iapd_p])
+packet = ethernet/ip/udp/dhcpv6/cid/iana/iapd
+packet.show()
+注意DHCP6 Option - IA Prefix option 的构造方法， IA Prefix选项是包含在IAPD选项内的，所以要赋值给iapdopt，多个option字段用逗号隔开。
+ls(DHCP6OptIA_PD)
+ls(DHCP6OptIA_NA)
+
+报文过滤
+from scapy.all import *
+import re
+
+package = "package.pcap"
+field = 'dst=00:0c:29:d9:98:c7'
+pkts = rdpcap(package)
+for packet in pkts:    
+    if packet.haslayer('DHCP6_Solicit'):        
+        packet_text = repr(packet)        
+        if re.search(field, packet_text, re.IGNORECASE):
+            print("666")
+repr内置函数用于返回对象的 string 格式。
+
+除了rdpcap()方法读取报文文件外，也可以使用嗅探函数sniff()：
+pkts = sniff(offline='packet_solicit.pcap')
+>>> from scapy.all import *
+>>> pkts = rdpcap('packet_solicit.pcap')
+>>> pkts[3]
+<Ether  dst=ff:ff:ff:ff:ff:ff src=00:0c:29:d9:98:c7 type=IPv6 |<IPv6  version=6 tc=0 fl=0 plen=46 nh=UDP hlim=64 src=fe80::20c:29ff:fed9:98c7 dst=ff02::1:2 |<UDP  sport=dhcpv6_client dport=dhcpv6_server len=46 chksum=0x764d |<DHCP6_Solicit  msgtype=SOLICIT trid=0x0 |<DHCP6OptClientId  optcode=CLIENTID optlen=14 duid=<DUID_LLT  type=Link-layer address plus time hwtype=Ethernet (10Mb) timeval=Sat, 01 Jan 2000 00:00:00 +0000 (946684800) lladdr=00:0c:29:d9:98:c7 |> |<DHCP6OptIA_NA  optcode=IA_NA optlen=12 iaid=0x0 T1=0 T2=0 |>>>>>>
+
+
+
+
+具体参考源码site-packages/scapy/packet.py
+
+常用工具函数
+列出所有scapy中的命令或函数
+
+
+>>> lsc()
+打印查看某个函数或者类的帮助信息
+>>> help(sendp)
+查看报文字段信息
+>>> ls(pkt)
+显示一个报文摘要
+>>> pkt.summary()
+展示报文内容
+>>> pkt.show()
+>>> pkt.display()
+显示聚合的数据包（例如，计算好了校验和的）
+>>> pkt.show2()
+返回可以生产数据包的Scapy命令
+>>> pkt.command()
+traceroute方法
+>>> Traceroute('114.114.114.114')
+发送报文
+发送报文方法的源码路径
+site-packages/scapy/sendrecv.py
+send()方法
+三层以上，不能指定网络接口。
+
+当loop=1时，一直发包。以下例子为发10个报文，报文间隔为1s。
+send(pkt,loop=0,inter=1,count=10)
+
+sendp()方法
+工作在2层，发包时必须指定网络接口。其他参数与send()方法一致。
+sendp(pkt,iface,loop=0,inter=1,count=5)
+
+sendpfast()方法
+工作在二层，可以指定网络接口和速率发包。Windows平台需要其他依赖库。
+sendpfast(pkt,iface,pps,mbps,loop=0)
+
+sr()方法
+发送数据包和接收响应，工作在3层（IP和ARP）。该函数返回有回应的数据包和没有回应的数据包。返回的两个列表数据，第一个就是发送的数据包及其应答组成的列表，第二个是无应答数据包组成的列表。
+>>> sr(pkt) 
+>>> ans,unans=_
+>>> ans.summary()
+
+sr1()方法
+与sr类似，工作在3层(IP和ARP)。但它只返回应答发送的分组（或分组集），用来返回一个应答数据包。
+>>> pkt1=IP()/ICMP()/Padding(str)
+>>> p=sr1(pkt)
+>>> p.show()
+>>> pkt=IP(dst=‘192.168.1.1’)/UDP()/DNS(rd=1,qd=DNSQR(qname=‘www.baidu.com’))
+>>> ans=sr1(pkt_dns)
+>>> ans.show()
+
+srp()方法
+工作在二层(Ether，802.3)，返回2个列表数据，第一个为返回结果，第二个无应答数据包组成
+>>> pkt=Ether(dst=“ff:ff:ff:ff:ff:ff”)/ARP(pdst=“192.168.1.0/24”,timeout=2)
+>>> ans,unans=srp(pkt)
+>>> ans.show()
+
+数据包处理
+
+嗅探报文
+sniff(count=0,offline=None,store=True,prn=None,filter,timeout,iface)
+count=200 抓到200个报文，即停止嗅探报文
+offline=‘D:2019H1workigmp.pcap’ 解析本地cap文件
+prn 为报文处理函数，回调此函数对抓到的报文进行处理
+filter=‘arp or icmp or (udp and src port 68 and dst port 67)’ 过滤条件，伯克利语法
+timeout 抓包时间，默认为None
+store=0 避免将所有的数据包存储在内存。
+
+保存数据报文
+pkts=sniff(filter=‘arp or icmp’,iface=‘eth1’,timeout=120)
+wrpcap(‘test.cap’,pkts)    
+
+读取本地数据报文
+有2种方法可以实现读取本地数据包，如下
+pkts= rdpcap(‘D:\2019H1work\igmp.pcap’ ) 
+pkts= sniff(offline=‘D:\2019H1work\igmp.pcap’ )
+
+数据包内容提取
+其实在sniff()嗅探报文或者rdpcap()读取报文的时候，报文已经自动解析完成了。
+我们可以直接获取报文不同层的字段值
+>>> pkts=sniff(filter=‘igmp’,iface=‘eth1’)
+>>> type(pkts)                  #报文类型
+>>> pkts.show()                 #报文列表
+>>> pkts[0][IP].show            #第一个报文的IP层
+>>> pkts[0][Ether].src          #第一个报文的源MAC地址
+>>> pkts[IGMP].show()           #只显示IGMP报文
+>>> pkts[IGMP][0][IGMP].show()  #显示IGMP报文第一个报文的IGMP层字段信息
+
+
+#encoding=utf-8
+import psutil
+from scapy.config import *
+from scapy.layers.all import *
+from scapy.packet import *
+from scapy.contrib.igmp import *
+from scapy.sendrecv import *
+import wmi
+class (object):
+    #初始化参数
+    def __init__(self):
+        self.sip='192.168.11.1'
+        self.pro_dip='224.0.0.1'
+        self.data_dip='239.192.45.86'
+        self.data_dmac=''
+        self.inter=1
+        self.iface_name='test'
+        self.iface="Intel(R) 82579LM Gigabit Network Connection"
+    #选择网卡,并获取iface name,并返回网卡名列表
+    def select_iface(self):
+        name_list=[]
+        ifaces=psutil.net_if_addrs()
+        for k,v in ifaces.items():
+            for item in v:
+                if item[0] == 2 and not item[1] == '127.0.0.1':
+                    iface.append(k)
+                elif item[0] == -1 and not item[1] == '00-00-00-00-00-00-00-E0':
+                    # iface.append((k,item[1]))
+                    pass
+        return name_list
+    # 获取选定网卡的MAC地址,功能无法生效
+    def get_mac_addr(self,iface):
+        mac={}
+        ifaces=psutil.net_if_addrs()
+        for k,v in ifaces.items():
+            for item in v:
+                if k == iface and item[0] == -1 and not item[1] == '00-00-00-00-00-00-00-E0':
+                    mac=item[1]
+                    mac=mac.replace("-",":")
+                    # print(mac)
+                    # print(k,item[0],item[1])
+        return mac
+    #返回网卡描述信息的列表,用以sendp传参
+    def get_iface_desc(self):
+        iface_list=[]
+        w=wmi.WMI()
+        iface=w.Win32_NetworkAdapterConfiguration (IPEnabled=1)
+        for interface in iface:
+            iface_desc=interface.Description
+            iface_list.append(iface_desc)
+        return iface_list
+    #根据组播IP生成组播Mac地址
+    def get_multicast_mac(self,ip):
+        mac_s='01:00:5e:'
+        ip_list=ip.split('.')[1:]
+        num_list=list(map(int,ip_list))
+        i=0
+        if num_list[0] >= 128:
+            num_list[0]=num_list[0]-128
+        for v in num_list:
+            str=hex(v)
+            if len(str)==3:
+                str=str.replace("0x","0")
+                num_list[i]=str
+            elif len(str)==4:
+                str=str.replace("0x","")
+                num_list[i]=str
+            i=i+1
+        mac_end=':'.join(num_list)
+        mac_addr=mac_s+mac_end
+        return mac_addr
+    #构造、发送通用组查询报文
+    def general_query(self):
+        srcmac=self.get_mac_addr(self.iface_name)
+        dstmac=self.get_multicast_mac('224.0.0.1')
+        str='00000000000000'
+        a=Ether(src=srcmac,dst=dstmac)
+        b=IP(src=self.sip,dst='224.0.0.1')
+        c=IGMP(type=0x11,gaddr='224.2.2.4')
+        pkt=a/b/c
+        a=Ether(src=src_mac,dst='')
+        b=IP(src='',dst='1.1.1.1')
+        c=IGMP(type=0x11,gaddr='')
+        x=a/b/c
+        x[IGMP].igmpize()
+        #pkt=IP(dst='224.0.0.1',src='192.168.11.1')/IGMP(type=0x11,gaddr='')/Padding(str)
+        sendp(pkt,iface=self.iface,verbose=False)
+        # send(pkt)
+    #构造、发送特定组查询报文
+    def general_query_speical(self):
+        src_mac=self.get_mac_addr(self.iface)
+        print('src_mac',src_mac)
+        dst_mac=self.get_multicast_mac(self.data_dip)
+        print('dst_mac',dst_mac)
+        a1=Ether(src,dst)
+        b1=IP(src='',dst='224.0.0.1')
+        c1=IGMP(type=0x11,gaddr=self.data_dip)
+        pkt=a1/b1/c1/Padding(str)
+        a=Ether()
+        b=IP(src=self.sip,dst=self.data_dip)
+        c=IGMP(type=0x11,gaddr=self.data_dip)
+        pkt=a/b/c
+        # send(p)
+        sendp(pkt,iface=self.iface,inter=1,count=4)
+    #构造组播数据报文
+    def udp_stream(self,**kwrgs):
+        dst_mac=self.get_multicast_mac('0.0.0.0')
+        src_mac=self.get_mac_addr(self.iface)
+        print(src_mac)
+        str='0000000000000'
+        a=Ether()
+        b=IP(src=self.sip,dst='0.0.0.0',flags=2)
+        c=UDP(sport=7411,dport=7411)
+        pkt=a/b/c/Raw(load=("AAAAAAAaaaaaaa") + str)
+        sendp(pkt,iface=self.iface,loop=1,inter=2)
+        # sendpfast(pkt,iface=self.iface,loop=1,mbps=8)
+    #构造组播IPv4报文
+    def ipv4_stream(self):
+        dst_mac=self.get_multicast_mac(self.data_dip)
+        src_mac=self.get_mac_addr(self.iface)
+        str='00000000000000000000000000'
+        a=Ether(src=src_mac,dst=dst_mac)
+        b=IP(src=self.sip,dst=self.data_dip)
+        pkt=a/b/Padding(str)
+        sendp(pkt,iface=self.iface,loop=1,inter=1)
+    #嗅探过滤报文
+    def sniff_pkt(self):
+        sniff(filter='',store=0,timeout=20,prn=Packet.summary,iface=self.iface)
+    #对嗅探的报文，调用此函数，进行下一步处理
+    def parser_pkt(self,pkt):
+        pass
+if __name__ == '__main__':
+    igmpser=IgmpSer()
+    # igmpser.get_multicast_mac(ip='224.1.1.1')
+    # print(igmpser.get_mac_addr(iface='test'))
+    # print(igmpser.select_iface())
+    igmpser.general_query_speical()
+	
+
+
+
+
+	
