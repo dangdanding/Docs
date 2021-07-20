@@ -36,6 +36,15 @@ git remote add origin git@github.com:userName/yourProject.git
 git push origin master 
 
 git push --set-upstream origin main
+git branch --set-upstream-to=origin/dev dev
+
+ git remote show origin
+
+  #branch dev
+  git checkout dev
+  git pull origin dev
+  git branch --set-upstream-to=origin/dev dev
+  git push --set-upstream origin dev
 
 #8. commands
 git branch
