@@ -1,4 +1,168 @@
-1073741824
+
+##################
+trex v2.87 on CentOS Linux release 7.6.1810 (Core), ConnectX-5 (MLNX_OFED_LINUX-5.2-2.2.3.0 (OFED-5.2-2.2.3))， 2 CPUs
+[root@cmob v2.87]# ofed_info
+MLNX_OFED_LINUX-5.2-2.2.3.0 (OFED-5.2-2.2.3):
+#lscpu 
+Intel(R) Xeon(R) Platinum 8160 CPU @ 2.10GHz (2 cpu, 2 X 48 cores)
+
+
+2021/8/18：
+[root@cmob v2.87]#  lspci -vv  |grep -i Mell
+3b:00.0 Ethernet controller: Mellanox Technologies MT27800 Family [ConnectX-5]
+	Subsystem: Mellanox Technologies Device 0006
+86:00.0 Ethernet controller: Mellanox Technologies MT27800 Family [ConnectX-5]
+	Subsystem: Mellanox Technologies Device 0006
+[root@cmob v2.87]#  lspci -vv -s 86:00.0|grep Wid
+		LnkCap:	Port #0, Speed 8GT/s, Width x16, ASPM not supported, Exit Latency L0s unlimited, L1 <4us
+			ExtSynch- ClockPM- AutWidDis- BWInt- AutBWInt-
+		LnkSta:	Speed 8GT/s, Width x8, TrErr- Train- SlotClk+ DLActive- BWMgmt- ABWMgmt-
+[root@cmob v2.87]#  lspci -vv -s 3b:00.0|grep Wid
+		LnkCap:	Port #0, Speed 8GT/s, Width x16, ASPM not supported, Exit Latency L0s unlimited, L1 <4us
+			ExtSynch- ClockPM- AutWidDis- BWInt- AutBWInt-
+		LnkSta:	Speed 8GT/s, Width x8, TrErr- Train- SlotClk+ DLActive- BWMgmt- ABWMgmt-
+
+[root@cmob v2.87]#  lspci -vv -s 3b:00.0 |grep PCIeGen
+			[V0] Vendor specific: PCIeGen3 x16
+
+The maximum possible PCIe bandwidth is calculated by multiplying the PCIe width and speed. From that number we reduce ~1Gb/s for error correction protocols and the PCIe headers overhead. The overhead is determined by both the PCIe encoding (see PCIe speed for details), and the PCIe MTU:
+Maximum PCIe Bandwidth = SPEED * WIDTH * (1 - ENCODING) - 1Gb/s.
+For example, a gen 3 PCIe device with x8 width will be limited to:
+Maximum PCIe Bandwidth = 8G * 8 * (1 - 2/130) - 1G = 64G * 0.985 - 1G = ~62Gb/s.
+Another example - a gen 2 PCIe device with x16 width will be limited to:
+Maximum PCIe Bandwidth = 5G * 16 * (1 - 1/5) - 1G = 80G * 0.8 - 1G = ~63Gb/s.
+
+1.
+start -f /tmp/single_cont_64b.py -p 0 --pin -m 100%
+./t-rex -i c 20
+L1: 65.6Gbps, cpu 79.95%
+
+2.
+start -f /tmp/single_cont_64b.py -p 0 --pin -m 100%
+./t-rex -i c 30
+L1: 65.3Gbps, cpu 67.95%
+
+#################
+mst restart
+
+在具有两个NUMA的计算机上，重要的是选择最接近所用卡的NUMA。为了找到最靠近卡的NUMA
+mst status -v
+
+
+BIOS 调优
+
+遵循了解BIOS配置以进行性能调整建议：
+1. 应该禁用超线程和虚拟化。 （如果使用VM，则启用虚拟化）
+2. 电源管理应集中在最小化系统干预和管理上。 设置为“最高性能配置文件”（如果服务器上可用）
+3. 禁用 P-states, (unrestricted) Turbo Mode
+4. Disable C-states (or change to C0/C1 preference) and T-states (对于媒体等高带宽应用非常重要)
+5. Enabling Turbo mode only on minimum amount of cores is better
+C-state
+要在系统中禁用C状态，只需将此代码段添加到您的应用程序中，或在运行应用程序时以其他过程运行此代码
+
+int set_low_latfency()
+{
+uint32_t lat = 0;
+fd = open("/dev/cpu_dma_latency", O_RDWR);
+if (fd == -1) {
+fprintf(stderr, "Failed to open cpu_dma_latency: error %s", strerror(errno));
+return fd;
+}
+write(fd, &lat, sizeof(lat));
+
+return fd
+}
+
+disable pause frames
+ethtool -A [interface] rx off tx off
+
+CPU Frequency
+检查CPU的最大可用频率（有用的命令：cpupower frequency-info，lshw，lscpu）
+监视CPU的活动，并检查内核的当前频率。 
+
+提取CPU内核状态的有用命令:
+$ cat /proc/cpuinfo | sed -n '/^processor\|^cpu MHz/p'
+$ turbostat --interval 1
+
+其他OS调优
+1. 禁用不是必需任务所必需的所有服务，例如: cups, gpm, ip6tables, mdmonitor, mdmpd, bluetooth, iptables, irqbalance, sysstat.
+2.  cpuspeed, nscd, crond, nt如果可用，应启用以下服务pd, ntp, network, tuned
+3. Set IRQ (interrupt request) affinity, refer to What is IRQ Affinity?
+4.设置系统配置文件，重点关注网络性能/延迟.
+$ tuned-adm profile network-throughput
+$ cpupower frequency-set --governor performance
+5.为了检查调整后的运行情况并使用正确的策略 
+$ tuned-adm active
+6. 关闭Numa平衡
+$ echo 0 > /proc/sys/kernel/numa_balancing
+
+7. 配置 tuned.conf
+添加到 tuned.conf:
+[bootloader]
+cmdline = audit=0 idle=poll nosoftlockup mce=ignore_ce
+
+改变tuned-main.conf:
+检查事件之前要睡多长时间（以秒为单位），较高的数字表示较低的开销，但响应时间较长。
+sleep_interval = 1 ===>更改为100
+动态调整的更新间隔（以秒为单位）。 它必须是sleep_interval的倍数。
+update_interval = 10 ===>更改为10000
+
+8. 减少系统调度的推荐配置:
+$ echo 100000000 > /proc/sys/kernel/sched_min_granularity_ns
+$ echo 50000000 > /proc/sys/kernel/sched_migration_cost_ns
+
+9. 其他减少系统调度的推荐配置:
+$ echo 0 > /proc/sys/vm/swappiness
+$ sysctl -w vm.swappiness=0
+$ sysctl -w vm.zone_reclaim_mode=0
+$ echo never > /sys/kernel/mm/transparent_hugepage/enabled
+ 
+选择正确的NUMA和核心
+在具有两个NUMA的计算机上，重要的是选择最接近所用卡的NUMA。
+为了找到最靠近卡的NUMA
+$ sudo mst status -v
+检查哪个内核位于每个NUMA上:
+$ lscpu
+
+Huge pages
+使用大页面可以减少访问页面表条目所需的系统资源量，从而提高系统性能。
+在运行Rivermax之前，请启用大页面
+$ echo 1000000000 > /proc/sys/kernel/shmmax
+$ echo 800 > /proc/sys/vm/nr_hugepages
+
+##################
+fp show group 2
+
+opencli-shell 模式下
+show counter partition 2 ounterid 2098176 40 0
+
+
+pip install ipython
+
+安装tcpreplay
+yum install -y epel-release
+yum install -y tcpreplay
+
+show inner-port real-time
+show running-config rule
+show board
+show nps-start 1
+set rule local disable 
+
+scapy:
+load_contrib('bgp')
+load_contrib('ospf')
+
+Ethernet II类型以太网帧的最小长度为64字节（6＋6＋2＋46＋4），最大长度为1518字节（6＋6＋2＋1500＋4）。其中前12字节分别标识出发送数据帧的源节点MAC地址和接收数据帧的目标节点MAC地址。（注：ISL封装后可达1548字节，802.1Q封装后可达1522字节）
+接下来的2个字节标识出以太网帧所携带的上层数据类型，如下：
+IPv4: 0x0800
+ARP:0x0806
+PPPoE:0x8864
+802.1Q tag: 0x8100
+IPV6: 0x86DD
+MPLS Label:0x8847
+在不定长的数据字段后是4个字节的帧校验序列（Frame. Check Sequence，FCS
+
 
 config mode: download image
 
@@ -13,12 +177,7 @@ Intel(R) Xeon(R) CPU E5-2665 0 @ 2.40GHz
 128b:  ./t-rex-64 -i -v 7 -c 1，  start -f stl/tests/single_cont1.py -p 0 --pin -m 100%: 64bit frame L1 bps: 32.3Gbps, cpu 87%
 128b:  ./t-rex-64 -i -v 7 -c 1，  start -f stl/tests/single_cont_256b.py -p 0 --pin -m 100%: 64bit frame L1 bps: 46.3Gbps, cpu 94%
 
-
-
-
-
-
-centos9.6, v2.88, ofed-5.2
+centos9.6, v2.88, ofed-5.2: not work
 EAL: Detected 32 lcore(s)
 EAL: Detected 2 NUMA nodes
 EAL: Static memory layout is selected, amount of reserved memory can be adjusted with -m or --socket-mem
@@ -34,7 +193,7 @@ EAL: Error - exiting with code: 1
   Cause: Invalid EAL arguments
 Killing Scapy server...
 
-centos7.6, MLNX_OFED_LINUX-4.6-1.0.1.1-rhel7.6-x86_64, trex-v2.86
+centos7.6, MLNX_OFED_LINUX-4.6-1.0.1.1-rhel7.6-x86_64, trex-v2.86: not work
 EAL: Static memory layout is selected, amount of reserved memory can be adjusted with -m or --socket-mem
 EAL: so/x86_64/libmlx5-64.so: undefined symbol: mlx5dv_devx_umem_reg
 EAL: FATAL: Cannot init plugins
@@ -81,12 +240,28 @@ ibv_devinfo
 ofed_info
 ofed_info -s
 
+10.87.30.82：
+[root@cmob v2.87]#  ibdev2netdev
+mlx5_0 port 1 ==> enp59s0 (Up)
+mlx5_1 port 1 ==> enp134s0 (Up)
+
  ibdev2netdev
 mlx5_0 port 1 ==> enp7s0f0 (Down)
 mlx5_1 port 1 ==> enp7s0f1 (Down)
 
  lspci | grep Mellanox
 mii-tool
+
+[bash]>sudo lspci | grep  Mellanox
+3b:00.0 Ethernet controller: Mellanox Technologies MT27800 Family [ConnectX-5]
+86:00.0 Ethernet controller: Mellanox Technologies MT27800 Family [ConnectX-5]
+[root@cmob v2.87]# 
+
+[bash]>sudo lspci -vv -s 3b:00.0
+LnkSta:	Speed 8GT/s, Width x8, TrErr- Train- SlotClk+ DLActive- BWMgmt- ABWMgmt-
+
+[bash]>sudo lspci -vt | grep Mellanox
+
 
 http://www.h3c.com/cn/d_202007/1317229_30005_0.htm
 
@@ -244,6 +419,7 @@ enabled=0
 gpgkey=http://mirrors.aliyun.com/centos/RPM-GPG-KEY-CentOS-7
 
 
+To verify NUMA and NIC topology: lstopo (yum install hwloc)
 
 lspci
 ethtool
@@ -342,12 +518,12 @@ yum makecache
 yum update
 
 
-10.87.30.81: trex-v2.87, MLNX_OFED_LINUX-5.2-2.2.3.0-rhel7.6-x86_64.tgz
-10.87.30.52: robot shell server, gitlab server
-10.87.30.151: trex-v2.89, trex-v2.66(gui client)
-
+10.87.30.81/16: trex-v2.89, MLNX_OFED_LINUX-5.2-2.2.3.0-rhel7.6-x86_64.tgz, gw: 10.87.0.1
+10.87.30.52/16: robot shell server, gitlab server, gw: 10.87.0.1
+10.87.30.151/16: trex-v2.89, trex-v2.66(gui client), gw: 10.87.0.1
+10.87.30.82: trex-v2.87, MLNX_OFED_LINUX-5.2-2.2.3.0-rhel7.6-x86_64.tgz，2X100G NICs, gw: 10.87.0.1 （10.81.130.133/16 -> 10.81.30.30/16)
+10.81.30.30/16：T9600, cmcc release, gw: 10.81.0.1
 
 
 枝江市档案托管单位为枝江市公共就业和人才服务局（地址：枝江市公园路113号2楼人力资源市场），联系方式：0717-4219180。为确保档案安全顺利到达，本人可在档案寄出后，及时与枝江市公共就业和人才服务局联系查询到档情况。
-
 据了解，能够从档案里复印或借用的材料有：成绩单、学位证明、毕业生登记表、职称材料、党员材料（主要用于预备期满转正）、报到证等其他经审批同意的事项。本人凭身份证就可以到档案托管机构办理复印或借用手续，因特殊情况本人不能办理的可以委托他人代办，凭委托人签字的《委托书》及委托人的身份证复印件、被委托人的身份证原件即可办理。借用党员材料的，需另持组织关系所在党委（总支、支部）的介绍信。

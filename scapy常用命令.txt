@@ -1,8 +1,27 @@
-Scapy常用命令
+﻿Scapy常用命令
 
 from scapy.all import *
 p = rdpcap('pcap.pcap')
+haslayer()
+>>> pkts=rdpcap("rogue_ospf_hello.pcap") 
+>>> p=pkts[0]
+>>> p.haslayer(UDP)
+0
+>>> p.haslayer(IP)
+1
 
+in
+root@u1010:~/scapy# scapy
+Welcome to Scapy (2.2.0-dev)
+>>> load_contrib("ospf")
+>>> pkts=rdpcap("rogue_ospf_hello.pcap")
+>>> p=pkts[0]
+>>> IP in p
+True
+>>> UDP in p
+False
+>>>
+root@u1010:~/scapy#
 
 try:
     pcap_file = PcapReader("pcap.pcap")
@@ -21,6 +40,8 @@ try:
 except Scapy_Exception as e:
     print(e)
 	
+如何检查scapy包中是否存在特定层？
+
 
 我想使用Scapy解析包负载的前两个字节。最好的方法是什么？是否需要偏移计算？
 首先需要解析负载，尽管下面将解析整个PCAP文件，是否有更有效的方法来获取每个负载的前两个字节？link
@@ -482,6 +503,20 @@ if __name__ == '__main__':
     # print(igmpser.select_iface())
     igmpser.general_query_speical()
 	
+from scapy.contrib.gtp import *
+from scapy.contrib.mpls import *
+Ether()/Dot1Q(vlan = 1100)/IPv6(dst="2001:0:4137:9350:8000:f12a:b9c8:2815",src="2001:4860:0:2001::68")/UDP()/GTP_U_Header()/IPv6()/UDP()
+Ether()/Dot1Q(vlan = 1100)/IPv6(dst="2001:0:4137:9350:8000:f12a:b9c8:2815",src="2001:4860:0:2001::68", nh=58)/ICMP(type=8)
+Ether()/Dot1Q(vlan = 1100)/IP(src="16.0.0.1",dst="48.0.0.1")/ICMP(type=8)/(1000*'x')
+Ether()/Dot1Q(vlan = 1100)/IPv6(dst="2001:0:4137:9350:8000:f12a:b9c8:2815",src="2001:4860:0:2001::68", nh=58)/ICMP(type=8)
+Ether()/Dot1Q(vlan = 1100)/Dot1Q(vlan = 1120)/MPLS(label=1,cos=0,s=1,ttl=64)/IP(src="1.1.1.1",dst="48.0.0.1")/TCP(dport=12,sport=1025)/('x'*20)
+Ether()/Dot1Q(vlan = 1100)/Dot1Q(vlan = 1110)/Dot1Q(vlan = 1120)/MPLS(label=15,cos=0,s=0,ttl=64)/MPLS(label=1,cos=0,s=1,ttl=64)/IP(src="1.1.1.1",dst="48.0.    0.1")/TCP(dport=12,sport=1025)/('x'*20)
+Ether()/Dot1Q(vlan = 1100)/MPLS(label=1,cos=0,s=1,ttl=64)/IPv6(dst="2001:0:4137:9350:8000:f12a:b9c8:2815",src="2001:4860:0:2001::68", nh='TCP')/               TCP(dport=12,sport=1025)/('x'*20)
+Ether()/Dot1Q(vlan = 1100)/IP(src="16.0.0.1",dst="48.0.0.1")/UDP(dport=4789,sport=4789)/VXLAN(vni=1000)/Ether()/IP()/(1000*'x')
+Ether()/Dot1Q(vlan = 1100)/IPv6(dst="2001:0:4137:9350:8000:f12a:b9c8:2815",src="2001:4860:0:2001::68")/UDP(dport=4789,sport=4789)/VXLAN(vni=1000)/Ether()/IP()/(1000*'x')
+Ether()/IP(src="192.168.50.100", dst="192.168.50.200")/UDP(sport=2152,dport=2152)/GTP_U_Header(teid=100,next_ex=133)/GTPPDUSessionContainer(type=1, QFI=6)/IP(src="192.168.128.79", dst="8.8.8.8")/TCP(sport=5001,dport=53)
+Ether()/Dot1Q(vlan = 1100)/IP(src="7.1.9.1",dst="48.0.0.1")/UDP()/GTPHeader(version=0)/IP()/UDP()
+
 
 
 
