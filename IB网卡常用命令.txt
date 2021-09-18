@@ -1,0 +1,60 @@
+1、常规 IB 监视命令
+ibv_asyncwatch 监视 InfiniBand 异步事件
+ibv_devices or ibv_devinfo 列举 InfiniBand 设备或设备信息
+ibv_rc_pingpong、ibv_srq_pingpong 或 ibv_ud_pingpong 使用 RC 连接、SRQ 或 UD 连接测试节点之间的连通性
+mckey 测试 RDMA CM 多播设置和简单数据传输
+rping 测试 RDMA CM 连接并尝试 RDMA ping
+ucmatose 测试 RDMA CM 连接并尝试简单 ping
+udaddy 测试 RDMA CM 数据报设置并尝试简单 ping
+
+2、常规 IB 性能测试命令
+rdma_client 或rdma_server 或rdma_xclient或 rdma_xserver 测试 RDMA 写处理确定流带宽或等待时间
+ib_read_bw 或 ib_read_lat 测试 RDMA 读处理确定带宽或等待时间
+ib_send_bw 或 ib_send_lat 测试 RDMA 发送处理确定带宽或等待时间
+ib_write_bw 或 ib_write_bw_postlist 测试 RDMA 写处理，确定一次显示一个 I/O 请求的带宽或显示一系列 I/O 请求的发布列表带宽
+ib_write_lat 测试 RDMA 写处理确定等待时间
+ib_clock_test 测试系统时钟准确性
+qperf 测量插槽与 RDMA 性能
+RDS 监视与测试工具
+rds-info 显示 RDS 内核模块信息
+rds-ping 确定基于 RDS 的远程节点是否可访问
+rds-stress 在基于 RDS 插槽的进程间发送消息
+
+3、光纤网络诊断工具
+iblinkinfo.pl 或 iblinkinfo 显示光纤网络中所有链路的链路信息
+sminfo 查询 IB SMInfo 属性
+ibstat 或 ibsysstat 查询 InfiniBand 设备状态或 IB 地址上的系统状态
+perfquery or saquery 查询 IB 端口计数器或 sIB 子网管理属性
+ibdiagnet 执行整个光纤网络诊断检查
+ibcheckerrors 或 ibcheckerrs 验证 IB 端口（或节点）或 IB 子网并报告错误
+ibaddr 查询 InfiniBand 的一个地址或多个地址
+ibnetdiscover 搜索远程 InfiniBand 拓扑
+ibping 验证 IB 节点之间的连通性
+ibportstate 查询 IB 端口的物理端口状态和链接速度
+ibroute 显示 InfiniBand 交换机转发表
+ibtracert 跟踪 IB 路径
+smpquery 或 smpdump 查询或转储 IB 子网管理属性
+ibchecknet, ibchecknode, 或 ibcheckport 验证 IB 子网、节点或端口并报告错误
+ibcheckportstate, ibcheckportwidth, ibcheckstate, or ibcheckwidth 验证已链接但不活动的 IB 端口、面向 1x (2.0 Gbps) 链路带宽的端口、IB 子网中已链接但不活动的端口或 IB 子网中的 lx 链路
+ibclearcounters or ibclearerrors 对 IB 子网中的端口计数器或错误计数器进行清零
+ibdatacounters or ibdatacounts 查询 IB 子网中的数据计数器或 IB 端口数据计数器
+ibdiscover.pl 注释并比较 IB 拓扑
+ibcheckerrors 或 ibcheckerrs 验证 IB 端口（或节点）或 IB 子网并报告错误
+ibchecknet, ibchecknode, 或 ibcheckport 验证 IB 子网、节点或端口并报告错误
+ibhosts 显示拓扑中的 IB 主机节点
+ibnodes 显示拓扑中的 IB 节点
+ibprintca.pl 显示来自 ibnetdiscover 输出的特定 CA 或 CA 列表
+ibprintrt.pl 显示来自 ibnetdiscover 输出的特定路由器或路由器列表
+ibprintswitch.pl 显示来自 ibnetdiscover 输出的特定交换机或交换机列表
+ibrouters 显示拓扑中的 IB 路由器节点
+ibstatus 查询 IB 设备的基本状态
+ibswitches 显示拓扑中的 IB 交换机节点
+ibswportwatch.pl
+ibqueryerrors.pl 轮询特定交换机或端口上的计数器并报告更改信息速率
+
+4、查询并报告非零 IB 端口计数器
+ibprintswitch.pl 显示来自 ibnetdiscover 输出的特定交换机或交换机列表
+set_nodedesc.sh 设置或显示针对 IB 主机控制器适配器 (HCA) 的节点描述字符串
+dump2psl.pl 转储基于 opensm 输出文件的 PSL 文件，该输出文件用于信用循环检查
+dump2slvl.pl 转储基于 opensm 输出文件的 SLVL 文件，该输出文件用于信用循环检查
+ibis 针对 IB 管理带内服务的扩展 TCL shell

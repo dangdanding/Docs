@@ -9,7 +9,6 @@ haslayer()
 0
 >>> p.haslayer(IP)
 1
-
 in
 root@u1010:~/scapy# scapy
 Welcome to Scapy (2.2.0-dev)
@@ -40,8 +39,17 @@ try:
 except Scapy_Exception as e:
     print(e)
 	
+
 如何检查scapy包中是否存在特定层？
 
+scapy:
+load_contrib('bgp')
+load_contrib('ospf')
+
+  5 import scapy.all
+  6 #from scapy.contrib.gtp import *
+  7 from scapy.contrib.gtp_v2 import GTPHeader as GTPHeader
+  8 from scapy.contrib.gtp_v2 import *
 
 我想使用Scapy解析包负载的前两个字节。最好的方法是什么？是否需要偏移计算？
 首先需要解析负载，尽管下面将解析整个PCAP文件，是否有更有效的方法来获取每个负载的前两个字节？link
@@ -502,7 +510,34 @@ if __name__ == '__main__':
     # print(igmpser.get_mac_addr(iface='test'))
     # print(igmpser.select_iface())
     igmpser.general_query_speical()
-	
+
+trex v2.89 with scapy-2.4.3 on python-3.9.5 ( python-2.7 was said to be ok) has issue to packet gtp-c IMSI packet and below will hit issue as following:
+
+  5 import scapy.all
+  6 #from scapy.contrib.gtp import *
+  7 from scapy.contrib.gtp_v2 import GTPHeader as GTPHeader
+  8 from scapy.contrib.gtp_v2 import *
+pkt = Ether()/Dot1Q(vlan = 1100)/IP(src="7.1.9.1",dst="48.0.0.1")/UDP()/GTPHeader()/GTPV2CreateSessionRequest(IE_list=[IE_IMSI(ietype=IEType[1], instance=0,                           IMSI='460005475030447', length=10), IE_MSISDN(digits="33123456789"),IE_MEI(ietype=75, MEI=0)])
+or 
+ie= []
+ie0 = IE_IMSI(ietype="IMSI", length=8, CR_flag=0, instance=0, IMSI="460005475030447")
+ie.append(ie0)
+s1= STLStream(
+          self_start = False if s != 1 else True,
+          name = f"s{s}",
+          isg = isg,  #us
+          packet = STLPktBuilder(pkt = Ether()/Dot1Q(vlan = 1100)/IP(src="7.1.9.1",dst="48.0.0.1")/UDP()/    GTPHeader()/GTPV2CreateSessionRequest(IE_list=ie)),
+          mode = STLTXSingleBurst(pps = 10000, total_pkts = 1000),
+#          next = f's{s_next}',
+          )
+got this issue:
+ValueError: invalid literal for int() with base 16: "'b"
+
+more info please check 
+https://github.com/secdev/scapy/pull/2491
+
+Fix this #2491 in trex v2.89, just use latest scapy-2.4.5 to replace old /opt/trex/v2.89/external_libs/scapy-2.4.3/scapy, please keep 2 files ipfix* in original scapy-2.4.3.
+
 from scapy.contrib.gtp import *
 from scapy.contrib.mpls import *
 Ether()/Dot1Q(vlan = 1100)/IPv6(dst="2001:0:4137:9350:8000:f12a:b9c8:2815",src="2001:4860:0:2001::68")/UDP()/GTP_U_Header()/IPv6()/UDP()

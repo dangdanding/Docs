@@ -1,11 +1,50 @@
+export FLASK_APP=lrm
+flask run --host=0.0.0.0
+flask init-db
 
 ##################
-trex v2.87 on CentOS Linux release 7.6.1810 (Core), ConnectX-5 (MLNX_OFED_LINUX-5.2-2.2.3.0 (OFED-5.2-2.2.3))， 2 CPUs
+2021.9.3
+trex v2.87 on CentOS Linux release 7.9.2009 (Core) kernel 3.10.0-1160.41.1.el7.x86_64 with python-3.6, MLNX_OFED_LINUX-5.2-2.2.3.0-rhel7.9-x86_64,
+cpu:
+Intel(R) Xeon(R) Gold 6132 CPU @ 2.60GHz
+host: 10.87.30.83
+./t-rex-64 -i -v 7 -c 50
+单向：start -f /tmp/single_cont_64b.py -p 0 --pin -m 100%
+Packet-len        L1                L2
+64bit            99.84Gbps        77.15Gbps
+128bit          99.82Gbps        86.69G 
+512bit          99.73Gbps        96.1Gbps
+1500bit        99.77Gbps        98.46Gbps
+
+双向：start -f /tmp/single_cont_64b.py  --pin -m 100%
+64bit            99.84Gbps        77.15Gbps
+1500bit         99.83Gbps        98.52Gbps     total: 199.45/196.83Gbps
+
+
+2021.8.18
+trex v2.87 on CentOS Linux release 7.6.1810 (Core) with python-3.9.5-amd64, ConnectX-5 (MLNX_OFED_LINUX-5.2-2.2.3.0 (OFED-5.2-2.2.3))， 2 CPUs
 [root@cmob v2.87]# ofed_info
 MLNX_OFED_LINUX-5.2-2.2.3.0 (OFED-5.2-2.2.3):
 #lscpu 
 Intel(R) Xeon(R) Platinum 8160 CPU @ 2.10GHz (2 cpu, 2 X 48 cores)
 
+##################
+
+
+CentOS7.6安装Python3.9
+ibdev2netdev
+python 安装包下载地址
+wget https://www.python.org/ftp/python/3.9.0/Python-3.9.0.tgz
+开启yum的缓存功能，方便后续使用。
+[root@registry ~]# vim /etc/yum.conf
+keepcache=1
+
+配置网络yum源
+[root@registry ~]# cd /etc/yum.repos.d/
+[root@registry yum.repos.d]# wget http://mirrors.aliyun.com/repo/Centos-7.repo
+
+安装python3的依赖包
+[root@registry ~]# yum install libffi-devel wget sqlite-devel xz gcc atuomake zlib-devel openssl-devel epel-release git -y
 
 2021/8/18：
 [root@cmob v2.87]#  lspci -vv  |grep -i Mell
@@ -177,7 +216,7 @@ Intel(R) Xeon(R) CPU E5-2665 0 @ 2.40GHz
 128b:  ./t-rex-64 -i -v 7 -c 1，  start -f stl/tests/single_cont1.py -p 0 --pin -m 100%: 64bit frame L1 bps: 32.3Gbps, cpu 87%
 128b:  ./t-rex-64 -i -v 7 -c 1，  start -f stl/tests/single_cont_256b.py -p 0 --pin -m 100%: 64bit frame L1 bps: 46.3Gbps, cpu 94%
 
-centos9.6, v2.88, ofed-5.2: not work
+centos7.6, v2.88, ofed-5.2: not work
 EAL: Detected 32 lcore(s)
 EAL: Detected 2 NUMA nodes
 EAL: Static memory layout is selected, amount of reserved memory can be adjusted with -m or --socket-mem
@@ -271,13 +310,15 @@ ibdiagnet
 connectx_port_config
 ca_self_test.ofed
 ibv_devices
+ib_write_bw
 
 
 使用numactl来查看node0和node1上认领的cpu核数,以及内存资源
 numactl --hardware
 cat /sys/devices/system/node/node*/meminfo | fgrep Huge
 
-
+内存：
+free -m
 
 EAL: 128 hugepages of size 1073741824 reserved, but no mounted hugetlbfs found for that size
 echo 8192 > /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages
