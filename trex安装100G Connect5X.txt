@@ -1,0 +1,320 @@
+##################
+2021.9.3
+trex v2.87 on CentOS Linux release 7.9.2009 (Core) kernel 3.10.0-1160.41.1.el7.x86_64 with python-3.6, MLNX_OFED_LINUX-5.2-2.2.3.0-rhel7.9-x86_64,
+cpu:
+Intel(R) Xeon(R) Gold 6132 CPU @ 2.60GHz
+host: 10.87.30.83
+./t-rex-64 -i -v 7 -c 50
+单向：start -f /tmp/single_cont_64b.py -p 0 --pin -m 100%
+Packet-len        L1                L2
+64bit            99.84Gbps        77.15Gbps
+128bit          99.82Gbps        86.69G 
+512bit          99.73Gbps        96.1Gbps
+1500bit        99.77Gbps        98.46Gbps
+
+双向：start -f /tmp/single_cont_64b.py  --pin -m 100%
+64bit            99.84Gbps        77.15Gbps
+1500bit         99.83Gbps        98.52Gbps     total: 199.45/196.83Gbps
+
+
+2021.8.18
+trex v2.87 on CentOS Linux release 7.6.1810 (Core) with python-3.9.5-amd64, ConnectX-5 (MLNX_OFED_LINUX-5.2-2.2.3.0 (OFED-5.2-2.2.3))， 2 CPUs
+[root@cmob v2.87]# ofed_info
+MLNX_OFED_LINUX-5.2-2.2.3.0 (OFED-5.2-2.2.3):
+#lscpu 
+Intel(R) Xeon(R) Platinum 8160 CPU @ 2.10GHz (2 cpu, 2 X 48 cores)
+
+##################
+
+2021/8/18：
+[root@cmob v2.87]#  lspci -vv  |grep -i Mell
+3b:00.0 Ethernet controller: Mellanox Technologies MT27800 Family [ConnectX-5]
+	Subsystem: Mellanox Technologies Device 0006
+86:00.0 Ethernet controller: Mellanox Technologies MT27800 Family [ConnectX-5]
+	Subsystem: Mellanox Technologies Device 0006
+[root@cmob v2.87]#  lspci -vv -s 86:00.0|grep Wid
+		LnkCap:	Port #0, Speed 8GT/s, Width x16, ASPM not supported, Exit Latency L0s unlimited, L1 <4us
+			ExtSynch- ClockPM- AutWidDis- BWInt- AutBWInt-
+		LnkSta:	Speed 8GT/s, Width x8, TrErr- Train- SlotClk+ DLActive- BWMgmt- ABWMgmt-
+[root@cmob v2.87]#  lspci -vv -s 3b:00.0|grep Wid
+		LnkCap:	Port #0, Speed 8GT/s, Width x16, ASPM not supported, Exit Latency L0s unlimited, L1 <4us
+			ExtSynch- ClockPM- AutWidDis- BWInt- AutBWInt-
+		LnkSta:	Speed 8GT/s, Width x8, TrErr- Train- SlotClk+ DLActive- BWMgmt- ABWMgmt-
+
+[root@cmob v2.87]#  lspci -vv -s 3b:00.0 |grep PCIeGen
+			[V0] Vendor specific: PCIeGen3 x16
+
+The maximum possible PCIe bandwidth is calculated by multiplying the PCIe width and speed. From that number we reduce ~1Gb/s for error correction protocols and the PCIe headers overhead. The overhead is determined by both the PCIe encoding (see PCIe speed for details), and the PCIe MTU:
+Maximum PCIe Bandwidth = SPEED * WIDTH * (1 - ENCODING) - 1Gb/s.
+For example, a gen 3 PCIe device with x8 width will be limited to:
+Maximum PCIe Bandwidth = 8G * 8 * (1 - 2/130) - 1G = 64G * 0.985 - 1G = ~62Gb/s.
+Another example - a gen 2 PCIe device with x16 width will be limited to:
+Maximum PCIe Bandwidth = 5G * 16 * (1 - 1/5) - 1G = 80G * 0.8 - 1G = ~63Gb/s.
+
+1.
+start -f /tmp/single_cont_64b.py -p 0 --pin -m 100%
+./t-rex -i c 20
+L1: 65.6Gbps, cpu 79.95%
+
+2.
+start -f /tmp/single_cont_64b.py -p 0 --pin -m 100%
+./t-rex -i c 30
+L1: 65.3Gbps, cpu 67.95%
+
+#################
+mst restart
+
+在具有两个NUMA的计算机上，重要的是选择最接近所用卡的NUMA。为了找到最靠近卡的NUMA
+mst status -v
+
+
+BIOS 调优
+
+遵循了解BIOS配置以进行性能调整建议：
+1. 应该禁用超线程和虚拟化。 （如果使用VM，则启用虚拟化）
+2. 电源管理应集中在最小化系统干预和管理上。 设置为“最高性能配置文件”（如果服务器上可用）
+3. 禁用 P-states, (unrestricted) Turbo Mode
+4. Disable C-states (or change to C0/C1 preference) and T-states (对于媒体等高带宽应用非常重要)
+5. Enabling Turbo mode only on minimum amount of cores is better
+C-state
+要在系统中禁用C状态，只需将此代码段添加到您的应用程序中，或在运行应用程序时以其他过程运行此代码
+
+int set_low_latfency()
+{
+uint32_t lat = 0;
+fd = open("/dev/cpu_dma_latency", O_RDWR);
+if (fd == -1) {
+fprintf(stderr, "Failed to open cpu_dma_latency: error %s", strerror(errno));
+return fd;
+}
+write(fd, &lat, sizeof(lat));
+
+return fd
+}
+
+disable pause frames
+ethtool -A [interface] rx off tx off
+
+CPU Frequency
+检查CPU的最大可用频率（有用的命令：cpupower frequency-info，lshw，lscpu）
+监视CPU的活动，并检查内核的当前频率。 
+
+提取CPU内核状态的有用命令:
+$ cat /proc/cpuinfo | sed -n '/^processor\|^cpu MHz/p'
+$ turbostat --interval 1
+
+其他OS调优
+1. 禁用不是必需任务所必需的所有服务，例如: cups, gpm, ip6tables, mdmonitor, mdmpd, bluetooth, iptables, irqbalance, sysstat.
+2.  cpuspeed, nscd, crond, nt如果可用，应启用以下服务pd, ntp, network, tuned
+3. Set IRQ (interrupt request) affinity, refer to What is IRQ Affinity?
+4.设置系统配置文件，重点关注网络性能/延迟.
+$ tuned-adm profile network-throughput
+$ cpupower frequency-set --governor performance
+5.为了检查调整后的运行情况并使用正确的策略 
+$ tuned-adm active
+6. 关闭Numa平衡
+$ echo 0 > /proc/sys/kernel/numa_balancing
+
+7. 配置 tuned.conf
+添加到 tuned.conf:
+[bootloader]
+cmdline = audit=0 idle=poll nosoftlockup mce=ignore_ce
+
+改变tuned-main.conf:
+检查事件之前要睡多长时间（以秒为单位），较高的数字表示较低的开销，但响应时间较长。
+sleep_interval = 1 ===>更改为100
+动态调整的更新间隔（以秒为单位）。 它必须是sleep_interval的倍数。
+update_interval = 10 ===>更改为10000
+
+8. 减少系统调度的推荐配置:
+$ echo 100000000 > /proc/sys/kernel/sched_min_granularity_ns
+$ echo 50000000 > /proc/sys/kernel/sched_migration_cost_ns
+
+9. 其他减少系统调度的推荐配置:
+$ echo 0 > /proc/sys/vm/swappiness
+$ sysctl -w vm.swappiness=0
+$ sysctl -w vm.zone_reclaim_mode=0
+$ echo never > /sys/kernel/mm/transparent_hugepage/enabled
+ 
+选择正确的NUMA和核心
+在具有两个NUMA的计算机上，重要的是选择最接近所用卡的NUMA。
+为了找到最靠近卡的NUMA
+$ sudo mst status -v
+检查哪个内核位于每个NUMA上:
+$ lscpu
+
+Huge pages
+使用大页面可以减少访问页面表条目所需的系统资源量，从而提高系统性能。
+在运行Rivermax之前，请启用大页面
+$ echo 1000000000 > /proc/sys/kernel/shmmax
+$ echo 800 > /proc/sys/vm/nr_hugepages
+
+##################
+
+
+centos7.6 + MLNX_OFED_LINUX-5.2-2.2.3.0 + trex-2.87
+
+Intel(R) Xeon(R) CPU E5-2665 0 @ 2.40GHz
+64b:  ./t-rex-64 -i -v 7 -c 15，   start -f stl/tests/single_cont1.py -p 0 --pin -m 100%: 64bit frame L1 bps: 65.3Gbps, cpu 93.0%
+128b:  ./t-rex-64 -i -v 7 -c 15， start -f stl/tests/single_cont1.py -p 0 --pin -m 100%: 64bit frame L1 bps: 58.3Gbps, cpu 88%
+256b:  ./t-rex-64 -i -v 7 -c 15， start -f stl/tests/single_cont1.py -p 0 --pin -m 100%: 64bit frame L1 bps: 54.3Gbps, cpu 85%
+
+64b:  ./t-rex-64 -i -v 7 -c 1，     start -f stl/tests/single_cont1.py -p 0 --pin -m 100%: 64bit frame L1 bps: 18.3Gbps, cpu 100%
+128b:  ./t-rex-64 -i -v 7 -c 1，  start -f stl/tests/single_cont1.py -p 0 --pin -m 100%: 64bit frame L1 bps: 32.3Gbps, cpu 87%
+128b:  ./t-rex-64 -i -v 7 -c 1，  start -f stl/tests/single_cont_256b.py -p 0 --pin -m 100%: 64bit frame L1 bps: 46.3Gbps, cpu 94%
+
+centos7.6, v2.88, ofed-5.2: not work
+EAL: Detected 32 lcore(s)
+EAL: Detected 2 NUMA nodes
+EAL: Static memory layout is selected, amount of reserved memory can be adjusted with -m or --socket-mem
+EAL: Multi-process socket /var/run/dpdk/rte/mp_socket
+EAL: Selected IOVA mode 'PA'
+ EAL: Probing VFIO support...
+EAL: Could not find space for memseg. Please increase CONFIG_RTE_MAX_MEMSEG_PER_TYPE and/or CONFIG_RTE_MAX_MEM_PER_TYPE in configuration.
+EAL: Couldn't remap hugepage files into memseg lists
+EAL: FATAL: Cannot init memory
+EAL: Cannot init memory
+ You might need to run ./trex-cfg  once  
+EAL: Error - exiting with code: 1
+  Cause: Invalid EAL arguments
+Killing Scapy server...
+
+centos7.6, MLNX_OFED_LINUX-4.6-1.0.1.1-rhel7.6-x86_64, trex-v2.86: not work
+EAL: Static memory layout is selected, amount of reserved memory can be adjusted with -m or --socket-mem
+EAL: so/x86_64/libmlx5-64.so: undefined symbol: mlx5dv_devx_umem_reg
+EAL: FATAL: Cannot init plugins
+EAL: Cannot init plugins
+  You might need to run ./trex-cfg  once  
+EAL: Error - exiting with code: 1
+  Cause: Invalid EAL arguments
+Killing Scapy server... Scapy server is killed
+[root@localhost v2.86]# 
+ brcm-shell
+
+libdoc LibByz.py LibByz.html
+
+./dpdk_setup_ports.py -t
+./dpdk_setup_ports.py -i
+ ./t-rex-64 -f cap2/dns.yaml -c 4 -m 1 -d 10
+
+ConnectX-5 on centos7.9:
+driver: 
+https://www.mellanox.com/products/infiniband-drivers/linux/mlnx_ofed
+MLNX_OFED_LINUX-5.2-1.0.4.0-rhel7.9-x86_64.tgz
+
+https://community.mellanox.com/s/article/getting-started-with-connectx-5-100gb-s-adapters-for-linux
+https://www.mellanox.com/related-docs/prod_software/Performance_Tuning_Guide_for_Mellanox_Network_Adapters.pdf
+
+To load the new driver, run:
+/etc/init.d/openibd restart
+ mlxfwreset -d mlx5_0 --yes r
+mst start
+
+ service firewalld stop
+ systemctl disable firewalld
+ service iptables stop
+
+ ibv_devinfo | grep vendor_part_id
+ mlxconfig -d /dev/mst/mt4121_pciconf0 q
+
+ ifconfig enp7s0f0 192.168.1.1/24 up
+ ifconfig enp7s0f1 192.168.2.1/24 up
+ ifconfig enp7s0f1 mtu 9000
+ ifconfig enp7s0f0 mtu 9000
+
+ibv_devinfo
+ofed_info
+ofed_info -s
+
+10.87.30.82：
+[root@cmob v2.87]#  ibdev2netdev
+mlx5_0 port 1 ==> enp59s0 (Up)
+mlx5_1 port 1 ==> enp134s0 (Up)
+
+ ibdev2netdev
+mlx5_0 port 1 ==> enp7s0f0 (Down)
+mlx5_1 port 1 ==> enp7s0f1 (Down)
+
+ lspci | grep Mellanox
+mii-tool
+
+[bash]>sudo lspci | grep  Mellanox
+3b:00.0 Ethernet controller: Mellanox Technologies MT27800 Family [ConnectX-5]
+86:00.0 Ethernet controller: Mellanox Technologies MT27800 Family [ConnectX-5]
+[root@cmob v2.87]# 
+
+[bash]>sudo lspci -vv -s 3b:00.0
+LnkSta:	Speed 8GT/s, Width x8, TrErr- Train- SlotClk+ DLActive- BWMgmt- ABWMgmt-
+
+[bash]>sudo lspci -vt | grep Mellanox
+
+
+http://www.h3c.com/cn/d_202007/1317229_30005_0.htm
+
+mlxlink -d /dev/mst/mt4121_pciconf0 -a UP
+ibstat
+ibdiagnet
+connectx_port_config
+ca_self_test.ofed
+ibv_devices
+ib_write_bw
+
+
+使用numactl来查看node0和node1上认领的cpu核数,以及内存资源
+numactl --hardware
+cat /sys/devices/system/node/node*/meminfo | fgrep Huge
+
+内存：
+free -m
+
+EAL: 128 hugepages of size 1073741824 reserved, but no mounted hugetlbfs found for that size
+echo 8192 > /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages
+echo 8192 > /sys/devices/system/node/node1/hugepages/hugepages-2048kB/nr_hugepages
+echo 16 > /sys/devices/system/node/node0/hugepages/hugepages-1048576kB/nr_hugepages
+echo 16 > /sys/devices/system/node/node1/hugepages/hugepages-1048576kB/nr_hugepages
+mkdir -p /mnt/huge2m
+mkdir -p /mnt/huge1g
+umount /mnt/huge1g
+umount /mnt/huge2m
+mount -t hugetlbfs none /mnt/huge1g -o pagesize=1GB
+mount -t hugetlbfs none /mnt/huge2m -o pagesize=2MB
+
+使用内核可调vm.nr_hugepages配置hugepages
+1. 编辑/etc/sysctl.conf文件，并在nr_hugepages参数中指定hugepages的数量。该条目使参数在重新引导时保持不变，但在运行下一步中描述的' sysctl -p '命令之前不会生效。
+# vi /etc/sysctl.conf
+vm.nr_hugepages = 10
+2. 执行' sysctl -p '命令以启用hugepages参数。
+# sysctl -p
+...
+vm.nr_hugepages = 10
+　　注意:建议在配置hugepages之后重新启动系统，因为当系统启动时，拥有连续内存的空间(用于hugepages分配)的机会要大得多。
+要验证hugepages参数设置，可以对下面给出的两个方法使用任意一个:
+1. 检查文件/proc/meminfo:
+# cat /proc/meminfo | grep Huge
+HugePages_Total:    10
+HugePages_Free:     10
+HugePages_Rsvd:      0
+Hugepagesize:     2048 kB
+解释:
+HugePages_Total——大页面池的大小。
+HugePages_Free -池中未使用的巨大页面的数量。
+HugePages_Rsvd -承诺从池中分配但尚未分配的巨大页面数量。
+HugePages_Surp -是“盈余”的缩写，是池中超过/proc/sys/vm/nr_hugepages值的巨大页面数。最大剩余的巨大页面数量由/proc/sys/vm/nr_overcommit_hugepages控制
+ # sysctl a | grep nr_hugepages
+vm.nr_hugepages = 10
+
+执行' sysctl -p '命令以启用hugepages参数。
+# sysctl -p
+
+Mellanox OFED 安装的信息
+/etc/infiniband/info
+
+看自动加载的模块列表
+/etc/infiniband/openib.conf
+
+
+OFED:
+https://www.mellanox.com/products/infiniband-drivers/linux/mlnx_ofed
+
+Getting Started with ConnectX-5 100Gb/s Adapters for Linux
+https://blog.csdn.net/superbfly/article/details/107303353

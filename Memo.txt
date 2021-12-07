@@ -1,6 +1,183 @@
+
+################################################
+rcpclient:
+1./usr/local/lib/libzlog.so.1.1
+2.add a line with /usr/local/lib to /etc/ld.so.conf and run ldconfig -v
+
+
+
+
+################################################
+2021.11.15
+TestCenter 4.44 automation:
+Spirent_TestCenter_Linux.x86_64_4.44.rpm
+
+64位centOS运行32位系统：
+32位tcl: ActiveTcl-8.5.19.8519-i686-linux-glibc-2.5-403583.tgz
+yum install glibc.i686     centos
+apt-get  install  lib32z1  ubuntu
+基础依赖
+    yum install glibc.i686
+
+可能的libstdc++依赖
+    yum install libstdc++.i686
+
+    若报版本不一致，请依次执行
+        yum install libstdc++
+        yum install libstdc++.i686
+
+export PATH="/opt/ActiveTcl-8.5/bin:$PATH"
+export STC_INSTALL_DIR=/opt/stc-4.44/Spirent_TestCenter_4.44/Spirent_TestCenter_Application_Linux
+export STC_TCL=/opt/ActiveTcl-8.5/bin/tclsh
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$STC_INSTALL_DIR
+
+11.18
+验证 source {/opt/stc-4.44/Spirent_TestCenter_4.44/Spirent_TestCenter_Application_Linux/SpirentTestCenter.tcl}
+
+pkgIndex.tcl  Testcenter HLTAPI for python in HLTAPI_4.40_GA.zip  (HLTAPI-5.0比对)
+HLTAPI_4.40_GA.zip解压后重命名成HltAPI，放到Spirent_Testcenter_Application_Linux
+
+export PATH="/opt/ActiveTcl-8.5/bin:$PATH"
+export STC_INSTALL_DIR=/opt/stc-4.44/Spirent_TestCenter_4.44/Spirent_TestCenter_Application_Linux
+export STC_TCL=/opt/ActiveTcl-8.5/bin/tclsh
+export LD_LIBRARY_PATH=/opt/stc-4.44/Spirent_TestCenter_4.44/
+export TCLLIBPATH="$STC_INSTALL_DIR $STC_INSTALL_DIR/HltAPI/SourceCode $STC_INSTALL_DIR/HltAPI/SourceCode/utracker /opt/ActiveTcl-8.5/lib"
+
+package require SpirentTestCenter
+package require SpirentHltApi
+fanhua@dijin test_scripts]$ tclsh
+% package require SpirentHltApi
+10:41:45.544 WARN  - Only 8.5.9 and 8.5.14 Tcl versions are officially supported from the 8.5 series.
+Error loading the utracker package. utracker package not loaded!! 
+OS: Linux, 3.10.0-957.el7.x86_64, unix; tcl version: 8.5.19
+SpirentTestCenter Automation Version: 4.44.4246.0000
+Hlt Api (Ver. 4.40) was successfully loaded and initialized
+Internal Version: 4.40GA.0811
+attempt to provide package SpirentHltApi 2.00 failed: package SpirentHltApi 4.40 provided instead
+
+11.19
+HLTAPI Environment Installation Guide.doc
+
+copy HLTAPI_4.46_GA/SourceCode/sthCore.tcl and replace HLTAPI_4.40_GA/SourceCode/sthCore.tcl
+HLTAPI_4.46_GA/SourceCode/pkgIndex.tcl
+HLTAPI_4.46_GA/SourceCode/hltapiWrapper
+[fanhua@dijin test_scripts]$ tclsh
+%  package require SpirentHltApi
+10:45:45.127 WARN  - Only 8.5.9 and 8.5.14 Tcl versions are officially supported from the 8.5 series.
+OS: Linux, 3.10.0-957.el7.x86_64, unix; tcl version: 8.5.19
+SpirentTestCenter Automation Version: 4.44.4246.0000
+Hlt Api (Ver. 4.40) was successfully loaded and initialized
+Internal Version: 4.40GA.0811
+attempt to provide package SpirentHltApi 2.00 failed: package SpirentHltApi 4.40 provided instead
+% 
+
+[fanhua@dijin test_scripts]$ python
+Python 2.7.5 (default, Nov 16 2020, 22:23:17) 
+[GCC 4.8.5 20150623 (Red Hat 4.8.5-44)] on linux2
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import sys
+>>> import time
+>>> import sth
+Current OS: Linux,3.10.0-957.el7.x86_64,#1 SMP Thu Nov 8 23:39:32 UTC 2018; python version: 2.7.5
+Connecting Tcl server via port 36380
+Loading SpirentHltApi...
+StcInit failed : CStcRunTimeError Unable to create directories: /home/fanhua/Spirent/TestCenter 4.44/Logs/2021-11-19_11-01-36_PID18416
+11:01:36.139 ERROR - in init: StcInit failed
+terminate called after throwing an instance of 'std::runtime_error'
+  what():  in init: StcInit failed
+Loaded SpirentHltApi: 
+>>>
+
+################################################
+
+
+################################################
+所有邮件、在线文档、微信，不得出现“敏感字母”和“专用”这样的敏感词。统一用H和K2表示。也可用串接设备和并接设备来说明。
+请各位访问办公桌面 svn://10.80.2.1/doc/研发部/K2，与办公桌面登录账户相同，其中的“历史文档”可供参考
+
+外网远程桌面IP：10.87.98.25， 账号密码为OA账号密码，账号带上域名@byzoro.com，
+外网串口服务器IP：10.87.1.100， port 10013 (k2: 10.87.31.101)
+spirent testcenter 测试仪表客户端软件版本4.44，IP地址10.87.120.200，
+
+C:\公共文件夹\K2项目\测试任务\规范测试例编写\樊华\基础配置举例.txt
+##################################################
+
 export FLASK_APP=lrm
 flask run --host=0.0.0.0
 flask init-db
+
+#各种报文pcap
+https://wiki.wireshark.org/SampleCaptures#SIP_and_RTP
+
+
+————————————————————
+install:
+yum install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+yum install https://download1.rpmfusion.org/free/el/rpmfusion-free-release-7.noarch.rpm
+
+Stream a file with VLC
+% vlc -vvv video1.xyz --sout udp:192.168.0.42 --ttl 12
+where:
+
+video1.xyz is the file you want to stream,
+192.168.0.42 is either:
+the IP address of the machine you want to unicast to;
+or the DNS name the machine you want to unicast to;
+or a multicast IP address.
+12 is the value of the TTL (Time To Live) of your IP packets (which means that the stream will be able to cross 11 routers).
+If you want to stream the file continuously, add the --loop option.
+
+Of course, you can add more options (like transcoding, or streaming to a TCP port, etc.), but this should get you started
+
+RTSP live streaming
+Stream with RTSP and RTP:
+
+Run on the server:
+% vlc -vvv input_stream --sout '#rtp{dst=192.168.0.12,port=1234,sdp=rtsp://server.example.org:8080/test.sdp}' 
+Run on the client(s):
+% vlc rtsp://server.example.org:8080/test.sdp
+RTSP on-demand streaming
+See Documentation:Streaming HowTo/VLM.
+
+MMS / MMSH streaming to Windows Media Player
+% vlc -vvv input_stream --sout '#transcode{vcodec=DIV3,vb=256,scale=1,acodec=mp3,ab=32,
+channels=2}:std{access=mmsh,mux=asfh,dst=:8080}' 
+VLC media player can connect to this by using the following url: mmsh://server_ip_address:8080. Windows Media Player can connect to this by using the following url: mms://server_ip_address:8080.
+
+______________________________
+
+https://wiki.videolan.org/Documentation:Streaming_HowTo/Receive_and_Save_a_Stream/#Receive_an_unicast_stream
+Receive a stream with VLC
+Receive an unicast stream
+% vlc -vvv rtp://
+Receive a multicast stream
+% vlc -vvv rtp://@239.255.12.42
+where 239.255.12.42 is the multicast IP address you want to join.
+
+Receive an HTTP/FTP/MMS stream
+Use one of the following command lines:
+
+% vlc -vvv http://example/stream.xyz
+where http://example/stream.xyz is the HTTP address of the stream;
+
+% vlc -vvv ftp://example/stream.xyz
+where ftp://example/stream.xyz is the FTP address of the stream;
+
+% vlc -vvv mms://viptvr.yacast.fr/encoderfranceinfo
+
+Receive a RTP stream available through RTSP
+% vlc -vvv rtsp://www.hardradio.com/tonbeme.mov
+where rtsp://www.hardradio.com/tonbeme.mov is the address of the stream.
+
+Receive a stream described by an SDP file
+% vlc -vvv http://server.example.org/stream.sdp
+
+————————————————————————————————————————
+
+
+from binascii import *
+b2a_hex
+b2a_hex
 
 ##################
 2021.9.3

@@ -38,9 +38,106 @@ try:
 			
 except Scapy_Exception as e:
     print(e)
+————————————————
 	
 
-如何检查scapy包中是否存在特定层？
+如何检查scapy包中是否存在读取pcap文件，进行相关操作
+# 读取文件 
+# 整个文件：packets：scapy.plist.PacketList对象 <file_name: TCP:n UDP:n ICMP:n Other:n>
+packets = rdpcap(file_name)
+for packet in packets:
+	# 帧：packet:scapy.layers.l2.Ether对象 
+	print(packet) # 二进制：16进制显示 如：b"\x00\x00\x01\x00
+	packet.show() # 打印出对象本层及上层协议协议的全部信息
+	bin_str = packet.build() # 返回对象的二进制字符串：16进制显示 如：b"\x00\x00\x01\x00
+	dict_packet = packet.fields # 该对象的属性字典：如{'sport': 2152, 'dport': 2152, 'len': 64, 'chksum': 0}
+	# 例：packet=packet[0]=packet[Ether]=Ether+IP+TCP/UDP+Raw
+	# 例：packet[1]=packet[IP]=IP+TCP/UDP+Raw
+	# 以上对象均有show()、build()方法、fields属性
+	# 可以直接修改对象的属性来修改数据帧
+# 保存文件
+wrpcap(filename, packets)
+
+大文件pcap包的读取
+# 使用PcapReader 生成一个迭代器
+with PcapReader(file_name) as packets:
+    for packet in packets:
+# 这里的packet 与上面的相同
+————————————————
+
+分析http协议
+# 导入包
+from scapy.all import *
+from scapy.layers.http import HTTPRequest, HTTPResponse, HTTP
+# 和文章开头分析pcap文件相同，但packet会增加 http协议 之后是 raw，可以对http层的字段进行分析和编译。
+with PcapReader(file_name) as packets:
+    for packet in packets:
+        try:
+            if packet.haslayer(HTTPRequest):
+                http_header = packet[HTTPRequest].fields
+                host = str(http_header.get('Host', ''))
+                ua = str(http_header.get('User_Agent', ''))
+                method = str(http_header.get('Method', ''))
+                uri = str(http_header.get('Path', ''))
+                if host and ua and method and uri:
+                    host = host[2:-1]
+                    ua = ua[2:-1]
+                    method = method[2:-1]
+                    uri = uri[2:-1]
+        except Exception:
+            print("haha")
+————————————————
+
+dpkt
+下载
+pip install dpkt
+
+导入
+import dpkt
+
+读取pcap文件
+with open(file_name, 'rb') as f:
+	pcap = dpkt.pcap.Reader(f)
+	for timestamp, buf in pcap:
+		# timestamp:时间戳 buf：帧数据：二进制字符串
+		eth = dpkt.ethernet.Ethernet(buf)
+		ip = eth.data
+		tcp = ip.data
+		raw = tcp.data
+		# eth ip tcp 为dpkt中的对象 都有__hdr__属性:该对象的属性元组：如(('sport', 'H', 57005), ('dport', 'H', 0), ('ulen', 'H', 8), ('sum', 'H', 0))
+		# 可以直接修改对象的属性来修改数据帧
+		# 对于一些其他的协议，可以使用对应的模块进行解析（二进制字符串）
+
+保存文件
+fw = open(write_file, 'wb')
+fwWriter = dpkt.pcap.Writer(fw)
+with open(read_file, 'rb') as f:
+    pcap = dpkt.pcap.Reader(f)
+    for ts, buf in pcap:
+        eth = dpkt.ethernet.Ethernet(buf)
+        # 可以对eth进行相应的修改
+        fwWriter.writepkt(eth, ts)
+fwWriter.close()
+
+
+解析指定协议
+# dpkt有很多模块，分别对应每种协议，如ip4，ip6，tcp，rtp ...
+# 里面是二进制字符串 如raw 返回相应的协议对象
+dpkt.rtp.RTP(raw)
+
+scapy与dpkt区别
+优点：
+
+scapy更方便、功能更多
+dpkt解析更快
+
+scapy适合解析小文件，伪造数据包
+dpkt适合解析大文件
+————————————————
+
+
+
+特定层？
 
 scapy:
 load_contrib('bgp')

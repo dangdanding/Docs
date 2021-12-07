@@ -1,7 +1,91 @@
+example from scapy site:
+
+class Disney(Packet):
+    name = "DisneyPacket "
+    fields_desc=[ ShortField("mickey",5),
+                 XByteField("minnie",3) ,
+                 IntEnumField("donald" , 1 ,
+                      { 1: "happy", 2: "cool" , 3: "angry" } ) ]
+
+___________________________________________
+
+I have this code to write a RTP packet in a cap:
+
+client = "192.168.10.1"
+server = "192.168.10.5"
+client_port = 5061
+server_port = 5060
+
+
+rtp = { 
+        "sequence": 1,
+        "timestamp": 1,
+        "marker": 1,
+        "payload_type": 17
+    }
+
+pkt= Ether()/IP(src=client, dst=server)/UDP(sport=client_port, dport=server_port)/RTP(**rtp)
+bind_layers(UDP, RTP, dport=server_port)
+wrpcap("rtp_pkt.pcap",pkt)
+
+The problem is that I see the packet as UDP in wireshark and not RTP. I can see it with SIP structures so I don't know 
+where is the problem
+
+In short - Wireshark shows you UDP, because there's no SIP/SDP packets. These packets initiate connection session 
+and Wireshark then can follow the stream and decode UDP to RTP. In SIP/SDP you can find main information: 
+From, To, Media type etc. (RFC 4566 SDP, RFC3621 SIP). So even if you build ideal RTP packet with scapy, without 
+session initiation Wireshark will always decode it as UDP.
+
+___________________________________________
 简单的例子
 
-每一个协议层都是Packet类的子类。协议层背后所有逻辑的操作都是被Packet类和继承的类所处理的。一个简单的协议层是被一系列的字段构成，他们关联在一起组成了协议层，解析时拆分成一个一个的字符串。这些字段都包含在名为fields_desc的属性中。每一个字段都是一个field类的实例：
+#!/usr/bin/env python 
 
+from scapy.all import *
+
+# create a simple protocol 
+# (example similar with the one in the scapy docs...)
+class Exmpl(Packet):
+    name = "myprotocol"
+    fields_desc=[ ShortField("fld1",5),
+                  XByteField("fld2",3) ]
+
+from scapy.utils import PcapWriter
+
+# write data in a pcap file to examine later with
+# 1 -> scapy
+# 2 -> wireshark
+print '\n[+] Writing net.pcap file...'
+cap = PcapWriter("net.pcap", append=True, sync=True)
+for i in range(10):
+    packet = Exmpl(fld1=i)
+    cap.write(packet)
+
+# read the data and examine them with scapy
+# scapy is aware of the "Exmpl" protocol (e.g. its fields etc...) 
+# and how to decode it, while wireshark is not
+print '[+] Examining net.pcap file...\n'
+packets = rdpcap('net.pcap')
+for p in packets: 
+    Exmpl(str(p)).show()
+以上脚本的输出如下:
+
+[+] Writing net.pcap file...
+[+] Examining net.pcap file...
+
+###[ myprotocol ]###
+  fld1      = 0
+  fld2      = 0x3
+###[ myprotocol ]###
+  fld1      = 1
+  fld2      = 0x3
+###[ myprotocol ]###
+  fld1      = 2
+  fld2      = 0x3
+...skip...
+
+
+每一个协议层都是Packet类的子类。协议层背后所有逻辑的操作都是被Packet类和继承的类所处理的。一个简单的协议层是被一系列的字段构成，他们关联在一起组成了协议层，解析时拆分成一个一个的字符串。这些字段都包含在名为fields_desc的属性中。每一个字段都是一个field类的实例：
 
 class Disney(Packet):
     name = "DisneyPacket "
