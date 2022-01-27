@@ -1,0 +1,85 @@
+http://tfr.org/cisco-ios
+
+**强调内容*BGP 路由通告原则：缺省情况下，BGP不发布任何本地路由。
+只有明确通告的网络才会发送给邻居；
+通告的网络必须能够精确地在路由表中找到；
+多条路径时，只选择最优的给自己使用；
+只把自己使用的最优路由通告给邻居；
+从EBGP学习到的路由会通告给所有邻居；*强调内容*
+从IBGP学习到的路由默认不会通告给IBGP（BGP水平分割原则）；
+默认情况下IGP引入BGP只能引入EBGP路由，无法引入IBGP路由
+
+根据路由协议涉及的初衷，IGP就是用来AS内部收敛，BGP用来AS间交换路由。所以，AS内，会尽量采用IGP路由，
+AS间只能用BGP。IGP协议是为了收敛，BGP是为了传递。AS内的IBGP 对等体关系，也只是为了大家都能学习到
+其他AS的路由，不是为了学习本AS的路由，本AS的用IGP收敛。
+
+从IBGP邻居所收到的路由信息，不会传递给其它的IBGP邻居，但可以传递给EBGP邻居，即IBGP的防环机制
+
+BGP通告原则之一仅将自己最优可达的路由发布给邻居
+BGP通告原则之二通过EBGP获得的最优可达路由发布给所有BGP邻居(其中包括IBGP和EBGP)
+BGP通告原则之三通过IBGP获得的最优可达路由不会发布给其他的IBGP邻居(IBGP的水平分割)目的是防止环路
+BGP通告原则之四BGP与IGP同步(华为默认关闭，开启不了)
+undo synchronization
+一条从IBGP邻居学来的路由在发布给一个BGP邻居之前，通过IGP必须知道该路由，即BGP与IGP同步
+
+
+选路原则：
+1，若路由下一跳不可达，忽略此路由，（通常会形成路由黑洞）
+2，Preferred-Valnue华为私有属性，越高越优先。
+3，Local-Preference,本地优先级，越高越优先。
+4，聚合路由优于非聚合路由。
+5，手动聚合优于自动聚合。
+6，network引入>Import-route。
+7，ASl路径短>AS路径长。
+8，Origin属性，IGP>EGP>Incomplete。
+9，MED值小的。
+10，EBGP路由>IBGP路由
+11，BGP优先选择到BGP下一跳的IGP度量值最低的路径。
+注意：以上全部相同时，为等价路由，可以负载分担。但是AS-Path必须一致，
+当负载分担时，以下3条原则无效。
+1，cluster-list小者。
+2，originator-id小者。
+3，比较对等体的IP，小者优先。
+————————————————
+
+1、用loopback环回口建立BGP邻居的方法
+2、BGP同步功能（系统默认关闭，现今主要使用mpls技术解决BGP路由黑洞问题）
+3、BGP的水平分割（防环路）
+4、邻居状态停留在 Idle或active的原因
+5、当IBGP路由器A与EBGP互联时，如果路由器A的一个IBGP邻居路由器B收到一个条目，并且这个条目来自于路由器A的EBGP邻居，
+那么这个条目在路由器B那里显示下一跳地址时会保留EBGP的地址。{ROUTER B——ROUTER A——ROUTER (EBGP)}
+6、BGP选路规则第一条 weight （权重）
+————————————————
+
+BGP的选路原则 (主要介绍前6条，共13条）：
+1.prefer highest weight (local to router). //优选weight属性高的，cisco私有属性
+
+2.prefer highest local preference (global within AS ). //优选本地优先级高的
+
+3.prefer route originated by the local router (next hop =0.0.0.0) //更相信自己network 的路由，下一跳为0.0.0.0
+
+4.prefer shortest AS path. //更优选AS-PATH数量短的路由
+
+5.prefer lowest origin code (IGP<EGP<incomplete) //比较路由起源，优选起源值更小的路由，默认为i<e<?。也就是说i的起源最小，
+如果有两条一样的路由条目来自两个方向，一个起源为i，一个起源为?，那么将优选i的路由
+
+6.Prefer lowest MED (exchanged between autonomous systems). //优选 MED值更小的路由
+————————————————
+
+
+BGP属性：
+BGP一共有11种属性，分别是：weight（权重值）、origin（起源）、AS_path、next-hop（下一跳）、local_pref（本地优先级）、MED（metric）、atomic_aggregate（汇总）、Aggregator（汇总者）、community（团体）、orginator_id、cluster_lis；
+
+针对属性的特点可以将属性分为4类，分别是：
+
+公认必尊 --必须传递且必须识别，所有 BGP 路由器必须识别遵守的属性有：
+origin，as_path、next_hop
+
+2、公认可尊--必须识别，所有路由器都能识别但是不一定要遵守，                                        local_pref，atomic_aggregate
+
+3、可选传递--不是所有 BGP 路由器都能识别，但是所有 BGP 都能传递：aggregator 和 community
+
+4、可选非传递--不是所有路由器都能识别，不能识别的 BGP 路由器就丢弃它：
+
+MED、originator_id 、cluster_id，weight
+————————————————

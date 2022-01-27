@@ -4,6 +4,7 @@ Trex:
 https://trex-tgn.cisco.com/trex/doc/
 Trex对ConnectX-4/5系列网卡支持相关文档：
 https://trex-tgn.cisco.com/trex/doc/trex_appendix_mellanox.html
+OFED: http://www.mellanox.com/page/products_dyn?product_family=26&mtag=linux_sw_drivers
 
 2.Trex官方对linux支持版本信息
 如下2个版本经官方测试并通过：
