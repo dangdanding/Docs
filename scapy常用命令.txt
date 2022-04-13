@@ -1,17 +1,21 @@
 ﻿Scapy常用命令
- 
+
+
+
 mac=Ether(src="00:50:56:95:0d:c2",dst="00:50:56:95:16:d9")
-ipv6=IPv6(src="3001::2", dst="3001::3",nh="Fragment Header")
-v6exthdr=IPv6ExtHdrFragment(m=1, id=4004085281)
-udp=UDP(sport=1025, dport=999)/('x'*1440)
+ipv6=IPv6(version=6, tc=0, fl=0, src="3001::2", dst="3001::3",plen=1456, nh="Fragment Header",hlim=64 )
+v6exthdr=IPv6ExtHdrFragment(m=0, id=4004085281,offset=185,nh="UDP", res1=0, res2=0)
+udp=UDP(sport=1025, dport=999, len=1448, chksum=0xb9dc)/('x'*1440)
 
 u=mac/ipv6/v6exthdr/udp
 srp(u,iface="ens192")
 
+
+
 R-0  [feth33] 16:27:53.013807 00:50:56:95:0d:c2 > 00:50:56:95:16:d9, ethertype IPv6 (0x86dd), length 1510: (hlim 64, next-header Fragment (44) payload length: 1456) 3001::2 > 3001::3: frag (0xeea97e21:0|1448) 1025 > 999: UDP, length 1440
 
 Fragment Extheader长度8
-Udp length1440
+Udp length1440 (v6 udp分片包头加入了udp头，和v4不一样）
 
 Udp 1440 + fragment Exthdr 8 = 1456 = payload length
 Payload length 1456 + 40 (ipv6 header) + 14 = 1510 (Ethernet frame length)
