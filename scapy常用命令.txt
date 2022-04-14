@@ -12,7 +12,94 @@ srp(u,iface="ens192")
 
 
 
-R-0  [feth33] 16:27:53.013807 00:50:56:95:0d:c2 > 00:50:56:95:16:d9, ethertype IPv6 (0x86dd), length 1510: (hlim 64, next-header Fragment (44) payload length: 1456) 3001::2 > 3001::3: frag (0xeea97e21:0|1448) 1025 > 999: UDP, length 1440
+09:22:33.511234 00:50:56:95:0d:c2 > 00:50:56:95:16:d9, ethertype IPv6 (0x86dd), length 1510: (hlim 64, next-header Fragment (44) payload length: 1456) 3001::2 > 3001::3: frag (0xeea97e27:0|1448) 56492 > applix: UDP, length 3608
+09:22:33.511246 00:50:56:95:0d:c2 > 00:50:56:95:16:d9, ethertype IPv6 (0x86dd), length 1510: (hlim 64, next-header Fragment (44) payload length: 1456) 3001::2 > 3001::3: frag (0xeea97e27:1448|1448)
+09:22:33.511249 00:50:56:95:0d:c2 > 00:50:56:95:16:d9, ethertype IPv6 (0x86dd), length 782: (hlim 64, next-header Fragment (44) payload length: 728) 3001::2 > 3001::3: frag (0xeea97e27:2896|720)
+scapy解析上述udp v6分片包
+>>> l[0].show()
+###[ Ethernet ]### 
+  dst= 00:50:56:95:16:d9
+  src= 00:50:56:95:0d:c2
+  type= IPv6
+###[ IPv6 ]### 
+     version= 6
+     tc= 0
+     fl= 0
+     plen= 1456
+     nh= Fragment Header
+     hlim= 64
+     src= 3001::2
+     dst= 3001::3
+###[ IPv6 Extension Header - Fragmentation header ]### 
+        nh= UDP
+        res1= 0
+        offset= 0
+        res2= 0
+        m= 1
+        id= 4004085287
+###[ UDP ]### 
+           sport= 56492
+           dport= applix
+           len= 3616
+           chksum= 0xfaec
+###[ Raw ]### 
+              load=
+	      
+>>> l[1].show()
+###[ Ethernet ]### 
+  dst= 00:50:56:95:16:d9
+  src= 00:50:56:95:0d:c2
+  type= IPv6
+###[ IPv6 ]### 
+     version= 6
+     tc= 0
+     fl= 0
+     plen= 1456
+     nh= Fragment Header
+     hlim= 64
+     src= 3001::2
+     dst= 3001::3
+###[ IPv6 Extension Header - Fragmentation header ]### 
+        nh= UDP
+        res1= 0
+        offset= 181
+        res2= 0
+        m= 1
+        id= 4004085287
+###[ UDP ]### 
+           sport= 30047
+           dport= 27759
+           len= 28263
+           chksum= 0x2069
+###[ Raw ]### 	      
+
+>>> l[2].show()
+###[ Ethernet ]### 
+  dst= 00:50:56:95:16:d9
+  src= 00:50:56:95:0d:c2
+  type= IPv6
+###[ IPv6 ]### 
+     version= 6
+     tc= 0
+     fl= 0
+     plen= 728
+     nh= Fragment Header
+     hlim= 64
+     src= 3001::2
+     dst= 3001::3
+###[ IPv6 Extension Header - Fragmentation header ]### 
+        nh= UDP
+        res1= 0
+        offset= 362
+        res2= 0
+        m= 0
+        id= 4004085287
+###[ UDP ]### 
+           sport= 11296
+           dport= 8819
+           len= 14960
+           chksum= 0x3a68
+###[ Raw ]### 
 
 Fragment Extheader长度8
 Udp length1440 (v6 udp分片包头加入了udp头，和v4不一样）
