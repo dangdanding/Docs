@@ -1,0 +1,238 @@
+
+如下是使用scapy v2.4.2解析分片包的内容
+V4 icmp首片含有icmp头，其他分片没有icmp头 （注意scapy在解析v4/v6报文的差别）
+###[ Ethernet ]### 
+dst= 00:50:56:95:16:d9
+src= 00:50:56:95:0d:c2
+type= IPv4
+###[ IP ]### 
+	version= 4
+	ihl= 5
+	tos= 0x0
+	len= 1500
+	id= 59654
+	flags= MF
+	frag= 0
+	ttl= 64
+	proto= icmp
+	chksum= 0xe8c4
+	src= 192.168.1.2
+	dst= 192.168.1.3
+	\options\
+###[ ICMP ]### 
+	type= echo-request
+	code= 0
+	chksum= 0xb8b4
+	id= 0x1eed
+	seq= 0x1
+###[ Raw ]### 
+	load=
+
+>>> p[3].show2()
+###[ Ethernet ]### 
+dst= 00:50:56:95:16:d9
+src= 00:50:56:95:0d:c2
+type= IPv4
+###[ IP ]### 
+	version= 4
+	ihl= 5
+	tos= 0x0
+	len= 1500
+	id= 59654
+	flags= MF
+	frag= 185
+	ttl= 64
+	proto= icmp
+	chksum= 0xe80b
+	src= 192.168.1.2
+	dst= 192.168.1.3
+	\options\
+###[ Raw ]### 
+	load=
+
+>>> p[4].show2()
+###[ Ethernet ]### 
+dst= 00:50:56:95:16:d9
+src= 00:50:56:95:0d:c2
+type= IPv4
+###[ IP ]### 
+	version= 4
+	ihl= 5
+	tos= 0x0
+	len= 1068
+	id= 59654
+	flags= 
+	frag= 370
+	ttl= 64
+	proto= icmp
+	chksum= 0x903
+	src= 192.168.1.2
+	dst= 192.168.1.3
+	\options\
+###[ Raw ]### 
+
+
+V6 udp分片包，每个分片都有udp扩展头，对比字段plen，offset,m, udp.len（这个很奇怪，第2个分片的len值为28263）。解释：除了分片首包以外，其他的Udp头部并不是真是存在的，而是将数据部分解析为udp头部了，通过这3个分片报文udp端口号可以验证，只有首包udp头部信息是正确的而且其长度信息是分片之前原udp数据包的长度值.
+
+>>> v[0].show2()
+###[ Ethernet ]### 
+dst= 00:50:56:95:16:d9
+src= 00:50:56:95:0d:c2
+type= IPv6
+###[ IPv6 ]### 
+	version= 6
+	tc= 0
+	fl= 0
+	plen= 1456
+	nh= Fragment Header
+	hlim= 64
+	src= 3001::2
+	dst= 3001::3
+###[ IPv6 Extension Header - Fragmentation header ]### 
+	nh= UDP
+	res1= 0
+	offset= 0
+	res2= 0
+	m= 1
+	id= 4004085287
+###[ UDP ]### 
+	sport= 56492
+	dport= applix
+	len= 3616
+	chksum= 0xfaec
+###[ Raw ]### 
+	load= 
+
+>>> v[1].show2()
+###[ Ethernet ]### 
+dst= 00:50:56:95:16:d9
+src= 00:50:56:95:0d:c2
+type= IPv6
+###[ IPv6 ]### 
+	version= 6
+	tc= 0
+	fl= 0
+	plen= 1456
+	nh= Fragment Header
+	hlim= 64
+	src= 3001::2
+	dst= 3001::3
+###[ IPv6 Extension Header - Fragmentation header ]### 
+	nh= UDP
+	res1= 0
+	offset= 181
+	res2= 0
+	m= 1
+	id= 4004085287
+###[ UDP ]### 
+	sport= 30047
+	dport= 27759
+	len= 28263
+	chksum= 0x2069
+###[ Raw ]### 
+	load= 
+
+>>> v[2].show2()
+###[ Ethernet ]### 
+dst= 00:50:56:95:16:d9
+src= 00:50:56:95:0d:c2
+type= IPv6
+###[ IPv6 ]### 
+	version= 6
+	tc= 0
+	fl= 0
+	plen= 728
+	nh= Fragment Header
+	hlim= 64
+	src= 3001::2
+	dst= 3001::3
+###[ IPv6 Extension Header - Fragmentation header ]### 
+	nh= UDP
+	res1= 0
+	offset= 362
+	res2= 0
+	m= 0
+	id= 4004085287
+###[ UDP ]### 
+	sport= 11296
+	dport= 8819
+	len= 14960
+	chksum= 0x3a68
+###[ Raw ]### 
+	load=  
+>>>
+
+V4 udp 分片只有首片包含udp头部，其余各片只有IP头，尽管IP层proto都是udp，除了首片解析出了udp头部以外，其他分片包均没有解析出udp头部。这里可以理解scapy在解析v6分片报文时一个缺陷。尽管v6分片报文头部包括udp扩展头但是除了首片以外其他各片不应该再解析出udp头部了。
+
+>>> p[0].show2()
+###[ Ethernet ]### 
+dst= 00:50:56:95:16:d9
+src= 00:50:56:95:0d:c2
+type= IPv4
+###[ IP ]### 
+	version= 4
+	ihl= 5
+	tos= 0x0
+	len= 1500
+	id= 10426
+	flags= MF
+	frag= 0
+	ttl= 64
+	proto= udp
+	chksum= 0xa901
+	src= 192.168.1.2
+	dst= 192.168.1.3
+	\options\
+###[ UDP ]### 
+	sport= applix
+	dport= 31337
+	len= 3616
+	chksum= 0x39e1
+###[ Raw ]### 
+	load= 
+
+>>> p[1].show2()
+###[ Ethernet ]### 
+dst= 00:50:56:95:16:d9
+src= 00:50:56:95:0d:c2
+type= IPv4
+###[ IP ]### 
+	version= 4
+	ihl= 5
+	tos= 0x0
+	len= 1500
+	id= 10426
+	flags= MF
+	frag= 185
+	ttl= 64
+	proto= udp
+	chksum= 0xa848
+	src= 192.168.1.2
+	dst= 192.168.1.3
+	\options\
+###[ Raw ]### 
+	load= 
+
+>>> p[2].show2()
+###[ Ethernet ]### 
+dst= 00:50:56:95:16:d9
+src= 00:50:56:95:0d:c2
+type= IPv4
+###[ IP ]### 
+	version= 4
+	ihl= 5
+	tos= 0x0
+	len= 676
+	id= 10426
+	flags= 
+	frag= 370
+	ttl= 64
+	proto= udp
+	chksum= 0xcac7
+	src= 192.168.1.2
+	dst= 192.168.1.3
+	\options\
+###[ Raw ]### 
+	load=
+
+>>>
