@@ -1,3 +1,70 @@
+IPv4报文长度：20Byte-60Byte；
+
+Version：4bit，二进制0100 IPv4，二进制0110 IPv6；
+
+Header Length（IHL）：4bit，最大1111，最小0101，1个字长是32bit是4个字节，最大1111，十进制为15，即15*4=60Byte，该字段在IPv6中被去掉了；
+
+Tpye of Service(ToS):8bit，QoS中IP Precedence、DSCP都是RFC通过对这8bit定义规则实现的；
+
+Total Length：16bit，十进制最大65535，IPv4报文头和数据之和；
+
+Identifier：与Flags、Fragment Offset联用，实现较大的数据包分段，所有被拆分开的小包有相同的Identifier，例如5000字节数据包穿过1500MTU的数据链路，该字段在IPv6中被去掉了；
+
+Flags：3bit，第1位reserved未使用，第2位DF（Don't Fragment）置1就代表不让分段了，第3位MF（More Fragment），例如1个数据包被分段，第1个分段MF置1，第2个置1，第3个置1......直到最后1个置0,路由器知道了，原来分段结束了；该字段在IPv6中被去掉了；
+
+Fragment Offset：13bit，表示该分段在该组分段中的位置，该字段在IPv6中被去掉了；
+
+Time to Live（TTL）:8bit，过1个设备减1个，过了255个为0了就丢弃，为了防止环路；
+
+Protocol：8bit，表示协议号，例如ospf为89，http默认是80，该字段在IPv6中被去掉了；
+
+Header Checksum：16bit，IP头部正确性校验，该字段在IPv6中被去掉了；
+
+Source Address/Destination Address：32bit，IPv4地址长度；
+
+Options：0-40Byte，用来支持排错、测量以及安全等措施；在必要的时候插入值为0的填充字节。主要用于测试起源设备根据需要改写，处理携带这些Options的IPv4报文会占用设备很大的资源，因此实际中也很少使用，该字段在IPv6中被去掉了；
+
+Padding：IPv4报文头是32bit的整数倍，在Option后面填充使用，该字段在IPv6中被去掉了；
+
+IPv6报文长度：40Byte，长度固定；
+
+Version：4bit，二进制0110 IPv6；
+
+Traffic Class：8bit，等同IPv4ToS，用于QoS；
+
+Flow Label：20bit，用于区分实时流量，不同的流标签+源地址可以唯一确定一条数据流，中间网络设备可以根据这些信息更加高效率的区分数据流；
+
+Payload Length：16bit，类似IPv4 Total Length，最大也65535，但是可以有巨型数据包，通过逐跳选项扩展报头表示，并把本字段置0；
+
+Next Header：8bit，这里要么填IPv6报头后的第一个扩展报头（如果有的话）要么填IPv6报头后面跟的协议类型，拗口请看图；如果没有扩展报头的话，Next Header这个位置，实际上代替了IPv4中Protocol的作用；
+
+庖丁解牛深挖IPv4和IPv6报文异同
+
+Hop Limit：8bit，就是TTL改了个名字而已；
+
+Source Address/Destination Address：128bit，IPv6地址长度；
+
+IPv6和IPv4相比，去除了IHL、identifiers、Flags、Fragment Offset、Protocol、Header Checksum、 Options、Paddiing，新增了Flow Label和Next Header，而且理论上这Next Header可以无限扩展；
+
+IPv4中的Header Checksum被去掉了，是因为IPv4经过每个路由器都要改变TTL，意味着每个路由器都要重新计算这个值，这会大大的降低效率，由于数据链路技术的提高和32位循环冗余校验支持，以及第4层校验和提供了足够的保护，因而IPv6认为头部校验和不再必需。
+
+三、IPv6扩展报头
+扩展报头：8bit Next Header，8bitExtension Header Len，剩下的都是Extension Header Data。一个IPv6报文可以包含0个、1个或多个扩展报头。IPv6扩展头长度任意，不受40字节限制，但扩展报头总是8字节长度的整数倍64bit；路由设备转发时根据基本报头中Next Header值来决定是否要处理扩展头，并不是所有的扩展报头都需要被转发路由设备查看和处理的；除了目的选项扩展报头可能出现一次或两次（一次在路由扩展报头之前，另一次在上层协议数据报文之前），其余扩展报头只能出现一次。
+
+扩展报头分类：逐跳选项报头、目的选项报头、路由报头、分段报头、认证报头、封装安全净载报头；多个扩展报头同时出现，报头必须按照下列顺序出现，下面我介绍的顺序也就是必须遵循的出现顺序；
+
+逐跳选项报头：Next Header字段值0，看上图抓包截图，IPv6 Hop-by-Hop Option那显示的就是0；用于为在传送路径上的每跳转发指定发送参数，传送路径上的每台中间节点都要读取并处理该字段。主要用于巨型载荷（载荷长度超过65535字节）、设备提示和资源预留；
+
+目的选项报头：Next Header字段值60，目的选项报头携带了一些只有目的节点才会处理的信息。目前，目的选项报文头主要应用于移动IPv6；
+
+路由报头：Next Header字段值43，路由报头和IPv4的Loose Source and Record Route选项类似，该报头能够被IPv6源节点用来强制数据包经过特定的设备。IPv4的Option功能挪到这里实现了，在IPv4选项中，有Loose Source、Strict Source、Record Route、Timestamp这四种常用的可选项；
+
+分段报头：Next Header字段值44，IPv6中分段报文用的；IPv4的identifiers、Flags、Fragment Offset的功能在这里实现了；
+
+认证报头：该报头由IPsec使用，提供认证、数据完整性以及重放保护；
+
+封装安全净载报头：该报头由IPsec使用，提供认证、数据完整性以及重放保护和IPv6数据报的保密；
+
 
 如下是使用scapy v2.4.2解析分片包的内容
 V4 icmp首片含有icmp头，其他分片没有icmp头 （注意scapy在解析v4/v6报文的差别）
