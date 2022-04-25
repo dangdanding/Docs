@@ -65,6 +65,39 @@ IPv4中的Header Checksum被去掉了，是因为IPv4经过每个路由器都要
 
 封装安全净载报头：该报头由IPsec使用，提供认证、数据完整性以及重放保护和IPv6数据报的保密；
 
+#!/usr/bin/python
+
+from scapy.all import *
+
+mac=Ether(src="00:50:56:95:0d:c2",dst="00:50:56:95:16:d9")
+ipv6=IPv6(version=6, tc=0, fl=0, src="3001::2", dst="3001::3",plen=1456, nh="Fragment Header",hlim=64 )
+
+
+for i in range (4096):
+   v6exthdr=IPv6ExtHdrFragment(m=1, id=i+4096,offset=185,nh="UDP", res1=0, res2=0)
+   udp=UDP(sport=1025, dport=999, len=1448, chksum=0xb9dc)/('x'*1440)
+   u=mac/ipv6/v6exthdr/udp
+   sendp(u,iface="ens192")
+
+
+while i >=0:
+
+   sp = 1025 + i 
+   if i == 65534 - 1025:
+      i = 0 
+
+   v6exthdr=IPv6ExtHdrFragment(m=1, id=i+1025,offset=185,nh="UDP", res1=0, res2=0)
+   udp6=UDP(sport=sp, dport=999, len=1448, chksum=0xb9dc)/('x'*1440)
+
+   u6=mac/ipv6/v6exthdr/udp6
+
+   ipv4 = IP(src="192.168.1.2", dst="192.168.1.3",id = i + 1025, flags=0, frag=185)
+   u4=mac/ipv4/UDP(sport=sp, dport=999)/('x'*1472)
+
+   sendp(u6,iface="ens192")
+   sendp(u4,iface="ens192")
+
+   i += 1
 
 如下是使用scapy v2.4.2解析分片包的内容
 V4 icmp首片含有icmp头，其他分片没有icmp头 （注意scapy在解析v4/v6报文的差别）
